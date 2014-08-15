@@ -22,11 +22,11 @@ func (x *Builtin) String() string {
 
 var BuiltinPlus = &Builtin{
 	do: func(cdr Value, e *EnvFrame) Value {
-                println("BuiltinPlus.do")
+		println("BuiltinPlus.do")
 		sum := 0
-                for v := range IterOverPairAsList(cdr) {
+		for v := range IterOverPairAsList(cdr) {
 			sum += int(Eval(v, e).(Int))
-                }
+		}
 		return Int(sum)
 	},
 }

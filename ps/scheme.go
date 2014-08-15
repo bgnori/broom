@@ -50,14 +50,14 @@ func (x String) String() string {
 }
 
 type Lambda struct {
-        arg Value
-        body Value
-        env *EnvFrame
+	arg  Value
+	body Value
+	env  *EnvFrame
 }
 
-func MakeLambda(arg Value, body Value, env *EnvFrame) *Lambda{
-        println("MakeLambda")
-        return &Lambda{arg:arg, body:body, env:env}
+func MakeLambda(arg Value, body Value, env *EnvFrame) *Lambda {
+	println("MakeLambda")
+	return &Lambda{arg: arg, body: body, env: env}
 }
 
 func (x *Lambda) Pair() bool {
@@ -65,15 +65,15 @@ func (x *Lambda) Pair() bool {
 }
 
 func (x *Lambda) Do(cdr Value, e *EnvFrame) Value {
-        println("Lambda.Do")
-        argenv := MakeEnv()
-        for z := range Zip(x.arg, cdr) {
-              name := z.x.(Name)
-              v := Eval(z.y, e)
-              argenv.Bind(string(name), v)
-        }
-        argenv.SetOuter(x.env) //Lexical Scope
-        return Eval(x.body, argenv)
+	println("Lambda.Do")
+	argenv := MakeEnv()
+	for z := range Zip(x.arg, cdr) {
+		name := z.x.(Name)
+		v := Eval(z.y, e)
+		argenv.Bind(string(name), v)
+	}
+	argenv.SetOuter(x.env) //Lexical Scope
+	return Eval(x.body, argenv)
 }
 
 func (x *Lambda) String() string {
@@ -151,44 +151,44 @@ func (pair *Pair) Eval(e *EnvFrame) Value {
 	println("*Pair.Eval")
 	car := pair.Car()
 	cdr := pair.Cdr()
-        println(car, cdr, e)
+	println(car, cdr, e)
 	if car == nil && cdr == nil {
 		return pair
 	}
-        if car == nil && cdr != nil {
-                panic("car is nil while evaluating pair")
-        }
+	if car == nil && cdr != nil {
+		panic("car is nil while evaluating pair")
+	}
 	x := Eval(car, e)
-        println(x)
+	println(x)
 	switch v := x.(type) {
 	case *SpecialForm:
 		return v.Eval(cdr, e)
-        case *Lambda:
+	case *Lambda:
 		return v.Do(cdr, e)
 	case *Builtin:
 		return v.Do(cdr, e)
 	}
-        panic("Bad object in car")
+	panic("Bad object in car")
 }
 
 type EnvFrame struct {
 	bindings map[string]Value
-        outer *EnvFrame
+	outer    *EnvFrame
 }
 
 func MakeEnv() *EnvFrame {
-  return &EnvFrame{bindings: make(map[string]Value), outer:nil}
+	return &EnvFrame{bindings: make(map[string]Value), outer: nil}
 }
 
 func (e *EnvFrame) Resolve(name string) Value {
 	v, ok := e.bindings[name]
 	if ok {
-                return v
+		return v
 	}
-        if e.outer == nil {
+	if e.outer == nil {
 		panic(fmt.Sprintf("no such name:%s", name))
-        }
-        return e.outer.Resolve(name)
+	}
+	return e.outer.Resolve(name)
 }
 
 func (e *EnvFrame) Bind(name string, v Value) {
@@ -196,9 +196,8 @@ func (e *EnvFrame) Bind(name string, v Value) {
 }
 
 func (e *EnvFrame) SetOuter(outer *EnvFrame) {
-        e.outer = outer
+	e.outer = outer
 }
-
 
 type Name string
 
@@ -210,10 +209,9 @@ func (n Name) String() string {
 	return string(n)
 }
 
-
 func Eval(x Value, e *EnvFrame) Value {
-        print("Eval:")
-        println(x)
+	print("Eval:")
+	println(x)
 	switch v := x.(type) {
 	case Name:
 		return e.Resolve(string(v))
@@ -227,8 +225,8 @@ func Eval(x Value, e *EnvFrame) Value {
 		return v
 	case *Pair:
 		return v.Eval(e)
-        case *Lambda:
-                return v
+	case *Lambda:
+		return v
 	}
 	return nil
 }

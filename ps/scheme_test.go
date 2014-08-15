@@ -134,17 +134,17 @@ func TestBuiltin(t *testing.T) {
 }
 
 func TestLambda(t *testing.T) {
-        println("TestLambda")
+	println("TestLambda")
 	env := MakeEnv()
 	env.Bind("+", BuiltinPlus)
 	expr := Cons(
-                MakeLambda(
+		MakeLambda(
 			Cons(Name("x"), nil), //Param List
 			Cons( //body
 				Name("+"),
 				Cons(Name("x"),
 					Cons(Int(1), nil))),
-                        env),
+			env),
 		Cons(Int(42), nil))
 	got := Eval(expr, env)
 	v, ok := got.(Int)
