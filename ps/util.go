@@ -31,3 +31,21 @@ func Zip(xs, ys Value) chan Z {
 	}()
 	return ch
 }
+
+func RecEq(x, y Value) bool {
+    if x == nil && y == nil {
+        return true
+    }
+    if x == nil || y == nil {
+        return false
+    }
+    if x.Pair() && y.Pair() {
+        p, _ := x.(*Pair)
+        q, _ := y.(*Pair)
+        return RecEq(p.Car(), q.Car()) && RecEq(p.Cdr(), q.Cdr())
+    }
+    if x.Pair() || y.Pair() {
+        return false
+    }
+    return x == y
+}
