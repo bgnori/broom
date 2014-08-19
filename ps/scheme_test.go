@@ -1,6 +1,7 @@
 package ps
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -155,3 +156,21 @@ func TestLambda(t *testing.T) {
 		t.Error("Bad result value")
 	}
 }
+
+func TestWithParse(t *testing.T) {
+	println("TestRecursiveAdd")
+	env := MakeEnv()
+	env.Bind("+", BuiltinPlus)
+        expr := Parse(strings.NewReader("((lambda (x) (+ x 1)) 42)"))[0]
+        println(expr)
+	got := Eval(expr, env)
+	v, ok := got.(Int)
+	if !ok {
+		t.Error("Bad result type")
+	}
+	if v != Int(43) {
+		t.Error("Bad result value")
+	}
+}
+
+

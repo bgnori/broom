@@ -110,7 +110,7 @@ func isDot(r rune) bool {
 
 
 func isWhite(r rune) bool {
-    return r == ' ' ||  r =='\t' || r == '\v'
+    return r == ' ' ||  r =='\t' || r == '\v' || r =='\r' || r == '\n'
 }
 
 
@@ -120,14 +120,14 @@ func parseInt(s string) (Value, error) {
     return Int(n), err
 }
 
-func parseString(s string) (Value, error) {
-    return String(s), nil
+func parseName(s string) (Value, error) {
+    return Name(s), nil
 }
 
 func NewChunk(start, end int, s string) *Token {
     v, err := parseInt(s)
     if err != nil {
-        v, _ = parseString(s)
+        v, _ = parseName(s)
     }
     return &Token{start:start, end: end, tkid: TOKEN_CHUNK, value: v}
 }
