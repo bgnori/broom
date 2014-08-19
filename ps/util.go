@@ -49,3 +49,13 @@ func RecEq(x, y Value) bool {
     }
     return x == y
 }
+
+func ch2xs(ch chan *Token) []*Token {
+    xs := make([]*Token, 0)
+    for t := range ch {
+        xs = append(xs, t)
+    }
+    return xs
+}
+
+

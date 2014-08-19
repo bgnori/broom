@@ -143,6 +143,14 @@ func (p *Pair) Cdr() Value {
 	return p.cdr
 }
 
+func MakeList(xs []Value, cdr Value) Value {
+    if xs == nil || len(xs) == 0 {
+        return cdr
+    }
+    return Cons(xs[0], MakeList(xs[1:], cdr))
+}
+
+
 func (p *Pair) String() string {
 	return fmt.Sprintf("(%v . %v)", p.Car(), p.Cdr())
 }
