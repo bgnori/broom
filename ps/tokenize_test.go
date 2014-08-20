@@ -1,6 +1,7 @@
 package ps
 
 import (
+    "fmt"
     "strings"
     "testing"
 )
@@ -113,13 +114,26 @@ func TestTokenizeNumber(t *testing.T) {
     }
 }
 
+func TestTokenizeSpecialForm(t *testing.T) {
+    tknz := NewTokenizer(strings.NewReader("lambda"))
+    xs := ch2xs(tknz.Tokenize())
+    if len(xs) != 2 {
+        t.Error("an item and TOKEN_ENDOFINPUT are expected")
+    }
+    if xs[0].value != SFLambda {
+        fmt.Println(xs[0].value)
+        t.Error("unexpected content")
+    }
+}
+
+
 func TestTokenizeUnicode(t *testing.T) {
     tknz := NewTokenizer(strings.NewReader("あいう"))
     xs := ch2xs(tknz.Tokenize())
     if len(xs) != 2 {
         t.Error("an item and TOKEN_ENDOFINPUT are expected")
     }
-    if xs[0].value != String("あいう") {
+    if xs[0].value != Name("あいう") {
         t.Error("unexpected content")
     }
 }
@@ -145,7 +159,7 @@ func TestTokenizeCons(t *testing.T) {
     if len(xs) != 6 {
         t.Error("5 items and TOKEN_ENDOFINPUT are expected")
     }
-    if xs[1].value != String("あいう") {
+    if xs[1].value != Name("あいう") {
         t.Error("unexpected content")
     }
     if xs[3].value != Int(123) {

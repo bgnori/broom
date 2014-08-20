@@ -56,7 +56,7 @@ type Lambda struct {
 }
 
 func MakeLambda(arg Value, body Value, env *EnvFrame) *Lambda {
-	println("MakeLambda")
+    fmt.Println("made lambda, ", arg)
 	return &Lambda{arg: arg, body: body, env: env}
 }
 
@@ -64,8 +64,8 @@ func (x *Lambda) Pair() bool {
 	return false
 }
 
-func (x *Lambda) Do(cdr Value, e *EnvFrame) Value {
-	println("Lambda.Do")
+func (x *Lambda) Apply(cdr Value, e *EnvFrame) Value {
+    fmt.Println("evaled lambda", cdr)
 	argenv := MakeEnv()
 	for z := range Zip(x.arg, cdr) {
 		name := z.x.(Name)
@@ -73,6 +73,7 @@ func (x *Lambda) Do(cdr Value, e *EnvFrame) Value {
 		argenv.Bind(string(name), v)
 	}
 	argenv.SetOuter(x.env) //Lexical Scope
+    fmt.Println(x.body)
 	return Eval(x.body, argenv)
 }
 
@@ -99,7 +100,7 @@ func (sf *SpecialForm) String() string {
 	case sfid_lambda:
 		return "lambda"
 	}
-	return ""
+	return "undefined SpecialForm id"
 }
 
 func (sf *SpecialForm) Pair() bool {
@@ -107,20 +108,20 @@ func (sf *SpecialForm) Pair() bool {
 }
 
 func (sf *SpecialForm) Eval(cdr Value, e *EnvFrame) Value {
-	println("*SpecialForm.Eval")
 	switch sf.sfid {
 	case sfid_quote:
-		println("*SpecialForm.Eval, quote")
 		return cdr
 	case sfid_if:
 		return nil
 	case sfid_lambda:
-		return nil
-	}
+		return MakeLambda(Car(cdr), Car(Cdr(cdr)), e)
+    }
 	return nil
 }
 
-var Quote = &SpecialForm{sfid: sfid_quote}
+var SFQuote = &SpecialForm{sfid: sfid_quote}
+var SFIf = &SpecialForm{sfid: sfid_if}
+var SFLambda = &SpecialForm{sfid: sfid_lambda}
 
 type Pair struct {
 	car Value
@@ -139,8 +140,24 @@ func (p *Pair) Car() Value {
 	return p.car
 }
 
+func Car(v Value) Value {
+    if p, ok := v.(*Pair) ; ok {
+        return p.Car()
+    } else {
+        panic("not pair")
+    }
+}
+
 func (p *Pair) Cdr() Value {
 	return p.cdr
+}
+
+func Cdr(v Value) Value {
+    if p, ok := v.(*Pair) ; ok {
+        return p.Cdr()
+    } else {
+        panic("not pair")
+    }
 }
 
 func MakeList(xs []Value, cdr Value) Value {
@@ -156,10 +173,8 @@ func (p *Pair) String() string {
 }
 
 func (pair *Pair) Eval(e *EnvFrame) Value {
-	println("*Pair.Eval")
 	car := pair.Car()
 	cdr := pair.Cdr()
-	println(car, cdr, e)
 	if car == nil && cdr == nil {
 		return pair
 	}
@@ -167,15 +182,15 @@ func (pair *Pair) Eval(e *EnvFrame) Value {
 		panic("car is nil while evaluating pair")
 	}
 	x := Eval(car, e)
-	println(x)
 	switch v := x.(type) {
 	case *SpecialForm:
 		return v.Eval(cdr, e)
 	case *Lambda:
-		return v.Do(cdr, e)
+		return v.Apply(cdr, e)
 	case *Builtin:
 		return v.Do(cdr, e)
 	}
+    fmt.Println("got ", x)
 	panic("Bad object in car")
 }
 
@@ -218,8 +233,6 @@ func (n Name) String() string {
 }
 
 func Eval(x Value, e *EnvFrame) Value {
-	print("Eval:")
-	println(x)
 	switch v := x.(type) {
 	case Name:
 		return e.Resolve(string(v))
@@ -229,12 +242,14 @@ func Eval(x Value, e *EnvFrame) Value {
 		return v
 	case String:
 		return v
-	case *SpecialForm:
-		return v
 	case *Pair:
 		return v.Eval(e)
-	case *Lambda:
-		return v
+    case *SpecialForm:
+        return v // expect: "Syntax Special Form"
+    case *Lambda:
+        return v // expect: "Clousure"
 	}
+    fmt.Println(x)
+    panic("bad object")
 	return nil
 }

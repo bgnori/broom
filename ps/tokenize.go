@@ -120,12 +120,35 @@ func parseInt(s string) (Value, error) {
     return Int(n), err
 }
 
+type chunkError struct {
+    source string
+}
+
+func (e *chunkError)Error() string {
+    return "not special form:" + e.source
+}
+
+func parseSpecial(s string) (Value, error) {
+    switch s {
+    case "quote":
+        return SFQuote, nil
+    case "lambda":
+        return SFLambda, nil
+    case "if":
+        return SFIf, nil
+    }
+    return nil, &chunkError{source: s}
+}
+
 func parseName(s string) (Value, error) {
     return Name(s), nil
 }
 
 func NewChunk(start, end int, s string) *Token {
     v, err := parseInt(s)
+    if err != nil {
+        v, err = parseSpecial(s)
+    }
     if err != nil {
         v, _ = parseName(s)
     }

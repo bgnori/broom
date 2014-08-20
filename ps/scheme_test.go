@@ -1,6 +1,7 @@
 package ps
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 )
@@ -106,7 +107,7 @@ func TestEvalName(t *testing.T) {
 
 func TestEvalQuote(t *testing.T) {
 	env := MakeEnv()
-	expr := Cons(Quote, Cons(Int(1), Int(2)))
+	expr := Cons(SFQuote, Cons(Int(1), Int(2)))
 	got := Eval(expr, env)
 	v, ok := got.(*Pair)
 	if !ok {
@@ -158,11 +159,27 @@ func TestLambda(t *testing.T) {
 }
 
 func TestWithParse(t *testing.T) {
-	println("TestRecursiveAdd")
+	println("TestWithParse")
 	env := MakeEnv()
 	env.Bind("+", BuiltinPlus)
-        expr := Parse(strings.NewReader("((lambda (x) (+ x 1)) 42)"))[0]
-        println(expr)
+    expr := Parse(strings.NewReader("((lambda (x) (+ x 1)) 42)"))[0]
+
+    expected := Cons(
+        Cons(
+            SFLambda,
+            Cons(
+                Cons(Name("x"),nil),
+                Cons(
+                    Cons(Name("+"), Cons(Name("x"), Cons(Int(1), nil))),
+                    nil))),
+        Cons(Int(42), nil))
+
+    if !RecEq(expected, expr) {
+        fmt.Println("expeted: ", expected)
+        fmt.Println("got: ", expr)
+		t.Error("Bad expr")
+    }
+
 	got := Eval(expr, env)
 	v, ok := got.(Int)
 	if !ok {
@@ -171,6 +188,6 @@ func TestWithParse(t *testing.T) {
 	if v != Int(43) {
 		t.Error("Bad result value")
 	}
+    println("end of TestWithParse")
 }
-
 

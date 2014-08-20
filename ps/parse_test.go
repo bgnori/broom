@@ -31,11 +31,11 @@ func TestParseString(t *testing.T) {
     if len(xs) != 1 {
         t.Error("a item is expected")
     }
-    u, ok := xs[0].(String)
+    u, ok := xs[0].(Name)
     if !ok {
-        t.Error("type String is expected")
+        t.Error("type Name is expected")
     }
-    if u != String("あいう") {
+    if u != Name("あいう") {
         t.Error("Wrong Value.")
     }
 }
