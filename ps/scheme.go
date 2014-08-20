@@ -78,7 +78,7 @@ func (x *Lambda) Apply(cdr Value, e *EnvFrame) Value {
 }
 
 func (x *Lambda) String() string {
-	return fmt.Sprintf("%x", x)
+	return fmt.Sprintf("lambda %x", x)
 }
 
 const (
@@ -107,7 +107,7 @@ func (sf *SpecialForm) Pair() bool {
 	return false
 }
 
-func (sf *SpecialForm) Eval(cdr Value, e *EnvFrame) Value {
+func (sf *SpecialForm) Eval (cdr Value, e *EnvFrame) Value {
 	switch sf.sfid {
 	case sfid_quote:
         if Cdr(cdr) != nil {
@@ -115,7 +115,18 @@ func (sf *SpecialForm) Eval(cdr Value, e *EnvFrame) Value {
         }
 		return Car(cdr)
 	case sfid_if:
-		return nil
+        cond := Car(cdr)
+        clauseThen := Car(Cdr(cdr))
+        clauseElse := Car(Cdr(Cdr(cdr)))
+        b, ok := Eval(cond, e).(Bool)
+        if !ok {
+            panic("Non bool value in if cond")
+        }
+        if b {
+            return Eval(clauseThen, e)
+        } else {
+            return Eval(clauseElse, e)
+        }
 	case sfid_lambda:
 		return MakeLambda(Car(cdr), Car(Cdr(cdr)), e)
     }
@@ -163,16 +174,32 @@ func Cdr(v Value) Value {
     }
 }
 
-func MakeList(xs []Value, cdr Value) Value {
+func MakeList(cdr Value, xs... Value) Value {
     if xs == nil || len(xs) == 0 {
         return cdr
     }
-    return Cons(xs[0], MakeList(xs[1:], cdr))
+    return Cons(xs[0], MakeList(cdr, xs[1:]...))
 }
 
-
 func (p *Pair) String() string {
-	return fmt.Sprintf("(%v . %v)", p.Car(), p.Cdr())
+    var cdr Value
+    //xs := make([]string, 0)
+    s := "("
+    cdr = p
+    for {
+        if p, ok := cdr.(*Pair); ok {
+            car := p.Car()
+            s += (car.String() + " ")
+            cdr = p.Cdr()
+        }else{
+            break
+        }
+    }
+    if cdr != Value(nil) {
+        return s + fmt.Sprintf(". %v)", cdr)
+    } else {
+        return s[:len(s)-1]+ ")"
+    }
 }
 
 func (pair *Pair) Eval(e *EnvFrame) Value {
@@ -185,6 +212,7 @@ func (pair *Pair) Eval(e *EnvFrame) Value {
 		panic("car is nil while evaluating pair")
 	}
 	x := Eval(car, e)
+    println(x)
 	switch v := x.(type) {
 	case *SpecialForm:
 		return v.Eval(cdr, e)

@@ -33,10 +33,10 @@ func Zip(xs, ys Value) chan Z {
 }
 
 func RecEq(x, y Value) bool {
-    if x == nil && y == nil {
+    if x == Value(nil) && y == Value(nil) {
         return true
     }
-    if x == nil || y == nil {
+    if x == Value(nil) || y == Value(nil) {
         return false
     }
     if x.Pair() && y.Pair() {

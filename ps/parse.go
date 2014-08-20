@@ -24,14 +24,14 @@ func Expr(tk *Token, ch chan *Token) Value {
             tk = <-ch
             switch tk.tkid {
             case TOKEN_RIGHTPAREN:
-                return MakeList(xs, nil)
+                return MakeList(nil, xs...)
             case TOKEN_DOT:
                 afterdot := <-ch
                 if afterdot.tkid == TOKEN_DOT {
                     panic("got '.' after '.'")
                 }
                 cdr := Expr(afterdot, ch)
-                r := MakeList(xs, cdr)
+                r := MakeList(cdr, xs...)
                 if (<-ch).tkid != TOKEN_RIGHTPAREN {
                     panic("expected ')' of ... '.' expr ')'")
                 }

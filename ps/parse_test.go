@@ -1,6 +1,7 @@
 package ps
 
 import (
+    "fmt"
     "strings"
     "testing"
 )
@@ -99,6 +100,7 @@ func TestParseQuoteAtom(t *testing.T) {
     }
 }
 
+
 func TestParseQuoteList(t *testing.T) {
     xs := Parse(strings.NewReader("(quote (a b))"))
     if len(xs) != 1 {
@@ -108,12 +110,46 @@ func TestParseQuoteList(t *testing.T) {
     if !ok {
         t.Error("type *Pair is expected")
     }
-    if !RecEq(u, Cons(SFQuote,
-                      Cons(
-                          Cons(Name("a"), Cons(Name("b"), nil)),
-                          nil),
-                      )) {
+    if !RecEq(u, MakeList(nil, SFQuote, MakeList(nil, Name("a"), Name("b")))){
         t.Error("Wrong Value.")
+    }
+}
+
+func TestParseIF(t *testing.T) {
+    println("TestParseIF")
+    xs := Parse(strings.NewReader("(if #f 1 2)"))
+    if len(xs) != 1 {
+        t.Error("a item is expected")
+    }
+    u, ok := xs[0].(*Pair)
+    if !ok {
+        t.Error("type *Pair is expected")
+    }
+    expected := MakeList(nil, SFIf, Bool(false), Int(1), Int(2))
+    // (if #f a b)
+    if !RecEq(u, expected) {
+        fmt.Println(expected)
+        fmt.Println(u)
+        t.Error("does not match.")
+    }
+}
+
+func TestParseIFName(t *testing.T) {
+    println("TestParseIF")
+    xs := Parse(strings.NewReader("(if #f a b)"))
+    if len(xs) != 1 {
+        t.Error("a item is expected")
+    }
+    u, ok := xs[0].(*Pair)
+    if !ok {
+        t.Error("type *Pair is expected")
+    }
+    expected := MakeList(nil, SFIf, Bool(false), Name("a"), Name("b"))
+    // (if #f a b)
+    if !RecEq(u, expected) {
+        fmt.Println(expected)
+        fmt.Println(u)
+        t.Error("does not match.")
     }
 }
 

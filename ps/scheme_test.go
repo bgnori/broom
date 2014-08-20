@@ -136,7 +136,6 @@ func TestBuiltin(t *testing.T) {
 }
 
 func TestLambda(t *testing.T) {
-	println("TestLambda")
 	env := MakeEnv()
 	env.Bind("+", BuiltinPlus)
 	expr := Cons(
@@ -159,7 +158,6 @@ func TestLambda(t *testing.T) {
 }
 
 func TestWithParse(t *testing.T) {
-	println("TestWithParse")
 	env := MakeEnv()
 	env.Bind("+", BuiltinPlus)
     expr := Parse(strings.NewReader("((lambda (x) (+ x 1)) 42)"))[0]
@@ -188,6 +186,22 @@ func TestWithParse(t *testing.T) {
 	if v != Int(43) {
 		t.Error("Bad result value")
 	}
-    println("end of TestWithParse")
 }
+
+
+func TestIF(t *testing.T) {
+	env := MakeEnv()
+	env.Bind("+", BuiltinPlus)
+	expr := MakeList(nil, SFIf, Bool(false), Int(0), Int(42)) // (if #f 0 42)
+    fmt.Println(expr)
+	got := Eval(expr, env)
+	v, ok := got.(Int)
+	if !ok {
+		t.Error("Bad result type")
+	}
+	if v != Int(42) {
+		t.Error("Bad result value")
+	}
+}
+
 

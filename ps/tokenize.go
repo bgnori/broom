@@ -128,6 +128,16 @@ func (e *chunkError)Error() string {
     return "not special form:" + e.source
 }
 
+func parseBool(s string) (Value, error) {
+    switch s {
+        case "#f":
+            return Bool(false), nil
+        case "#t":
+            return Bool(true), nil
+    }
+    return nil, &chunkError{source: s}
+}
+
 func parseSpecial(s string) (Value, error) {
     switch s {
     case "quote":
@@ -146,6 +156,9 @@ func parseName(s string) (Value, error) {
 
 func NewChunk(start, end int, s string) *Token {
     v, err := parseInt(s)
+    if err != nil {
+        v, err = parseBool(s)
+    }
     if err != nil {
         v, err = parseSpecial(s)
     }
