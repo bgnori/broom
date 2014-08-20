@@ -85,6 +85,35 @@ func TestParseList(t *testing.T) {
     }
 }
 
+func TestParseQuoteAtom(t *testing.T) {
+    xs := Parse(strings.NewReader("(quote a)"))
+    if len(xs) != 1 {
+        t.Error("a item is expected")
+    }
+    u, ok := xs[0].(*Pair)
+    if !ok {
+        t.Error("type *Pair is expected")
+    }
+    if !RecEq(u, Cons(SFQuote, Cons(Name("a"), nil))) {
+        t.Error("Wrong Value.")
+    }
+}
 
-
+func TestParseQuoteList(t *testing.T) {
+    xs := Parse(strings.NewReader("(quote (a b))"))
+    if len(xs) != 1 {
+        t.Error("a item is expected")
+    }
+    u, ok := xs[0].(*Pair)
+    if !ok {
+        t.Error("type *Pair is expected")
+    }
+    if !RecEq(u, Cons(SFQuote,
+                      Cons(
+                          Cons(Name("a"), Cons(Name("b"), nil)),
+                          nil),
+                      )) {
+        t.Error("Wrong Value.")
+    }
+}
 

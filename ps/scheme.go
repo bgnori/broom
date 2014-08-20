@@ -110,7 +110,10 @@ func (sf *SpecialForm) Pair() bool {
 func (sf *SpecialForm) Eval(cdr Value, e *EnvFrame) Value {
 	switch sf.sfid {
 	case sfid_quote:
-		return cdr
+        if Cdr(cdr) != nil {
+            panic("got non nil cdr for quote")
+        }
+		return Car(cdr)
 	case sfid_if:
 		return nil
 	case sfid_lambda:

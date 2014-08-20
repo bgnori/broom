@@ -126,7 +126,6 @@ func TestTokenizeSpecialForm(t *testing.T) {
     }
 }
 
-
 func TestTokenizeUnicode(t *testing.T) {
     tknz := NewTokenizer(strings.NewReader("あいう"))
     xs := ch2xs(tknz.Tokenize())

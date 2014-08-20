@@ -107,7 +107,7 @@ func TestEvalName(t *testing.T) {
 
 func TestEvalQuote(t *testing.T) {
 	env := MakeEnv()
-	expr := Cons(SFQuote, Cons(Int(1), Int(2)))
+	expr := Cons(SFQuote, Cons(Cons(Int(1), Int(2)), nil))
 	got := Eval(expr, env)
 	v, ok := got.(*Pair)
 	if !ok {
