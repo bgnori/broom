@@ -205,3 +205,20 @@ func TestIF(t *testing.T) {
 }
 
 
+func TestCond(t *testing.T) {
+	env := GlobalEnv()
+	expr := Parse(strings.NewReader("(cond (#f 1) (#f 2) (100 3) (else 0))"))
+    v := Eval(expr[0], env)
+    if v != Int(3) {
+        t.Error("Expected Int(3)")
+    }
+}
+
+func TestCond3(t *testing.T) {
+	env := GlobalEnv()
+	expr := Parse(strings.NewReader("(cond (#f 1) (#f 2) (#f 3) (else + 2 1))"))
+    v := Eval(expr[0], env)
+    if v != Int(1) {
+        t.Error("Expected Int(1)")
+    }
+}

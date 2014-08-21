@@ -146,6 +146,8 @@ func parseSpecial(s string) (Value, error) {
         return SFLambda, nil
     case "if":
         return SFIf, nil
+    case "cond":
+        return SFCond, nil
     }
     return nil, &chunkError{source: s}
 }

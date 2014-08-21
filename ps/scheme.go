@@ -9,6 +9,13 @@ type Value interface {
 	String() string
 }
 
+func isTrue (v Value) bool {
+    if u, ok := v.(Bool) ; ok {
+        return bool(u)
+    }
+    return true
+}
+
 type Bool bool
 
 func (x Bool) Pair() bool {
@@ -85,6 +92,7 @@ const (
 	sfid_if     = iota
 	sfid_quote  = iota
 	sfid_lambda = iota
+    sfid_cond = iota
 )
 
 type SpecialForm struct {
@@ -127,6 +135,50 @@ func (sf *SpecialForm) Eval (cdr Value, e *EnvFrame) Value {
         } else {
             return Eval(clauseElse, e)
         }
+    case sfid_cond:
+        for clause := range IterOverPairAsList(cdr) {
+            test := Car(clause)
+            then := Cdr(clause)
+            fmt.Println("clause", test)
+            switch {
+            case test == Name("else"):
+                //(else expr expr2 …)
+                //must be last item
+                var v Value
+                for x := range IterOverPairAsList(then) {
+                    v = Eval(x, e)
+                }
+                return v
+
+                // to be implemented
+                //(test => expr)
+                // それが2番目の形式であれば、exprがまず評価されます。
+                // exprは引数をひとつ取る手続きを返さねばなりません。 
+                // 続いて、testの結果がその手続きに渡され、
+                // その手続きの戻り値がcond形式の評価値となります。 
+
+                // to be implemented
+                //(test guard => expr)
+                // 3番目の形式はSRFI-61で定義されています。この形式では、testは
+                // 任意の数の値に評価されることができます。それらの値がまず
+                // guardに渡され、もしguardが真の値を返したら、同じ引数がexprに
+                // 適用されて、その戻り値がcond形式の評価値となります。 
+                // guardが#fを返した場合は次の節へと評価が進みます。 guardとexpr
+                // は、testが返すのと同数の引数を取れなければいけません。 
+            default:
+                if isTrue(Eval(test, e)) {
+                    //(test expr …)
+                    var v Value
+                    for x := range IterOverPairAsList(then) {
+                        v = Eval(x, e)
+                    }
+                return v
+                }
+            }
+        }
+        return nil
+        // もし全てのテストが偽の値を返し、最後の節が4番目の形式(else節)でなければ、
+        // 未定義の値が返されます。 
 	case sfid_lambda:
 		return MakeLambda(Car(cdr), Car(Cdr(cdr)), e)
     }
@@ -136,6 +188,7 @@ func (sf *SpecialForm) Eval (cdr Value, e *EnvFrame) Value {
 var SFQuote = &SpecialForm{sfid: sfid_quote}
 var SFIf = &SpecialForm{sfid: sfid_if}
 var SFLambda = &SpecialForm{sfid: sfid_lambda}
+var SFCond = &SpecialForm{sfid: sfid_cond}
 
 type Pair struct {
 	car Value
