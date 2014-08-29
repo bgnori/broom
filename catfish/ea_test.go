@@ -73,3 +73,12 @@ func TestEvalLambda(t *testing.T) {
 		t.Error("expected 123")
 	}
 }
+
+func TestEvalWhen(t *testing.T) {
+	e := NewGlobalRootFrame()
+	v := Eval(List(nil, sym("when"), true, 1, 2, 3), e)
+        if v != 3 {
+		t.Error("expected 3")
+                fmt.Println(v)
+        }
+}

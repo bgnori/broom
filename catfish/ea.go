@@ -51,43 +51,45 @@ type syntaxImpl struct {
 	body Value
 	args Value
 	env  Enviroment
-	foo  func(syn *syntaxImpl, env Enviroment, cdr Value) Value
+	foo  func(syn Syntax, env Enviroment, cdr Value) Value
 }
 
-func (s *syntaxImpl) LexEnv() Enviroment {
-	return s.env
+func (syn *syntaxImpl) LexEnv() Enviroment {
+	return syn.env
 }
 
 func (syn *syntaxImpl) Apply(env Enviroment, cdr Value) Value {
 	return syn.foo(syn, env, cdr)
 }
 
+
+func makeBuiltinSF(f func(sync Syntax, env Enviroment, cdr Value) Value ) Syntax {
+  return &syntaxImpl{foo: f}
+}
+
 func setupSpecialForms(env Enviroment) Enviroment {
 	//case sym("quote").Eq(car): //quoted?
-	quote := &syntaxImpl{foo: func(syn *syntaxImpl, env Enviroment, cdr Value) Value {
+	env.Bind("quote", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Value) Value {
 		return Car(cdr)
-	}}
-	env.Bind("quote", quote)
+	}))
 
 	//case sym("set!").Eq(car): //assignment?
-	setbang := &syntaxImpl{foo: func(syn *syntaxImpl, env Enviroment, cdr Value) Value {
+	env.Bind("set!", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Value) Value {
 		panic("not implemented: set!")
 		return nil
-	}}
-	env.Bind("set!", setbang)
+	}))
 
 	//case sym("define").Eq(car): //definition?
-	define := &syntaxImpl{foo: func(syn *syntaxImpl, env Enviroment, cdr Value) Value {
+	env.Bind("define", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Value) Value {
 		s, _ := Car(cdr).(Symbol)
 		v := Car(Cdr(cdr))
 		u := Eval(v, env)
 		env.Bind(s.GetValue(), u)
 		return s
-	}}
-	env.Bind("define", define)
+	}))
 
 	//case sym("if").Eq(car): //if?
-	_if := &syntaxImpl{foo: func(syn *syntaxImpl, env Enviroment, cdr Value) Value {
+	env.Bind("if", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Value) Value {
 		cond := Car(cdr)
 		fmt.Println(cond)
 		if Eval(cond, env) == true {
@@ -99,17 +101,15 @@ func setupSpecialForms(env Enviroment) Enviroment {
 			return Eval(clauseElse, env)
 		}
 		return nil
-	}}
-	env.Bind("if", _if)
+	}))
 
 	//case sym("lambda").Eq(car): //lambda?
-	lambda := &syntaxImpl{foo: func(syn *syntaxImpl, env Enviroment, cdr Value) Value {
+	env.Bind("lambda", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Value) Value {
 		return FromLambda(cdr, env)
-	}}
-	env.Bind("lambda", lambda)
+	}))
 
 	//case sym("begin").Eq(car): //begin?
-	begin := &syntaxImpl{foo: func(syn *syntaxImpl, env Enviroment, cdr Value) Value {
+	env.Bind("begin", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Value) Value {
 		var x Value
 		e := NewEnvFrame()
 		e.outer = env
@@ -117,14 +117,20 @@ func setupSpecialForms(env Enviroment) Enviroment {
 			x = Eval(b, e)
 		}
 		return x
-	}}
-	env.Bind("begin", begin)
+	}))
 
 	//case sym("cond").Eq(car): //cond?
-	cond := &syntaxImpl{foo: func(syn *syntaxImpl, env Enviroment, cdr Value) Value {
+	env.Bind("cond", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Value) Value {
 		return nil
-	}}
-	env.Bind("cond", cond)
+	}))
+
+        // when macro
+        // http://www.shido.info/lisp/scheme_syntax.html
+	env.Bind("when", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Value) Value {
+                conv := List(nil, sym("if"), Car(cdr),
+                              List(Cdr(cdr), sym("begin")))
+		return Eval(conv, env)
+	}))
 	return env
 }
 

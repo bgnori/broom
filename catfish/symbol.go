@@ -19,3 +19,7 @@ func (s *symbolImpl) Eq(other Value) bool {
 		return false
 	}
 }
+
+func (s *symbolImpl) String () string {
+      return s.value
+}

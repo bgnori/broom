@@ -1,6 +1,7 @@
 package catfish
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -98,3 +99,12 @@ func Test_Length_03(t *testing.T) {
 	}
 
 }
+
+func Test_String(t *testing.T) {
+	xs := List(nil, sym("a"), List(nil, sym("b")), List(nil, sym("c"), sym("d"), sym("e")))
+	if fmt.Sprint(xs) != "(a (b) (c d e))" {
+          t.Error("expected: (a (b) (c d e))")
+          t.Error("actually:", fmt.Sprint(xs))
+	}
+}
+

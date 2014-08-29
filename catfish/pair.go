@@ -1,5 +1,10 @@
 package catfish
 
+import (
+  "fmt"
+  "strings"
+)
+
 type pairImpl struct {
 	car Value
 	cdr Value
@@ -43,11 +48,22 @@ func (p *pairImpl) SetCdr(v Value) Undef {
 	return nil
 }
 
+func (p *pairImpl) String() string {
+  //assume that proper list
+  xs := List2Arr(p)
+  ss := make([]string, 0)
+  for _, x := range xs {
+    ss = append(ss, fmt.Sprint(x))
+  }
+  return "(" + strings.Join(ss, " ") + ")"
+}
+
 func sub(v Value, xs []Value) []Value {
 	if v == nil {
 		return xs
 	} else {
-		return append(sub(Cdr(v), xs), Car(v))
+                xs = append(xs, Car(v))
+		return sub(Cdr(v), xs)
 	}
 }
 
