@@ -24,11 +24,11 @@ func FromLambda(cdr Value, env Enviroment) *clousure {
 	return c
 }
 
-func (c *clousure) Apply(env Enviroment, args ...Value) Value {
+func (c *clousure) Apply(env Enviroment, cdr Value) Value {
 	e := NewEnvFrame()
-	e.outer = env
+	e.outer = c.LexEnv()
 	formals := List2Arr(c.args)
-	for i, a := range args {
+	for i, a := range List2Arr(cdr) {
 		fmt.Println(formals[i], "Eval", a)
 		v := Eval(a, e)
 		fmt.Println(formals[i], "Bind", v)
@@ -43,16 +43,22 @@ func (c *clousure) Apply(env Enviroment, args ...Value) Value {
 	return x
 }
 
-type Foo func(syn *syntaxImpl, env Enviroment, cdr Value) Value
+func (c *clousure) LexEnv() Enviroment {
+	return c.env
+}
 
 type syntaxImpl struct {
 	body Value
 	args Value
 	env  Enviroment
-	foo  Foo
+	foo  func(syn *syntaxImpl, env Enviroment, cdr Value) Value
 }
 
-func (syn *syntaxImpl) Process(env Enviroment, cdr Value) Value {
+func (s *syntaxImpl) LexEnv() Enviroment {
+	return s.env
+}
+
+func (syn *syntaxImpl) Apply(env Enviroment, cdr Value) Value {
 	return syn.foo(syn, env, cdr)
 }
 
@@ -149,21 +155,18 @@ func Eval(expr Value, env Enviroment) Value {
 	            (error "Unknown expression type -- EVAL" exp))))
 	*/
 	switch {
-	case isBoolean(expr) || isNumber(expr) || isString(expr) || isProcedure(expr): // self-evaluating?
+	case isBoolean(expr) || isNumber(expr) || isString(expr) || isProcedure(expr) || isSyntax(expr): // self-evaluating?
 		return expr
 	case isSymbol(expr): // variables?
 		sym, _ := expr.(Symbol)
 		return env.Resolve(sym.GetValue())
 	case isPair(expr):
 		car := Eval(Car(expr), env)
-		switch car.(type) {
-		case Syntax:
-			s, _ := car.(Syntax)
-			return s.Process(env, Cdr(expr))
-		case Procedure:
-			p, _ := car.(Procedure)
-			return p.Apply(env, List2Arr(Cdr(expr))...)
+		op, ok := car.(SExprOperator)
+		if !ok {
+			panic("application error, expected SExprOperator")
 		}
+		return op.Apply(env, Cdr(expr))
 	}
 	return nil
 }

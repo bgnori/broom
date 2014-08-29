@@ -17,10 +17,6 @@ type Pair interface {
 	SetCdr(v Value) Undef
 }
 
-type Procedure interface {
-	Apply(env Enviroment, args ...Value) Value
-}
-
 func isNull(v Value) bool {
 	//null?
 	return v == nil
@@ -77,9 +73,29 @@ func isPair(v Value) bool {
 }
 
 //port?
+
+type SExprOperator interface {
+	Apply(env Enviroment, cdr Value) Value
+	LexEnv() Enviroment //Leixical Enviroment
+}
+
+type Procedure interface {
+	SExprOperator
+}
+
 func isProcedure(v Value) bool {
 	//procedure?
 	_, ok := v.(Procedure)
+	return ok
+}
+
+type Syntax interface {
+	SExprOperator
+}
+
+func isSyntax(v Value) bool {
+	//syntax?
+	_, ok := v.(Syntax)
 	return ok
 }
 
@@ -92,13 +108,3 @@ func isString(v Value) bool {
 // vector?
 // bytevector?
 // define-record-type
-
-type Syntax interface {
-	Process(env Enviroment, cdr Value) Value
-}
-
-func isSyntax(v Value) bool {
-	//syntax?
-	_, ok := v.(Syntax)
-	return ok
-}
