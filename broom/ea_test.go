@@ -63,12 +63,12 @@ func TestEvalIF(t *testing.T) {
 
 func TestEvalLambda(t *testing.T) {
 	e := NewGlobalRootFrame()
-	f := Eval(List(nil, sym("lambda"), List(nil, sym("x")), sym("x")), e)
+	f := Eval(List(sym("lambda"), List(sym("x")), sym("x")), e)
 	if _, ok := f.(Procedure); !ok {
 		t.Error("expected Procedure")
 	}
 	println("having", f)
-	v := Eval(List(nil, f, 123), e)
+	v := Eval(List(f, 123), e)
 	if v != 123 {
 		t.Error("expected 123")
 	}
@@ -76,7 +76,7 @@ func TestEvalLambda(t *testing.T) {
 
 func TestEvalWhen(t *testing.T) {
 	e := NewGlobalRootFrame()
-	v := Eval(List(nil, sym("when"), true, 1, 2, 3), e)
+	v := Eval(List(sym("when"), true, 1, 2, 3), e)
         if v != 3 {
 		t.Error("expected 3")
                 fmt.Println(v)

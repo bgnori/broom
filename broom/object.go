@@ -12,9 +12,9 @@ type Symbol interface {
 
 type Pair interface {
 	Car() Value
-	Cdr() Value
+	Cdr() Pair
 	SetCar(v Value) Undef
-	SetCdr(v Value) Undef
+	SetCdr(p Pair) Undef
 }
 
 func isNull(v Value) bool {

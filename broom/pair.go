@@ -7,10 +7,10 @@ import (
 
 type pairImpl struct {
 	car Value
-	cdr Value
+	cdr Pair
 }
 
-func Cons(car, cdr Value) Pair {
+func Cons(car Value, cdr Pair) Pair {
 	return &pairImpl{car: car, cdr: cdr}
 }
 
@@ -22,7 +22,7 @@ func Car(v Value) Value {
 	return u.Car()
 }
 
-func Cdr(v Value) Value {
+func Cdr(v Value) Pair{
 	u, ok := v.(Pair)
 	if !ok {
 		panic("non pair object for Cdr()")
@@ -34,7 +34,7 @@ func (p *pairImpl) Car() Value {
 	return p.car
 }
 
-func (p *pairImpl) Cdr() Value {
+func (p *pairImpl) Cdr() Pair {
 	return p.cdr
 }
 
@@ -43,8 +43,8 @@ func (p *pairImpl) SetCar(v Value) Undef {
 	return nil
 }
 
-func (p *pairImpl) SetCdr(v Value) Undef {
-	p.cdr = v
+func (p *pairImpl) SetCdr(cdr Pair) Undef {
+	p.cdr = cdr
 	return nil
 }
 
@@ -71,13 +71,13 @@ func List2Arr(v Value) []Value {
 	return sub(v, make([]Value, 0))
 }
 
-func List(cdr Value, xs ...Value) Value {
+func List(xs ...Value) Pair{
 	//(list obj... )
 	// this function supports . cdr, for none proper list
 	if len(xs) == 0 {
-		return cdr
+		return nil
 	}
-	return Cons(xs[0], List(cdr, xs[1:]...))
+	return Cons(xs[0], List(xs[1:]...))
 }
 
 func isList(xs Value) bool {

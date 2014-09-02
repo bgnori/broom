@@ -7,7 +7,7 @@ import (
 
 func Test_ConsCarCdr(t *testing.T) {
 	var v Value
-	v = Cons(1, 2)
+	v = Cons(1, Cons(2, nil))
 	if isNull(v) {
 		t.Error("(null? v) must be null? false.")
 	}
@@ -21,10 +21,10 @@ func Test_ConsCarCdr(t *testing.T) {
 	} else {
 		t.Error("(car v) must be 1.")
 	}
-	if !isNumber(Cdr(v)) {
+	if !isNumber(Car(Cdr(v))) {
 		t.Error("(cdr v) must be number.")
 	}
-	if u, ok := Cdr(v).(int); ok && u == 2 {
+	if u, ok := Car(Cdr(v)).(int); ok && u == 2 {
 	} else {
 		t.Error("(cdr v) must be 2.")
 	}
@@ -38,7 +38,7 @@ func Test_ConsNilNil(t *testing.T) {
 }
 
 func Test_ListNil(t *testing.T) {
-	xs := List(nil)
+	xs := List()
 	if !isNull(xs) {
 		t.Error("xs must be null, i.e. '()")
 	}
@@ -62,12 +62,9 @@ func Test_isList_02(t *testing.T) {
 	}
 }
 
-func Test_isList_03(t *testing.T) {
+func xTest_isList_03(t *testing.T) {
 	//(list? '(a . b)) =) #f
-	xs := Cons(sym("A"), sym("B"))
-	if isList(xs) {
-		t.Error("expect that (list? '(a . b)) =) #f")
-	}
+        // no support for improper list.
 }
 
 func Test_isList_04(t *testing.T) {
@@ -86,7 +83,7 @@ func Test_Length_01(t *testing.T) {
 
 func Test_Length_02(t *testing.T) {
 	//(length '(a (b) (c d e))) =) 3
-	xs := List(nil, sym("a"), List(nil, sym("b")), List(nil, sym("c"), sym("d"), sym("e")))
+	xs := List(sym("a"), List(sym("b")), List(sym("c"), sym("d"), sym("e")))
 	if Length(xs) != 3 {
 		t.Error("expected 3 for (length '(a (b) (c d e))) ")
 	}
@@ -101,7 +98,7 @@ func Test_Length_03(t *testing.T) {
 }
 
 func Test_String(t *testing.T) {
-	xs := List(nil, sym("a"), List(nil, sym("b")), List(nil, sym("c"), sym("d"), sym("e")))
+	xs := List(sym("a"), List(sym("b")), List(sym("c"), sym("d"), sym("e")))
 	if fmt.Sprint(xs) != "(a (b) (c d e))" {
           t.Error("expected: (a (b) (c d e))")
           t.Error("actually:", fmt.Sprint(xs))

@@ -127,15 +127,15 @@ func setupSpecialForms(env Enviroment) Enviroment {
         // when macro
         // http://www.shido.info/lisp/scheme_syntax.html
 	env.Bind("when", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Value) Value {
-                conv := List(nil, sym("if"), Car(cdr),
-                              List(Cdr(cdr), sym("begin")))
+                conv := List(sym("if"), Car(cdr),
+                              Cons(sym("begin"), Cdr(cdr)))
 		return Eval(conv, env)
 	}))
 
         // to be implemented
 	env.Bind("macroexpand", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Value) Value {
-                conv := List(nil, sym("if"), Car(cdr),
-                              List(Cdr(cdr), sym("begin")))
+                conv := List(sym("if"), Car(cdr),
+                              Cons(sym("begin"), Cdr(cdr)))
 		return Eval(conv, env)
 	}))
 	return env
