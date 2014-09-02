@@ -131,6 +131,13 @@ func setupSpecialForms(env Enviroment) Enviroment {
                               List(Cdr(cdr), sym("begin")))
 		return Eval(conv, env)
 	}))
+
+        // to be implemented
+	env.Bind("macroexpand", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Value) Value {
+                conv := List(nil, sym("if"), Car(cdr),
+                              List(Cdr(cdr), sym("begin")))
+		return Eval(conv, env)
+	}))
 	return env
 }
 
