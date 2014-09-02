@@ -20,6 +20,6 @@ func (s *symbolImpl) Eq(other Value) bool {
 	}
 }
 
-func (s *symbolImpl) String () string {
-      return s.value
+func (s *symbolImpl) String() string {
+	return s.value
 }

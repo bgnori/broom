@@ -75,7 +75,7 @@ func isPair(v Value) bool {
 //port?
 
 type SExprOperator interface {
-	Apply(env Enviroment, cdr Value) Value
+	Apply(env Enviroment, cdr Pair) Value
 	LexEnv() Enviroment //Leixical Enviroment
 }
 

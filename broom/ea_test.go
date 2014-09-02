@@ -77,8 +77,8 @@ func TestEvalLambda(t *testing.T) {
 func TestEvalWhen(t *testing.T) {
 	e := NewGlobalRootFrame()
 	v := Eval(List(sym("when"), true, 1, 2, 3), e)
-        if v != 3 {
+	if v != 3 {
 		t.Error("expected 3")
-                fmt.Println(v)
-        }
+		fmt.Println(v)
+	}
 }

@@ -15,7 +15,7 @@ type clousure struct {
 	env  Enviroment
 }
 
-func FromLambda(cdr Value, env Enviroment) *clousure {
+func FromLambda(cdr Pair, env Enviroment) *clousure {
 	c := new(clousure)
 	c.args = Car(cdr)
 	c.body = Cdr(cdr)
@@ -24,7 +24,7 @@ func FromLambda(cdr Value, env Enviroment) *clousure {
 	return c
 }
 
-func (c *clousure) Apply(env Enviroment, cdr Value) Value {
+func (c *clousure) Apply(env Enviroment, cdr Pair) Value {
 	e := NewEnvFrame()
 	e.outer = c.LexEnv()
 	formals := List2Arr(c.args)
@@ -51,36 +51,35 @@ type syntaxImpl struct {
 	body Value
 	args Value
 	env  Enviroment
-	foo  func(syn Syntax, env Enviroment, cdr Value) Value
+	foo  func(syn Syntax, env Enviroment, cdr Pair) Value
 }
 
 func (syn *syntaxImpl) LexEnv() Enviroment {
 	return syn.env
 }
 
-func (syn *syntaxImpl) Apply(env Enviroment, cdr Value) Value {
+func (syn *syntaxImpl) Apply(env Enviroment, cdr Pair) Value {
 	return syn.foo(syn, env, cdr)
 }
 
-
-func makeBuiltinSF(f func(sync Syntax, env Enviroment, cdr Value) Value ) Syntax {
-  return &syntaxImpl{foo: f}
+func makeBuiltinSF(f func(sync Syntax, env Enviroment, cdr Pair) Value) Syntax {
+	return &syntaxImpl{foo: f}
 }
 
 func setupSpecialForms(env Enviroment) Enviroment {
 	//case sym("quote").Eq(car): //quoted?
-	env.Bind("quote", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Value) Value {
+	env.Bind("quote", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Pair) Value {
 		return Car(cdr)
 	}))
 
 	//case sym("set!").Eq(car): //assignment?
-	env.Bind("set!", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Value) Value {
+	env.Bind("set!", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Pair) Value {
 		panic("not implemented: set!")
 		return nil
 	}))
 
 	//case sym("define").Eq(car): //definition?
-	env.Bind("define", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Value) Value {
+	env.Bind("define", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Pair) Value {
 		s, _ := Car(cdr).(Symbol)
 		v := Car(Cdr(cdr))
 		u := Eval(v, env)
@@ -89,7 +88,7 @@ func setupSpecialForms(env Enviroment) Enviroment {
 	}))
 
 	//case sym("if").Eq(car): //if?
-	env.Bind("if", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Value) Value {
+	env.Bind("if", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Pair) Value {
 		cond := Car(cdr)
 		fmt.Println(cond)
 		if Eval(cond, env) == true {
@@ -104,12 +103,12 @@ func setupSpecialForms(env Enviroment) Enviroment {
 	}))
 
 	//case sym("lambda").Eq(car): //lambda?
-	env.Bind("lambda", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Value) Value {
+	env.Bind("lambda", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Pair) Value {
 		return FromLambda(cdr, env)
 	}))
 
 	//case sym("begin").Eq(car): //begin?
-	env.Bind("begin", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Value) Value {
+	env.Bind("begin", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Pair) Value {
 		var x Value
 		e := NewEnvFrame()
 		e.outer = env
@@ -120,22 +119,22 @@ func setupSpecialForms(env Enviroment) Enviroment {
 	}))
 
 	//case sym("cond").Eq(car): //cond?
-	env.Bind("cond", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Value) Value {
+	env.Bind("cond", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Pair) Value {
 		return nil
 	}))
 
-        // when macro
-        // http://www.shido.info/lisp/scheme_syntax.html
-	env.Bind("when", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Value) Value {
-                conv := List(sym("if"), Car(cdr),
-                              Cons(sym("begin"), Cdr(cdr)))
+	// when macro
+	// http://www.shido.info/lisp/scheme_syntax.html
+	env.Bind("when", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Pair) Value {
+		conv := List(sym("if"), Car(cdr),
+			Cons(sym("begin"), Cdr(cdr)))
 		return Eval(conv, env)
 	}))
 
-        // to be implemented
-	env.Bind("macroexpand", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Value) Value {
-                conv := List(sym("if"), Car(cdr),
-                              Cons(sym("begin"), Cdr(cdr)))
+	// to be implemented
+	env.Bind("macroexpand", makeBuiltinSF(func(syn Syntax, env Enviroment, cdr Pair) Value {
+		conv := List(sym("if"), Car(cdr),
+			Cons(sym("begin"), Cdr(cdr)))
 		return Eval(conv, env)
 	}))
 	return env

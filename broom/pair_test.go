@@ -64,7 +64,7 @@ func Test_isList_02(t *testing.T) {
 
 func xTest_isList_03(t *testing.T) {
 	//(list? '(a . b)) =) #f
-        // no support for improper list.
+	// no support for improper list.
 }
 
 func Test_isList_04(t *testing.T) {
@@ -100,8 +100,7 @@ func Test_Length_03(t *testing.T) {
 func Test_String(t *testing.T) {
 	xs := List(sym("a"), List(sym("b")), List(sym("c"), sym("d"), sym("e")))
 	if fmt.Sprint(xs) != "(a (b) (c d e))" {
-          t.Error("expected: (a (b) (c d e))")
-          t.Error("actually:", fmt.Sprint(xs))
+		t.Error("expected: (a (b) (c d e))")
+		t.Error("actually:", fmt.Sprint(xs))
 	}
 }
-

@@ -1,8 +1,8 @@
 package broom
 
 import (
-  "fmt"
-  "strings"
+	"fmt"
+	"strings"
 )
 
 type pairImpl struct {
@@ -22,7 +22,7 @@ func Car(v Value) Value {
 	return u.Car()
 }
 
-func Cdr(v Value) Pair{
+func Cdr(v Value) Pair {
 	u, ok := v.(Pair)
 	if !ok {
 		panic("non pair object for Cdr()")
@@ -49,20 +49,20 @@ func (p *pairImpl) SetCdr(cdr Pair) Undef {
 }
 
 func (p *pairImpl) String() string {
-  //assume that proper list
-  xs := List2Arr(p)
-  ss := make([]string, 0)
-  for _, x := range xs {
-    ss = append(ss, fmt.Sprint(x))
-  }
-  return "(" + strings.Join(ss, " ") + ")"
+	//assume that proper list
+	xs := List2Arr(p)
+	ss := make([]string, 0)
+	for _, x := range xs {
+		ss = append(ss, fmt.Sprint(x))
+	}
+	return "(" + strings.Join(ss, " ") + ")"
 }
 
 func sub(v Value, xs []Value) []Value {
 	if v == nil {
 		return xs
 	} else {
-                xs = append(xs, Car(v))
+		xs = append(xs, Car(v))
 		return sub(Cdr(v), xs)
 	}
 }
@@ -71,7 +71,7 @@ func List2Arr(v Value) []Value {
 	return sub(v, make([]Value, 0))
 }
 
-func List(xs ...Value) Pair{
+func List(xs ...Value) Pair {
 	//(list obj... )
 	// this function supports . cdr, for none proper list
 	if len(xs) == 0 {
