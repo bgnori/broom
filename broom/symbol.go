@@ -1,4 +1,4 @@
-package catfish
+package broom
 
 type symbolImpl struct {
 	value string
