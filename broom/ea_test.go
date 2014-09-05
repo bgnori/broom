@@ -31,7 +31,7 @@ func TestEvalVariable(t *testing.T) {
 
 func TestEvalQuotedSymbol(t *testing.T) {
 	e := NewGlobalRootFrame()
-	v := Eval(Cons(sym("quote"), Cons(sym("A"), nil)), e)
+	v := Eval(List(sym("quote"), sym("A")), e)
 	if !sym("A").Eq(v) {
 		t.Error("expected sym A")
 		fmt.Println(v)
@@ -64,7 +64,7 @@ func TestEvalIF(t *testing.T) {
 func TestEvalLambda(t *testing.T) {
 	e := NewGlobalRootFrame()
 	f := Eval(List(sym("lambda"), List(sym("x")), sym("x")), e)
-	if _, ok := f.(Procedure); !ok {
+	if _, ok := f.(Closure); !ok {
 		t.Error("expected Procedure")
 	}
 	println("having", f)

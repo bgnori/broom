@@ -74,24 +74,15 @@ func isPair(v Value) bool {
 
 //port?
 
-type SExprOperator interface {
-	Apply(env Enviroment, cdr Pair) Value
-	LexEnv() Enviroment //Leixical Enviroment
-}
-
-type Procedure interface {
-	SExprOperator
-}
+type Closure func(env Enviroment, cdr Pair) Value
 
 func isProcedure(v Value) bool {
 	//procedure?
-	_, ok := v.(Procedure)
+	_, ok := v.(Closure)
 	return ok
 }
 
-type Syntax interface {
-	SExprOperator
-}
+type Syntax Closure
 
 func isSyntax(v Value) bool {
 	//syntax?
