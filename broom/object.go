@@ -1,5 +1,9 @@
 package broom
 
+import (
+    "fmt"
+)
+
 type Value interface{} // Anything.
 
 type Undef interface{} // T.B.D.
@@ -97,5 +101,63 @@ func isString(v Value) bool {
 }
 
 // vector?
+func isArray(v Value) bool {
+    _, ok := v.([]Value)
+    return ok
+}
+
+
 // bytevector?
 // define-record-type
+
+func isMap(v Value) bool {
+    _, ok := v.(map[Value]Value)
+    return ok
+}
+
+func DumpMap(x Value) {
+    mx, _ := x.(map[Value]Value)
+    fmt.Println("Dumping", mx)
+    for k, vx := range mx {
+        fmt.Println(k, vx)
+    }
+}
+
+func EqMap(x, y Value) bool {
+    mx, _ := x.(map[Value]Value)
+    my, _ := y.(map[Value]Value)
+    for k, vx := range mx {
+        vy, in := my[k]
+        if in && vx == vy {
+            continue
+        } else {
+            return false
+        }
+    }
+    for k, vy := range my {
+        vx, in := mx[k]
+        if in && vx == vy {
+            continue
+        } else {
+            return false
+        }
+    }
+    return true
+}
+
+func Eq(x, y Value) bool {
+    switch {
+    case isMap(x) && isMap(y):
+        return EqMap(x,y)
+    case isSymbol(x) && isSymbol(y):
+        sx, _ := x.(Symbol)
+        sy, _ := y.(Symbol)
+        return sx.Eq(sy)
+    case isPair(x) && isPair(y):
+        return Eq(Car(x), Car(y)) && Eq(Cdr(x), Cdr(y))
+    default:
+        return x==y
+    }
+    return false
+}
+

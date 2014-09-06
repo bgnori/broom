@@ -2,6 +2,7 @@ package broom
 
 import (
     "bufio"
+    "fmt"
     "io"
     "unicode/utf8"
 )
@@ -84,6 +85,12 @@ func isRightBrace(r rune) bool {
     return '}' == r
 }
 
+func isParenBracketBrace(r rune) bool {
+    return isLeftParen(r) || isRightParen(r) ||
+    isLeftBracket(r) || isRightBracket(r) ||
+    isLeftBrace(r) || isRightBrace(r)
+}
+
 func isDot(r rune) bool {
     return '.' == r
 }
@@ -95,6 +102,23 @@ func isDoubleQuote(r rune) bool {
 func isBackSlash(r rune) bool {
     return '\\' == r
 }
+
+func isVerticalBar(r rune) bool {
+    return '|' == r
+}
+
+func isSharp(r rune) bool {
+    return '#' == r
+}
+
+func isQuote(r rune) bool {
+    return '\'' == r
+}
+
+func isQuasiQuote(r rune) bool {
+    return '`' == r
+}
+
 
 func isWhite(r rune) bool {
     return r == ' ' ||  r =='\t' || r == '\v' || r =='\r' || r == '\n'
@@ -172,6 +196,12 @@ func TopLevel(reader *Reader) ReaderState {
     case isDoubleQuote(r):
         reader.Emit(reader.tryString())
         return TopLevel
+    case isVerticalBar(r):
+        reader.Emit(reader.MakeVerticalVar())
+        return TopLevel
+    case isSharp(r):
+        reader.Emit(reader.MakeSharp())
+        return TopLevel
     default:
         reader.Emit(reader.tryChunk())
         return TopLevel
@@ -208,13 +238,19 @@ func (reader *Reader) tryChunk () Token {
     xs := make([]rune,0)
     pos := reader.buffer.pos
     r, eos := reader.buffer.Peek()
-    for !eos && !isWhite(r) && !isLeftParen(r) && !isRightParen(r) {
+    for !eos && !isWhite(r) && !isParenBracketBrace(r) {
         xs = append(xs, r)
         reader.buffer.Consume(1)
         r, eos = reader.buffer.Peek()
     }
-    return Token{id: TOKEN_CHUNK, v:string(xs), pos:pos}
+    s := string(xs)
+    var n int
+    if _, err := fmt.Sscanf(s, "%d", &n); err == nil {
+        return Token{id: TOKEN_INT, v:s, pos:pos}
+    }
+    return Token{id: TOKEN_SYMBOL, v:s, pos:pos}
 }
+
 
 type Token struct {
     id int
@@ -224,7 +260,8 @@ type Token struct {
 
 const (
     TOKEN_ENDOFINPUT= iota
-    TOKEN_CHUNK //Number, Symbol
+    TOKEN_SYMBOL
+    TOKEN_INT
     TOKEN_STRING
     TOKEN_LEFT_PAREN
     TOKEN_RIGHT_PAREN
@@ -232,6 +269,12 @@ const (
     TOKEN_RIGHT_BRACKET
     TOKEN_LEFT_BRACE
     TOKEN_RIGHT_BRACE
+    TOKEN_VERTICAL_BAR
+    TOKEN_SHARP
+    TOKEN_SEMICOLON
+    TOKEN_COLON
+    TOKEN_QUOTE
+    TOKEN_QUASIQUOTE
     TOKEN_DOT
 )
 
@@ -271,5 +314,138 @@ func (r *Reader)MakeRightBrace() Token {
     return t
 }
 
+func (r *Reader)MakeVerticalVar() Token {
+    t := Token{pos:r.buffer.pos, id:TOKEN_VERTICAL_BAR}
+    r.buffer.Consume(1)
+    return t
+}
 
+func (r *Reader)MakeSharp() Token {
+    t := Token{pos:r.buffer.pos, id:TOKEN_SHARP}
+    r.buffer.Consume(1)
+    return t
+}
+
+func (r *Reader)MakeColon() Token {
+    t := Token{pos:r.buffer.pos, id:TOKEN_COLON}
+    r.buffer.Consume(1)
+    return t
+}
+
+func (r *Reader)MakeSemicolon() Token {
+    t := Token{pos:r.buffer.pos, id:TOKEN_SEMICOLON}
+    r.buffer.Consume(1)
+    return t
+}
+
+func (r *Reader)MakeQuote() Token {
+    t := Token{pos:r.buffer.pos, id:TOKEN_QUOTE}
+    r.buffer.Consume(1)
+    return t
+}
+
+func (r *Reader)MakeQuasiQuote() Token {
+    t := Token{pos:r.buffer.pos, id:TOKEN_QUASIQUOTE}
+    r.buffer.Consume(1)
+    return t
+}
+
+type tokenSeq struct {
+    typ int
+    items []Value
+}
+
+type SExprBuilder struct {
+    stack []*tokenSeq
+}
+
+func NewSExprBuilder() *SExprBuilder{
+    b := &SExprBuilder{stack:make([]*tokenSeq,0)}
+    return b
+}
+
+func (b *SExprBuilder)Len() int {
+    return len(b.stack)
+}
+
+func (b *SExprBuilder)push(expr Value) {
+    top := b.Len() - 1
+    seq := b.stack[top]
+    seq.items = append(seq.items, expr)
+    b.stack[top] = seq
+}
+
+func (b *SExprBuilder)startSeq(typ int) {
+    seq := new(tokenSeq)
+    seq.typ = typ
+    seq.items = make([]Value, 0)
+    b.stack = append(b.stack, seq)
+}
+
+func (b *SExprBuilder)endSeq() *tokenSeq {
+    last := b.Len() - 1
+    seq := b.stack[last]
+    b.stack = b.stack[0:last]
+    return seq
+}
+
+
+func buildSExpr(buf *Buffered) Value {
+    reader := NewReader(buf)
+    builder := NewSExprBuilder()
+    builder.startSeq(-1)
+    for tk := reader.Read() ; tk.id != TOKEN_ENDOFINPUT ; tk = reader.Read() {
+        switch tk.id {
+        case TOKEN_LEFT_PAREN:
+            builder.startSeq(tk.id)
+        case TOKEN_RIGHT_PAREN:
+            seq := builder.endSeq()
+            if seq.typ != TOKEN_LEFT_PAREN {
+                panic("PAREN does not match")
+            }
+            builder.push(List(seq.items...))
+        case TOKEN_LEFT_BRACKET:
+            builder.startSeq(tk.id)
+        case TOKEN_RIGHT_BRACKET:
+            seq := builder.endSeq()
+            if seq.typ != TOKEN_LEFT_BRACKET{
+                panic("PAREN does not match")
+            }
+            builder.push(seq.items)
+        case TOKEN_LEFT_BRACE:
+            builder.startSeq(tk.id)
+        case TOKEN_RIGHT_BRACE:
+            seq := builder.endSeq()
+            if seq.typ != TOKEN_LEFT_BRACE{
+                panic("PAREN does not match")
+            }
+            println("iter over", seq.items)
+            m := make(map[Value]Value)
+            var key Value
+            for i, v := range seq.items {
+                println("got", i, v)
+                if i%2 == 0 {
+                    key = v
+                } else {
+                    println("putting", key, v)
+                    m[key] = v
+                }
+            }
+            builder.push(m)
+        case TOKEN_INT:
+            var n int
+            fmt.Sscanf(tk.v, "%d", &n)
+            builder.push(n)
+        case TOKEN_SYMBOL:
+            builder.push(sym(tk.v))
+        case TOKEN_STRING:
+            builder.push(tk.v)
+        }
+    }
+    seq := builder.endSeq()
+    if seq.typ != -1 {
+        panic("expected TopLevel")
+    }
+    return seq.items[0]
+}
 
