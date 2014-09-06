@@ -68,6 +68,22 @@ func isRightParen(r rune) bool {
     return ')' == r
 }
 
+func isLeftBracket(r rune) bool {
+    return '[' == r
+}
+
+func isRightBracket(r rune) bool {
+    return ']' == r
+}
+
+func isLeftBrace(r rune) bool {
+    return '{' == r
+}
+
+func isRightBrace(r rune) bool {
+    return '}' == r
+}
+
 func isDot(r rune) bool {
     return '.' == r
 }
@@ -141,6 +157,18 @@ func TopLevel(reader *Reader) ReaderState {
     case isRightParen(r):
         reader.Emit(reader.MakeRightParen())
         return TopLevel
+    case isLeftBracket(r) :
+        reader.Emit(reader.MakeLeftBracket())
+        return TopLevel
+    case isRightBracket(r):
+        reader.Emit(reader.MakeRightBracket())
+        return TopLevel
+    case isLeftBrace(r) :
+        reader.Emit(reader.MakeLeftBrace())
+        return TopLevel
+    case isRightBrace(r):
+        reader.Emit(reader.MakeRightBrace())
+        return TopLevel
     case isDoubleQuote(r):
         reader.Emit(reader.tryString())
         return TopLevel
@@ -198,21 +226,50 @@ const (
     TOKEN_ENDOFINPUT= iota
     TOKEN_CHUNK //Number, Symbol
     TOKEN_STRING
-    TOKEN_LEFTPAREN
-    TOKEN_RIGHTPAREN
+    TOKEN_LEFT_PAREN
+    TOKEN_RIGHT_PAREN
+    TOKEN_LEFT_BRACKET
+    TOKEN_RIGHT_BRACKET
+    TOKEN_LEFT_BRACE
+    TOKEN_RIGHT_BRACE
     TOKEN_DOT
 )
 
 func (r *Reader)MakeLeftParen() Token {
-    t := Token{pos:r.buffer.pos, id:TOKEN_LEFTPAREN}
+    t := Token{pos:r.buffer.pos, id:TOKEN_LEFT_PAREN}
     r.buffer.Consume(1)
     return t
 }
 
 func (r *Reader)MakeRightParen() Token {
-    t := Token{pos:r.buffer.pos, id:TOKEN_RIGHTPAREN}
+    t := Token{pos:r.buffer.pos, id:TOKEN_RIGHT_PAREN}
     r.buffer.Consume(1)
     return t
 }
+
+func (r *Reader)MakeLeftBracket() Token {
+    t := Token{pos:r.buffer.pos, id:TOKEN_LEFT_BRACKET}
+    r.buffer.Consume(1)
+    return t
+}
+
+func (r *Reader)MakeRightBracket() Token {
+    t := Token{pos:r.buffer.pos, id:TOKEN_RIGHT_BRACKET}
+    r.buffer.Consume(1)
+    return t
+}
+
+func (r *Reader)MakeLeftBrace() Token {
+    t := Token{pos:r.buffer.pos, id:TOKEN_LEFT_BRACE}
+    r.buffer.Consume(1)
+    return t
+}
+
+func (r *Reader)MakeRightBrace() Token {
+    t := Token{pos:r.buffer.pos, id:TOKEN_RIGHT_BRACE}
+    r.buffer.Consume(1)
+    return t
+}
+
 
 

@@ -32,11 +32,11 @@ func TestReaderEmptyList(t *testing.T) {
     buf := NewBuffered(strings.NewReader("()"))
     reader := NewReader(buf)
 
-    if tkn := reader.Read() ; tkn.id != TOKEN_LEFTPAREN{
+    if tkn := reader.Read() ; tkn.id != TOKEN_LEFT_PAREN{
         t.Error("bad token id.")
         println(tkn.id)
     }
-    if tkn := reader.Read() ; tkn.id != TOKEN_RIGHTPAREN{
+    if tkn := reader.Read() ; tkn.id != TOKEN_RIGHT_PAREN{
         t.Error("bad token id.")
         println(tkn.id)
     }
@@ -46,11 +46,49 @@ func TestReaderEmptyList(t *testing.T) {
     }
 }
 
+func TestReaderEmptyArr(t *testing.T) {
+    buf := NewBuffered(strings.NewReader("[]"))
+    reader := NewReader(buf)
+
+    if tkn := reader.Read() ; tkn.id != TOKEN_LEFT_BRACKET{
+        t.Error("bad token id.")
+        println(tkn.id)
+    }
+    if tkn := reader.Read() ; tkn.id != TOKEN_RIGHT_BRACKET{
+        t.Error("bad token id.")
+        println(tkn.id)
+    }
+    if tkn := reader.Read(); tkn.id != TOKEN_ENDOFINPUT{
+        t.Error("bad token id.")
+        println(tkn.id)
+    }
+}
+
+func TestReaderEmptyMap(t *testing.T) {
+    buf := NewBuffered(strings.NewReader("{}"))
+    reader := NewReader(buf)
+
+    if tkn := reader.Read() ; tkn.id != TOKEN_LEFT_BRACE{
+        t.Error("bad token id.")
+        println(tkn.id)
+    }
+    if tkn := reader.Read() ; tkn.id != TOKEN_RIGHT_BRACE{
+        t.Error("bad token id.")
+        println(tkn.id)
+    }
+    if tkn := reader.Read(); tkn.id != TOKEN_ENDOFINPUT{
+        t.Error("bad token id.")
+        println(tkn.id)
+    }
+}
+
+
+
 func TestReaderSomeList(t *testing.T) {
     buf := NewBuffered(strings.NewReader("(a b (c d) e)"))
     reader := NewReader(buf)
 
-    if tkn := reader.Read() ; tkn.id != TOKEN_LEFTPAREN{
+    if tkn := reader.Read() ; tkn.id != TOKEN_LEFT_PAREN{
         t.Error("bad token id.")
         println(tkn.id)
     }
@@ -62,7 +100,7 @@ func TestReaderSomeList(t *testing.T) {
         t.Error("bad token id.")
         println(tkn.id)
     }
-    if tkn := reader.Read() ; tkn.id != TOKEN_LEFTPAREN{
+    if tkn := reader.Read() ; tkn.id != TOKEN_LEFT_PAREN{
         t.Error("bad token id.")
         println(tkn.id)
     }
@@ -74,7 +112,7 @@ func TestReaderSomeList(t *testing.T) {
         t.Error("bad token id.")
         println(tkn.id)
     }
-    if tkn := reader.Read() ; tkn.id != TOKEN_RIGHTPAREN{
+    if tkn := reader.Read() ; tkn.id != TOKEN_RIGHT_PAREN{
         t.Error("bad token id.")
         println(tkn.id)
     }
@@ -82,7 +120,7 @@ func TestReaderSomeList(t *testing.T) {
         t.Error("bad token id.")
         println(tkn.id)
     }
-    if tkn := reader.Read() ; tkn.id != TOKEN_RIGHTPAREN{
+    if tkn := reader.Read() ; tkn.id != TOKEN_RIGHT_PAREN{
         t.Error("bad token id.")
         println(tkn.id)
     }
