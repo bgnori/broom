@@ -43,9 +43,13 @@ func (buffer *Buffered)Peek() (r rune, eos bool) {
         }
         return 0, true
     }
+    panic("never reach")
 }
 
 func (buffer *Buffered)Consume(n int) {
+    if k := len(buffer.buffer) ; k < n {
+        panic("not enough content to consume")
+    }
     buffer.buffer = buffer.buffer[n:]
     buffer.pos += n
     buffer.PopulateBuffer(BUFFERSIZE)
@@ -68,6 +72,13 @@ func isDot(r rune) bool {
     return '.' == r
 }
 
+func isDoubleQuote(r rune) bool {
+    return '"' == r
+}
+
+func isBackSlash(r rune) bool {
+    return '\\' == r
+}
 
 func isWhite(r rune) bool {
     return r == ' ' ||  r =='\t' || r == '\v' || r =='\r' || r == '\n'
@@ -77,25 +88,25 @@ func isWhite(r rune) bool {
 type Reader struct {
     buffer *Buffered
     out chan Token
+    state ReaderState
 }
 
 type ReaderState func(reader *Reader) ReaderState
 
 func NewReader(buffer *Buffered) *Reader {
-    return &Reader{buffer: buffer, out: make(chan Token, 2)}
+    return &Reader{buffer: buffer, out: make(chan Token, 2), state: TopLevel}
 }
 
 func (reader *Reader) Read () Token{
-    state := Expr
-    for state != nil {
+    for { //reader.state != nil {
         select {
         case tkn := <-reader.out:
             return tkn
         default:
-            state (reader)
+            reader.state = reader.state (reader)
         }
     }
-    panic("")
+    panic("nil state")
 }
 
 func (reader *Reader) Emit (token Token){
@@ -117,50 +128,64 @@ func (reader *Reader) ZapWhite() (rune, error) {
     return r, nil
 }
 
-func Expr(reader *Reader) ReaderState {
+func TopLevel(reader *Reader) ReaderState {
     r, err := reader.ZapWhite()
     if err != nil {
+        reader.Emit(Token{id:TOKEN_ENDOFINPUT})
         return nil
     }
     switch {
     case isLeftParen(r) :
         reader.Emit(reader.MakeLeftParen())
-        return ZeroOrMoreExprOrLeftParen
+        return TopLevel
     case isRightParen(r):
-        panic("unexpected Right Paren")
+        reader.Emit(reader.MakeRightParen())
+        return TopLevel
+    case isDoubleQuote(r):
+        reader.Emit(reader.tryString())
+        return TopLevel
     default:
-        reader.Emit(reader.tryChunk(r))
-        return nil
+        reader.Emit(reader.tryChunk())
+        return TopLevel
     }
     panic("Should not reach here")
 }
 
-func LeftParen(reader *Reader) ReaderState {
-    r, err := reader.ZapWhite()
-    if err != nil {
-        return nil
+func (reader *Reader) tryString () Token {
+    xs := make([]rune,0)
+    pos := reader.buffer.pos
+    reader.buffer.Consume(1) // skip "
+    r, eos := reader.buffer.Peek()
+    escaped := false
+    for !eos && !(!escaped && isDoubleQuote(r)) {
+        if !escaped && isBackSlash(r) {
+            escaped = true
+        } else {
+            xs = append(xs, r)
+            escaped = false
+        }
+        reader.buffer.Consume(1)
+        r, eos = reader.buffer.Peek()
     }
-    if isRightParen(r) {
-        reader.Emit(reader.MakeRightParen())
-        return nil //???
+    if eos {
+        panic("string must be closed")
     }
-    return nil
+    if isDoubleQuote(r) {
+        reader.buffer.Consume(1) // skip "
+    }
+    return Token{id: TOKEN_STRING, v:string(xs), pos:pos}
 }
 
-func ZeroOrMoreExprOrLeftParen(reader *Reader) ReaderState {
-    r, err := reader.ZapWhite()
-    if err != nil {
-        return nil
+func (reader *Reader) tryChunk () Token {
+    xs := make([]rune,0)
+    pos := reader.buffer.pos
+    r, eos := reader.buffer.Peek()
+    for !eos && !isWhite(r) && !isLeftParen(r) && !isRightParen(r) {
+        xs = append(xs, r)
+        reader.buffer.Consume(1)
+        r, eos = reader.buffer.Peek()
     }
-    switch {
-    case isLeftParen(r) :
-        return Expr
-    }
-    return nil
-}
-
-func (reader *Reader) tryChunk (r rune) Token {
-    return Token{id: TOKEN_CHUNK}
+    return Token{id: TOKEN_CHUNK, v:string(xs), pos:pos}
 }
 
 type Token struct {
@@ -171,7 +196,8 @@ type Token struct {
 
 const (
     TOKEN_ENDOFINPUT= iota
-    TOKEN_CHUNK
+    TOKEN_CHUNK //Number, Symbol
+    TOKEN_STRING
     TOKEN_LEFTPAREN
     TOKEN_RIGHTPAREN
     TOKEN_DOT
