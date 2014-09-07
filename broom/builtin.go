@@ -45,6 +45,10 @@ func setupBuiltins(env Enviroment) Enviroment {
         xs := List2Arr(Cdr(cdr))
         return fmt.Sprintf(format, xs...)
     }))
+	env.Bind("println", Closure(func (env Enviroment, cdr Pair) Value {
+        fmt.Println(Car(cdr))
+        return nil
+    }))
     return env
 }
 
