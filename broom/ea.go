@@ -134,7 +134,7 @@ func Eval(expr Value, env Enviroment) Value {
 		car := Eval(Car(expr), env)
 		op, ok := car.(Closure)
 		if !ok {
-			panic("application error, expected SExprOperator, but got" + fmt.Sprintf("%v", car))
+			panic("application error, expected SExprOperator, but got " + fmt.Sprintf("%v", car))
 		}
 		return op(env, Cdr(expr))
 	}

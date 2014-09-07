@@ -7,7 +7,7 @@ import (
 
 
 func setupBuiltins(env Enviroment) Enviroment {
-	env.Bind(".", MakeMethodInvoker)
+	env.Bind(".", MakeMethodInvoker())
 	env.Bind("+", Closure(func (env Enviroment, cdr Pair) Value {
         xs := List2Arr(Cdr(cdr))
         acc := Eval(Car(cdr), env).(int)
@@ -70,8 +70,8 @@ func setupBuiltins(env Enviroment) Enviroment {
 func MakeMethodInvoker() Closure {
 	return func(env Enviroment, cdr Pair) Value {
 		//see  http://stackoverflow.com/questions/14116840/dynamically-call-method-on-interface-regardless-of-receiver-type
-		obj := cdr.Car()
-		fmt.Println(obj)
+		obj := Eval(cdr.Car(), env)
+        fmt.Println("obj: ", obj)
 		name := cdr.Cdr().Car().(Symbol).GetValue()
 		fmt.Println("to invoke:", name)
 		xs := helper(cdr.Cdr().Cdr(), nil)
