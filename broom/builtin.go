@@ -40,6 +40,11 @@ func setupBuiltins(env Enviroment) Enviroment {
         }
         return acc
     }))
+	env.Bind("sprintf", Closure(func (env Enviroment, cdr Pair) Value {
+        format := Car(cdr).(string)
+        xs := List2Arr(Cdr(cdr))
+        return fmt.Sprintf(format, xs...)
+    }))
     return env
 }
 
@@ -87,14 +92,4 @@ func helper(args Pair, result []reflect.Value) []reflect.Value {
 	result = append(result, v)
 
 	return helper(cdr, result)
-}
-
-
-func GetFunc() Closure {
-    return func(env Enviroment, cdr Pair) Value {
-        name := Car(cdr)
-        fmt.Println(name)
-
-        return nil
-    }
 }

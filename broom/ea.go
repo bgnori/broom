@@ -139,7 +139,6 @@ func Eval(expr Value, env Enviroment) Value {
 	case isPair(expr):
 		car := Eval(Car(expr), env)
 		fmt.Println("isPair car", car)
-        env.Dump()
 		op, ok := car.(Closure)
 		if !ok {
 			panic("application error, expected SExprOperator, but got" + fmt.Sprintf("%v", car))
