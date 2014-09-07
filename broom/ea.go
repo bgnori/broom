@@ -12,8 +12,7 @@ type Enviroment interface {
 
 func FromLambda(cdr Pair, lexical Enviroment) Closure {
 	return func(dynamic Enviroment, args Pair) Value {
-		e := NewEnvFrame()
-		e.outer = lexical
+		e := NewEnvFrame(lexical)
 		formals := List2Arr(Car(cdr))
 		for i, a := range List2Arr(args) {
 			fmt.Println(formals[i], "Eval", a)
@@ -74,8 +73,7 @@ func setupSpecialForms(env Enviroment) Enviroment {
 	//case sym("begin").Eq(car): //begin?
 	env.Bind("begin", Closure(func(env Enviroment, cdr Pair) Value {
 		var x Value
-		e := NewEnvFrame()
-		e.outer = env
+		e := NewEnvFrame(env)
 		for _, b := range List2Arr(cdr) {
 			x = Eval(b, e)
 		}
@@ -102,10 +100,6 @@ func setupSpecialForms(env Enviroment) Enviroment {
 		return Eval(conv, env)
 	}))
 	return env
-}
-
-func NullEnviroment(version int) Enviroment {
-	return nil
 }
 
 func Eval(expr Value, env Enviroment) Value {
@@ -152,15 +146,17 @@ type enviroment struct {
 	outer     Enviroment
 }
 
-func NewEnvFrame() *enviroment {
+func NewEnvFrame(outer Enviroment) *enviroment {
 	e := new(enviroment)
 	e.variables = make(map[string]Value)
-	e.outer = nil
+	e.outer = outer
+	e.Bind("_env", e)
+	e.Bind("_outer", outer)
 	return e
 }
 
 func NewGlobalRootFrame() *enviroment {
-	e := NewEnvFrame()
+	e := NewEnvFrame(nil)
 	setupSpecialForms(e)
 	setupBuiltins(e)
 	return e

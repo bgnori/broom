@@ -82,3 +82,11 @@ func TestEvalWhen(t *testing.T) {
 		fmt.Println(v)
 	}
 }
+
+func TestEvalEnvSymbol(t *testing.T) {
+	e := NewGlobalRootFrame()
+	v := Eval(sym("_env"), e)
+	if v != e {
+		t.Error("expected enviroment object")
+    }
+}
