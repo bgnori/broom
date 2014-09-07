@@ -50,10 +50,6 @@ func isNumber(v Value) bool {
 	//number?
 	//see golang builtin
 	switch v.(type) {
-	case float32:
-	case float64:
-	case complex64:
-	case complex128:
 	case int:
 	case int8:
 	case int16:
@@ -64,6 +60,10 @@ func isNumber(v Value) bool {
 	case uint16:
 	case uint32:
 	case uint64:
+	case float32:
+	case float64:
+	case complex64:
+	case complex128:
 	default:
 		return false
 	}
