@@ -10,7 +10,7 @@ func setupBuiltins(env Enviroment) Enviroment {
 	env.Bind(".", MakeMethodInvoker)
 	env.Bind("+", Closure(func (env Enviroment, cdr Pair) Value {
         xs := List2Arr(Cdr(cdr))
-        acc := Car(cdr).(int)
+        acc := Eval(Car(cdr), env).(int)
         for _, x := range xs {
             acc += Eval(x, env).(int)
         }
@@ -18,15 +18,19 @@ func setupBuiltins(env Enviroment) Enviroment {
     }))
 	env.Bind("*", Closure(func (env Enviroment, cdr Pair) Value {
         xs := List2Arr(Cdr(cdr))
-        acc := Car(cdr).(int)
+        acc := Eval(Car(cdr), env).(int)
         for _, x := range xs {
             acc *= Eval(x, env).(int)
         }
         return acc
     }))
 	env.Bind("-", Closure(func (env Enviroment, cdr Pair) Value {
+        env.Dump()
         xs := List2Arr(Cdr(cdr))
-        acc := Car(cdr).(int)
+        acc, ok := Eval(Car(cdr), env).(int)
+        if !ok {
+            panic("1st arg is not int")
+        }
         for _, x := range xs {
             acc -= Eval(x, env).(int)
         }
@@ -34,7 +38,7 @@ func setupBuiltins(env Enviroment) Enviroment {
     }))
 	env.Bind("/", Closure(func (env Enviroment, cdr Pair) Value {
         xs := List2Arr(Cdr(cdr))
-        acc := Car(cdr).(int)
+        acc := Eval(Car(cdr), env).(int)
         for _, x := range xs {
             acc /= Eval(x, env).(int)
         }
@@ -48,6 +52,16 @@ func setupBuiltins(env Enviroment) Enviroment {
 	env.Bind("println", Closure(func (env Enviroment, cdr Pair) Value {
         fmt.Println(Car(cdr))
         return nil
+    }))
+	env.Bind("<", Closure(func (env Enviroment, cdr Pair) Value {
+        first := Eval(Car(cdr), env).(int)
+        second := Eval((Car(Cdr(cdr))), env).(int)
+        return first < second
+    }))
+	env.Bind(">", Closure(func (env Enviroment, cdr Pair) Value {
+        first := Eval(Car(cdr), env).(int)
+        second := Eval((Car(Cdr(cdr))), env).(int)
+        return first > second
     }))
     return env
 }

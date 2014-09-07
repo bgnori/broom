@@ -70,6 +70,18 @@ func TestNumMinus(t *testing.T) {
 	}
 }
 
+func TestNumMinus2(t *testing.T) {
+	e := NewGlobalRootFrame()
+
+	expr := List(sym("-"), 10, 2, 3)
+	r := Eval(expr, e)
+    if r != 5 {
+		t.Error("expected 5")
+		fmt.Println(r)
+	}
+}
+
+
 func TestNumDiv(t *testing.T) {
 	e := NewGlobalRootFrame()
 

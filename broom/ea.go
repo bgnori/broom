@@ -10,14 +10,14 @@ type Enviroment interface {
     Dump()
 }
 
-func FromLambda(cdr Pair, env Enviroment) Closure {
+func FromLambda(cdr Pair, lexical Enviroment) Closure {
 	return func(dynamic Enviroment, args Pair) Value {
 		e := NewEnvFrame()
-		e.outer = env
+		e.outer = lexical
 		formals := List2Arr(Car(cdr))
 		for i, a := range List2Arr(args) {
 			fmt.Println(formals[i], "Eval", a)
-			v := Eval(a, e)
+			v := Eval(a, dynamic)
 			fmt.Println(formals[i], "Bind", v)
 			s, _ := formals[i].(Symbol)
 			e.Bind(s.GetValue(), v)
@@ -138,7 +138,6 @@ func Eval(expr Value, env Enviroment) Value {
 		return env.Resolve(sym.GetValue())
 	case isPair(expr):
 		car := Eval(Car(expr), env)
-		fmt.Println("isPair car", car)
 		op, ok := car.(Closure)
 		if !ok {
 			panic("application error, expected SExprOperator, but got" + fmt.Sprintf("%v", car))
@@ -182,6 +181,7 @@ func (env *enviroment) Resolve(name string) Value {
 }
 
 func (env *enviroment) Dump() {
+    fmt.Println("=====")
     for key, value := range env.variables {
         fmt.Println(key, ":", value)
     }
