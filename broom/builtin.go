@@ -5,6 +5,45 @@ import (
 	"reflect"
 )
 
+
+func setupBuiltins(env Enviroment) Enviroment {
+	env.Bind(".", MakeMethodInvoker)
+	env.Bind("+", Closure(func (env Enviroment, cdr Pair) Value {
+        xs := List2Arr(Cdr(cdr))
+        acc := Car(cdr).(int)
+        for _, x := range xs {
+            acc += Eval(x, env).(int)
+        }
+        return acc
+    }))
+	env.Bind("*", Closure(func (env Enviroment, cdr Pair) Value {
+        xs := List2Arr(Cdr(cdr))
+        acc := Car(cdr).(int)
+        for _, x := range xs {
+            acc *= Eval(x, env).(int)
+        }
+        return acc
+    }))
+	env.Bind("-", Closure(func (env Enviroment, cdr Pair) Value {
+        xs := List2Arr(Cdr(cdr))
+        acc := Car(cdr).(int)
+        for _, x := range xs {
+            acc -= Eval(x, env).(int)
+        }
+        return acc
+    }))
+	env.Bind("/", Closure(func (env Enviroment, cdr Pair) Value {
+        xs := List2Arr(Cdr(cdr))
+        acc := Car(cdr).(int)
+        for _, x := range xs {
+            acc /= Eval(x, env).(int)
+        }
+        return acc
+    }))
+    return env
+}
+
+
 func MakeMethodInvoker() Closure {
 	return func(env Enviroment, cdr Pair) Value {
 		//see  http://stackoverflow.com/questions/14116840/dynamically-call-method-on-interface-regardless-of-receiver-type
@@ -48,4 +87,14 @@ func helper(args Pair, result []reflect.Value) []reflect.Value {
 	result = append(result, v)
 
 	return helper(cdr, result)
+}
+
+
+func GetFunc() Closure {
+    return func(env Enviroment, cdr Pair) Value {
+        name := Car(cdr)
+        fmt.Println(name)
+
+        return nil
+    }
 }

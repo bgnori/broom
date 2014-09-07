@@ -7,6 +7,7 @@ import (
 type Enviroment interface {
 	Bind(name string, v Value)
 	Resolve(name string) Value
+    Dump()
 }
 
 func FromLambda(cdr Pair, env Enviroment) Closure {
@@ -138,9 +139,10 @@ func Eval(expr Value, env Enviroment) Value {
 	case isPair(expr):
 		car := Eval(Car(expr), env)
 		fmt.Println("isPair car", car)
+        env.Dump()
 		op, ok := car.(Closure)
 		if !ok {
-			panic("application error, expected SExprOperator")
+			panic("application error, expected SExprOperator, but got" + fmt.Sprintf("%v", car))
 		}
 		return op(env, Cdr(expr))
 	}
@@ -162,6 +164,7 @@ func NewEnvFrame() *enviroment {
 func NewGlobalRootFrame() *enviroment {
 	e := NewEnvFrame()
 	setupSpecialForms(e)
+	setupBuiltins(e)
 	return e
 }
 
@@ -177,4 +180,13 @@ func (env *enviroment) Resolve(name string) Value {
 		return env.outer.Resolve(name)
 	}
 	return nil
+}
+
+func (env *enviroment) Dump() {
+    for key, value := range env.variables {
+        fmt.Println(key, ":", value)
+    }
+    if env.outer != nil {
+        env.outer.Dump()
+    }
 }

@@ -390,7 +390,7 @@ func (b *SExprBuilder)endSeq() *tokenSeq {
 }
 
 
-func buildSExpr(buf *Buffered) Value {
+func BuildSExpr(buf *Buffered) Value {
     reader := NewReader(buf)
     builder := NewSExprBuilder()
     builder.startSeq(-1)

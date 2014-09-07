@@ -3,14 +3,14 @@ package main
 import (
 	"fmt"
         "os"
-        "./ps"
+        "./broom"
 )
 
 func main() {
-	env := ps.MakeEnv()
-	env.Bind("+", ps.BuiltinPlus)
-        for _, expr := range ps.Parse(os.Stdin) {
-            got := ps.Eval(expr, env)
-            fmt.Println("-->", got)
-        }
+	env := broom.NewGlobalRootFrame()
+        buf := broom.NewBuffered(os.Stdin)
+        expr := broom.BuildSExpr(buf)
+        fmt.Println("input:", expr)
+        got := broom.Eval(expr, env)
+        fmt.Println("-->", got)
 }
