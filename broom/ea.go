@@ -99,7 +99,37 @@ func setupSpecialForms(env Enviroment) Enviroment {
 			Cons(sym("begin"), Cdr(cdr)))
 		return Eval(conv, env)
 	}))
+
+	//
+	env.Bind("and", Closure(and))
+	env.Bind("or", Closure(or))
 	return env
+}
+
+func and(env Enviroment, cdr Pair) Value {
+	v := Eval(Car(cdr), env).(bool)
+	if v {
+		next := Cdr(cdr)
+		if next == nil {
+			return true
+		} else {
+			return and(env, next)
+		}
+	}
+	return false
+}
+
+func or(env Enviroment, cdr Pair) Value {
+	v := Eval(Car(cdr), env).(bool)
+	if !v {
+		next := Cdr(cdr)
+		if next == nil {
+			return false
+		} else {
+			return or(env, next)
+		}
+	}
+	return true
 }
 
 func Eval(expr Value, env Enviroment) Value {

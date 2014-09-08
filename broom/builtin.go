@@ -6,6 +6,8 @@ import (
 )
 
 func setupBuiltins(env Enviroment) Enviroment {
+	env.Bind("true", true)
+	env.Bind("false", false)
 	env.Bind(".", MakeMethodInvoker())
 	env.Bind("+", Closure(func(env Enviroment, cdr Pair) Value {
 		xs := List2Arr(Cdr(cdr))
