@@ -67,7 +67,7 @@ func sub(v Value, xs []interface{}) [](interface{}) {
 	}
 }
 
-func List2Arr(v Value) []interface{}{
+func List2Arr(v Value) []interface{} {
 	return sub(v, make([]interface{}, 0))
 }
 
@@ -99,4 +99,3 @@ func Length(xs Value) int {
 	}
 	panic("proper list required")
 }
-

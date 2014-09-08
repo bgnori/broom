@@ -42,7 +42,7 @@ func TestNumPlus(t *testing.T) {
 
 	expr := List(sym("+"), 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 	r := Eval(expr, e)
-    if r != 55 {
+	if r != 55 {
 		t.Error("expected 55")
 		fmt.Println(r)
 	}
@@ -53,7 +53,7 @@ func TestNumMul(t *testing.T) {
 
 	expr := List(sym("*"), 5, 2)
 	r := Eval(expr, e)
-    if r != 10 {
+	if r != 10 {
 		t.Error("expected 10")
 		fmt.Println(r)
 	}
@@ -64,7 +64,7 @@ func TestNumMinus(t *testing.T) {
 
 	expr := List(sym("-"), 10, 2)
 	r := Eval(expr, e)
-    if r != 8 {
+	if r != 8 {
 		t.Error("expected 8")
 		fmt.Println(r)
 	}
@@ -75,19 +75,18 @@ func TestNumMinus2(t *testing.T) {
 
 	expr := List(sym("-"), 10, 2, 3)
 	r := Eval(expr, e)
-    if r != 5 {
+	if r != 5 {
 		t.Error("expected 5")
 		fmt.Println(r)
 	}
 }
-
 
 func TestNumDiv(t *testing.T) {
 	e := NewGlobalRootFrame()
 
 	expr := List(sym("/"), 10, 2)
 	r := Eval(expr, e)
-    if r != 5 {
+	if r != 5 {
 		t.Error("expected 5")
 		fmt.Println(r)
 	}
@@ -97,7 +96,7 @@ func TestSprintf(t *testing.T) {
 	e := NewGlobalRootFrame()
 	expr := List(sym("sprintf"), "Answer is %d", 42)
 	r := Eval(expr, e)
-    if r != "Answer is 42" {
+	if r != "Answer is 42" {
 		t.Error("expected \"Answer is 42\"")
 		fmt.Println(r)
 	}

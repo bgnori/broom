@@ -7,7 +7,7 @@ import (
 type Enviroment interface {
 	Bind(name string, v Value)
 	Resolve(name string) Value
-    Dump()
+	Dump()
 }
 
 func FromLambda(cdr Pair, lexical Enviroment) Closure {
@@ -177,11 +177,11 @@ func (env *enviroment) Resolve(name string) Value {
 }
 
 func (env *enviroment) Dump() {
-    fmt.Println("=====")
-    for key, value := range env.variables {
-        fmt.Println(key, ":", value)
-    }
-    if env.outer != nil {
-        env.outer.Dump()
-    }
+	fmt.Println("=====")
+	for key, value := range env.variables {
+		fmt.Println(key, ":", value)
+	}
+	if env.outer != nil {
+		env.outer.Dump()
+	}
 }

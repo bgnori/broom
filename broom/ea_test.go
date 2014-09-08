@@ -88,7 +88,5 @@ func TestEvalEnvSymbol(t *testing.T) {
 	v := Eval(sym("_env"), e)
 	if v != e {
 		t.Error("expected enviroment object")
-    }
+	}
 }
-
-
