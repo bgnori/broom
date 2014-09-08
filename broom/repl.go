@@ -16,7 +16,8 @@ func Repl(in io.Reader) {
 
 	reader := bufio.NewReader(in)
 
-	chunks := make([]string, 0)
+        var chunks []string
+        chunks = nil
 
 	fmt.Println("Hello!")
 	fmt.Print("broom > ")
@@ -26,18 +27,66 @@ func Repl(in io.Reader) {
 			panic(err)
 		}
 		if len(line) == 0 {
-			c := strings.Join(chunks, "")
-			chunks = chunks[0:0]
-			expr := BuildSExpr(NewBuffered(strings.NewReader(c)))
-			fmt.Println("input:", expr)
-			got := Eval(expr, env)
-			fmt.Println("-->", got)
-			fmt.Print("broom > ")
+                  input := strings.Join(chunks, "")
+                  if len(input) == 0 {
+                    fmt.Println("no input...")
+	            fmt.Print("broom > ")
+                    continue
+                  }
+                  expr, err := try2Build(input)
+		  chunks = nil
+                  if err != nil {
+                    fmt.Println("Something wrong with input!")
+                    fmt.Println(err)
+	            fmt.Print("broom > ")
+                    continue
+                  }
+                  fmt.Println("input:", expr)
+
+
+                  got, err := try2Eval(expr, env)
+                  if err != nil {
+                    fmt.Println("Failed eval!")
+                    fmt.Println(err)
+	            fmt.Print("broom > ")
+                    continue
+                  }
+                  fmt.Println("-->", got)
+                  fmt.Print("broom > ")
 		} else {
 			fmt.Println("... ")
+                        if chunks == nil {
+                          chunks = make([]string, 1)
+                        }
 			chunks = append(chunks, string(line))
 		}
 	}
 	fmt.Println()
 	fmt.Println("bye!")
+}
+
+
+type MyErr string
+func (e MyErr) Error()string {
+  return string(e)
+}
+
+func try2Build(c string) (expr Value, err error) {
+  defer func(){
+    if e := recover() ; e != nil {
+      expr = nil
+      err = MyErr(e.(string))
+    }
+  }()
+  return BuildSExpr(NewBuffered(strings.NewReader(c))), nil
+}
+
+func try2Eval(expr Value, env Enviroment) (result Value, err error) {
+  defer func(){
+    if e := recover() ; e != nil {
+      result = nil
+      err = MyErr(e.(string))
+    }
+  }()
+  return Eval(expr, env), nil
 }
