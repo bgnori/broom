@@ -9,8 +9,8 @@ import (
 
 func Repl(in io.Reader) {
 	env := NewGlobalRootFrame()
-	env.Bind("quit", Closure(func(dynamic Enviroment, cdr Pair) Value {
-		fmt.Println("quit (to be implemented)")
+	env.Bind("dump", Closure(func(dynamic Enviroment, cdr Pair) Value {
+		dynamic.Dump()
 		return nil
 	}))
 

@@ -24,7 +24,6 @@ func setupBuiltins(env Enviroment) Enviroment {
 		return acc
 	}))
 	env.Bind("-", Closure(func(env Enviroment, cdr Pair) Value {
-		env.Dump()
 		xs := List2Arr(Cdr(cdr))
 		acc, ok := Eval(Car(cdr), env).(int)
 		if !ok {
