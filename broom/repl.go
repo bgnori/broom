@@ -53,7 +53,7 @@ func Repl(in io.Reader) {
 			fmt.Println("-->", got)
 			fmt.Print("broom > ")
 		} else {
-			fmt.Println("... ")
+			fmt.Print("... ")
 			if chunks == nil {
 				chunks = make([]string, 1)
 			}
