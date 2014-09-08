@@ -7,7 +7,7 @@ import (
 
 func TestMethodInvocationA(t *testing.T) {
 	e := NewGlobalRootFrame()
-	expr := List(MakeMethodInvoker(), Cons(1, nil), sym("Car"))
+	expr := List(MakeMethodInvoker(), List(sym("quote"), List(1, 2)), sym("Car"))
 	r := Eval(expr, e)
 	if v, ok := r.(int); !ok || v != 1 {
 		t.Error("expected 1")
@@ -19,10 +19,10 @@ func TestMethodInvocationA(t *testing.T) {
 
 func TestMethodInvocationB(t *testing.T) {
 	e := NewGlobalRootFrame()
-	expr := List(MakeMethodInvoker(), Cons(1, nil), sym("String"))
+	expr := List(MakeMethodInvoker(), List(sym("quote"), List(1, 2)), sym("String"))
 	r := Eval(expr, e)
-	if r != "(1)" {
-		t.Error("expected (1)")
+	if r != "(1 2)" {
+		t.Error("expected (1 2)")
 		fmt.Println(r)
 	}
 }
