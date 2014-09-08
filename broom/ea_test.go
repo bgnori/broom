@@ -90,3 +90,40 @@ func TestEvalEnvSymbol(t *testing.T) {
 		t.Error("expected enviroment object")
 	}
 }
+
+func TestEvalAnd1(t *testing.T) {
+	e := NewGlobalRootFrame()
+	v := Eval(List(sym("and"), true, true, false), e)
+	if v != false {
+		t.Error("expected false")
+		fmt.Println(v)
+	}
+}
+
+func TestEvalAnd2(t *testing.T) {
+	e := NewGlobalRootFrame()
+	v := Eval(List(sym("and"), true, true, true), e)
+	if v != true {
+		t.Error("expected true")
+		fmt.Println(v)
+	}
+}
+
+func TestEvalOr1(t *testing.T) {
+	e := NewGlobalRootFrame()
+	v := Eval(List(sym("or"), false, false, true), e)
+	if v != true {
+		t.Error("expected true")
+		fmt.Println(v)
+	}
+}
+
+func TestEvalOr2(t *testing.T) {
+	e := NewGlobalRootFrame()
+	v := Eval(List(sym("or"), false, false, false), e)
+	if v != false {
+		t.Error("expected false")
+		fmt.Println(v)
+	}
+}
+
