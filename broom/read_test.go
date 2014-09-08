@@ -275,7 +275,7 @@ func TestReaderArr(t *testing.T) {
 
 func TestMakeInt(t *testing.T) {
 	buf := NewBuffered(strings.NewReader("42"))
-	expr := BuildSExpr(buf)[0]
+	expr := BuildSExpr(buf)
 	if expr != 42 {
 		t.Error("42 is expected")
 	}
@@ -283,7 +283,7 @@ func TestMakeInt(t *testing.T) {
 
 func TestMakeSymbol(t *testing.T) {
 	buf := NewBuffered(strings.NewReader("a"))
-	expr := BuildSExpr(buf)[0]
+	expr := BuildSExpr(buf)
 	if !sym("a").Eq(expr) {
 		t.Error("'a is expected")
 	}
@@ -291,7 +291,7 @@ func TestMakeSymbol(t *testing.T) {
 
 func TestMakeEmptyList(t *testing.T) {
 	buf := NewBuffered(strings.NewReader("()"))
-	expr := BuildSExpr(buf)[0]
+	expr := BuildSExpr(buf)
 
 	if expr != nil {
 		t.Error("nil is expected")
@@ -300,7 +300,7 @@ func TestMakeEmptyList(t *testing.T) {
 
 func TestMakeSomeList(t *testing.T) {
 	buf := NewBuffered(strings.NewReader("(1 2 3)"))
-	expr := BuildSExpr(buf)[0]
+	expr := BuildSExpr(buf)
 
 	if !Eq(List(1, 2, 3), expr) {
 		t.Error("(1 2 3) is expected")
@@ -309,7 +309,7 @@ func TestMakeSomeList(t *testing.T) {
 
 func TestMakeNestedList(t *testing.T) {
 	buf := NewBuffered(strings.NewReader("(a b (c d) e)"))
-	expr := BuildSExpr(buf)[0]
+	expr := BuildSExpr(buf)
 
 	if !Eq(List(sym("a"), sym("b"), List(sym("c"), sym("d")), sym("e")), expr) {
 		t.Error("(a b (c d) e) is expected")
@@ -318,7 +318,7 @@ func TestMakeNestedList(t *testing.T) {
 
 func TestMakeSomeArray(t *testing.T) {
 	buf := NewBuffered(strings.NewReader("[1 2 3]"))
-	expr := BuildSExpr(buf)[0]
+	expr := BuildSExpr(buf)
 
 	if Eq([]int{1, 2, 3}, expr) {
 		t.Error("[1 2 3] is expected")
@@ -327,7 +327,7 @@ func TestMakeSomeArray(t *testing.T) {
 
 func TestMakeSomeMap(t *testing.T) {
 	buf := NewBuffered(strings.NewReader("{1 \"one\" \"two\" \"二\" 3 \"III\"}"))
-	expr := BuildSExpr(buf)[0]
+	expr := BuildSExpr(buf)
 
 	if !Eq(map[Value]Value{1: "one", "two": "二", 3: "III"}, expr) {
 		t.Error("{1:\"one\" \"two\":\"二\" 3:\"III\"} is expected")

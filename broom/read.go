@@ -386,7 +386,7 @@ func (b *SExprBuilder) endSeq() *tokenSeq {
 	return seq
 }
 
-func BuildSExpr(buf *Buffered) []Value {
+func BuildSExpr(buf *Buffered) Value {
 	reader := NewReader(buf)
 	builder := NewSExprBuilder()
 	builder.startSeq(-1)
@@ -442,5 +442,5 @@ func BuildSExpr(buf *Buffered) []Value {
 	if seq.typ != -1 {
 		panic("expected TopLevel")
 	}
-	return seq.items
+	return seq.items[0]
 }
