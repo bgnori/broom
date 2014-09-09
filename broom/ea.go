@@ -203,6 +203,7 @@ func (env *enviroment) Resolve(name string) Value {
 	if env.outer != nil {
 		return env.outer.Resolve(name)
 	}
+	panic(fmt.Sprintf("Unbound variable %s", name))
 	return nil
 }
 
