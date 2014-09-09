@@ -16,14 +16,14 @@ func FromLambda(cdr Pair, lexical Environment) Closure {
 		formals := List2Arr(Car(cdr))
 		for i, a := range List2Arr(args) {
 			fmt.Println(formals[i], "Eval", a)
-			v := Eval(a, dynamic)
+			v := Eval(dynamic, a)
 			fmt.Println(formals[i], "Bind", v)
 			s, _ := formals[i].(Symbol)
 			e.Bind(s.GetValue(), v)
 		}
 		var x Value
 		for _, b := range List2Arr(Cdr(cdr)) {
-			x = Eval(b, e)
+			x = Eval(e, b)
 		}
 		return x
 	}
@@ -45,7 +45,7 @@ func setupSpecialForms(env Environment) Environment {
 	env.Bind("define", Closure(func(env Environment, cdr Pair) Value {
 		s, _ := Car(cdr).(Symbol)
 		v := Car(Cdr(cdr))
-		u := Eval(v, env)
+		u := Eval(env, v)
 		env.Bind(s.GetValue(), u)
 		return s
 	}))
@@ -54,13 +54,13 @@ func setupSpecialForms(env Environment) Environment {
 	env.Bind("if", Closure(func(env Environment, cdr Pair) Value {
 		cond := Car(cdr)
 		fmt.Println(cond)
-		if Eval(cond, env) == true {
+		if Eval(env, cond) == true {
 			clauseThen := Car(Cdr(cdr))
 			fmt.Println(clauseThen)
-			return Eval(clauseThen, env)
+			return Eval(env, clauseThen)
 		} else {
 			clauseElse := Car(Cdr(Cdr(cdr)))
-			return Eval(clauseElse, env)
+			return Eval(env, clauseElse)
 		}
 		return nil
 	}))
@@ -75,7 +75,7 @@ func setupSpecialForms(env Environment) Environment {
 		var x Value
 		e := NewEnvFrame(env)
 		for _, b := range List2Arr(cdr) {
-			x = Eval(b, e)
+			x = Eval(e, b)
 		}
 		return x
 	}))
@@ -90,14 +90,14 @@ func setupSpecialForms(env Environment) Environment {
 	env.Bind("when", Closure(func(env Environment, cdr Pair) Value {
 		conv := List(sym("if"), Car(cdr),
 			Cons(sym("begin"), Cdr(cdr)))
-		return Eval(conv, env)
+		return Eval(env, conv)
 	}))
 
 	// to be implemented
 	env.Bind("macroexpand", Closure(func(env Environment, cdr Pair) Value {
 		conv := List(sym("if"), Car(cdr),
 			Cons(sym("begin"), Cdr(cdr)))
-		return Eval(conv, env)
+		return Eval(env, conv)
 	}))
 
 	//
@@ -107,7 +107,7 @@ func setupSpecialForms(env Environment) Environment {
 }
 
 func and(env Environment, cdr Pair) Value {
-	v := Eval(Car(cdr), env).(bool)
+	v := Eval(env, Car(cdr)).(bool)
 	if v {
 		next := Cdr(cdr)
 		if next == nil {
@@ -120,7 +120,7 @@ func and(env Environment, cdr Pair) Value {
 }
 
 func or(env Environment, cdr Pair) Value {
-	v := Eval(Car(cdr), env).(bool)
+	v := Eval(env, Car(cdr)).(bool)
 	if !v {
 		next := Cdr(cdr)
 		if next == nil {
@@ -132,7 +132,7 @@ func or(env Environment, cdr Pair) Value {
 	return true
 }
 
-func Eval(expr Value, env Environment) Value {
+func Eval(env Environment, expr Value) Value {
 	/*
 	   (define (eval exp env)
 	     (cond ((self-evaluating? exp) exp)
@@ -161,7 +161,7 @@ func Eval(expr Value, env Environment) Value {
 		sym, _ := expr.(Symbol)
 		return env.Resolve(sym.GetValue())
 	case isPair(expr):
-		car := Eval(Car(expr), env)
+		car := Eval(env, Car(expr))
 		op, ok := car.(Closure)
 		if !ok {
 			panic("application error, expected SExprOperator, but got " + fmt.Sprintf("%v", car))

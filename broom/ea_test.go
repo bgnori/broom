@@ -7,14 +7,14 @@ import (
 
 func TestEvalNumber(t *testing.T) {
 	e := NewGlobalRootFrame()
-	if Eval(1, e) != 1 {
+	if Eval(e, 1) != 1 {
 		t.Error("expected 1")
 	}
 }
 
 func TestEvalString(t *testing.T) {
 	e := NewGlobalRootFrame()
-	if Eval("あいう", e) != "あいう" {
+	if Eval(e, "あいう") != "あいう" {
 		t.Error("expected あいう")
 	}
 }
@@ -22,7 +22,7 @@ func TestEvalString(t *testing.T) {
 func TestEvalVariable(t *testing.T) {
 	e := NewGlobalRootFrame()
 	e.Bind("a", 42)
-	v := Eval(sym("a"), e)
+	v := Eval(e, sym("a"))
 	if v != 42 {
 		t.Error("expected 42")
 		fmt.Println(v)
@@ -31,7 +31,7 @@ func TestEvalVariable(t *testing.T) {
 
 func TestEvalQuotedSymbol(t *testing.T) {
 	e := NewGlobalRootFrame()
-	v := Eval(List(sym("quote"), sym("A")), e)
+	v := Eval(e, List(sym("quote"), sym("A")))
 	if !sym("A").Eq(v) {
 		t.Error("expected sym A")
 		fmt.Println(v)
@@ -40,7 +40,7 @@ func TestEvalQuotedSymbol(t *testing.T) {
 
 func TestEvalDefine(t *testing.T) {
 	e := NewGlobalRootFrame()
-	v := Eval(Cons(sym("define"), Cons(sym("A"), Cons(42, nil))), e)
+	v := Eval(e, List(sym("define"), sym("A"), 42))
 	if e.Resolve("A") != 42 {
 		t.Error("expected 42")
 	}
@@ -51,11 +51,11 @@ func TestEvalDefine(t *testing.T) {
 
 func TestEvalIF(t *testing.T) {
 	e := NewGlobalRootFrame()
-	v := Eval(Cons(sym("if"), Cons(true, Cons(42, Cons(123, nil)))), e)
+    v := Eval(e, List(sym("if"), true, 42, 123))
 	if v != 42 {
 		t.Error("expected 42")
 	}
-	v = Eval(Cons(sym("if"), Cons(false, Cons(42, Cons(123, nil)))), e)
+    v = Eval(e, List(sym("if"), false, 42, 123))
 	if v != 123 {
 		t.Error("expected 123")
 	}
@@ -63,12 +63,12 @@ func TestEvalIF(t *testing.T) {
 
 func TestEvalLambda(t *testing.T) {
 	e := NewGlobalRootFrame()
-	f := Eval(List(sym("lambda"), List(sym("x")), sym("x")), e)
+    f := Eval(e, List(sym("lambda"), List(sym("x")), sym("x")))
 	if _, ok := f.(Closure); !ok {
 		t.Error("expected Procedure")
 	}
 	println("having", f)
-	v := Eval(List(f, 123), e)
+	v := Eval(e, List(f, 123))
 	if v != 123 {
 		t.Error("expected 123")
 	}
@@ -76,7 +76,7 @@ func TestEvalLambda(t *testing.T) {
 
 func TestEvalWhen(t *testing.T) {
 	e := NewGlobalRootFrame()
-	v := Eval(List(sym("when"), true, 1, 2, 3), e)
+    v := Eval(e, List(sym("when"), true, 1, 2, 3))
 	if v != 3 {
 		t.Error("expected 3")
 		fmt.Println(v)
@@ -85,7 +85,7 @@ func TestEvalWhen(t *testing.T) {
 
 func TestEvalEnvSymbol(t *testing.T) {
 	e := NewGlobalRootFrame()
-	v := Eval(sym("_env"), e)
+	v := Eval(e, sym("_env"))
 	if v != e {
 		t.Error("expected enviroment object")
 	}
@@ -93,7 +93,7 @@ func TestEvalEnvSymbol(t *testing.T) {
 
 func TestEvalAnd1(t *testing.T) {
 	e := NewGlobalRootFrame()
-	v := Eval(List(sym("and"), true, true, false), e)
+	v := Eval(e, List(sym("and"), true, true, false))
 	if v != false {
 		t.Error("expected false")
 		fmt.Println(v)
@@ -102,7 +102,7 @@ func TestEvalAnd1(t *testing.T) {
 
 func TestEvalAnd2(t *testing.T) {
 	e := NewGlobalRootFrame()
-	v := Eval(List(sym("and"), true, true, true), e)
+	v := Eval(e, List(sym("and"), true, true, true))
 	if v != true {
 		t.Error("expected true")
 		fmt.Println(v)
@@ -111,7 +111,7 @@ func TestEvalAnd2(t *testing.T) {
 
 func TestEvalOr1(t *testing.T) {
 	e := NewGlobalRootFrame()
-	v := Eval(List(sym("or"), false, false, true), e)
+	v := Eval(e, List(sym("or"), false, false, true))
 	if v != true {
 		t.Error("expected true")
 		fmt.Println(v)
@@ -120,7 +120,7 @@ func TestEvalOr1(t *testing.T) {
 
 func TestEvalOr2(t *testing.T) {
 	e := NewGlobalRootFrame()
-	v := Eval(List(sym("or"), false, false, false), e)
+	v := Eval(e, List(sym("or"), false, false, false))
 	if v != false {
 		t.Error("expected false")
 		fmt.Println(v)

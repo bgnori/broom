@@ -11,36 +11,36 @@ func setupBuiltins(env Environment) Environment {
 	env.Bind(".", MakeMethodInvoker())
 	env.Bind("+", Closure(func(env Environment, cdr Pair) Value {
 		xs := List2Arr(Cdr(cdr))
-		acc := Eval(Car(cdr), env).(int)
+		acc := Eval(env, Car(cdr)).(int)
 		for _, x := range xs {
-			acc += Eval(x, env).(int)
+			acc += Eval(env, x).(int)
 		}
 		return acc
 	}))
 	env.Bind("*", Closure(func(env Environment, cdr Pair) Value {
 		xs := List2Arr(Cdr(cdr))
-		acc := Eval(Car(cdr), env).(int)
+		acc := Eval(env, Car(cdr)).(int)
 		for _, x := range xs {
-			acc *= Eval(x, env).(int)
+			acc *= Eval(env, x).(int)
 		}
 		return acc
 	}))
 	env.Bind("-", Closure(func(env Environment, cdr Pair) Value {
 		xs := List2Arr(Cdr(cdr))
-		acc, ok := Eval(Car(cdr), env).(int)
+		acc, ok := Eval(env, Car(cdr)).(int)
 		if !ok {
 			panic("1st arg is not int")
 		}
 		for _, x := range xs {
-			acc -= Eval(x, env).(int)
+			acc -= Eval(env, x).(int)
 		}
 		return acc
 	}))
 	env.Bind("/", Closure(func(env Environment, cdr Pair) Value {
 		xs := List2Arr(Cdr(cdr))
-		acc := Eval(Car(cdr), env).(int)
+		acc := Eval(env, Car(cdr)).(int)
 		for _, x := range xs {
-			acc /= Eval(x, env).(int)
+			acc /= Eval(env, x).(int)
 		}
 		return acc
 	}))
@@ -54,13 +54,13 @@ func setupBuiltins(env Environment) Environment {
 		return nil
 	}))
 	env.Bind("<", Closure(func(env Environment, cdr Pair) Value {
-		first := Eval(Car(cdr), env).(int)
-		second := Eval((Car(Cdr(cdr))), env).(int)
+		first := Eval(env, Car(cdr)).(int)
+		second := Eval(env, (Car(Cdr(cdr)))).(int)
 		return first < second
 	}))
 	env.Bind(">", Closure(func(env Environment, cdr Pair) Value {
-		first := Eval(Car(cdr), env).(int)
-		second := Eval((Car(Cdr(cdr))), env).(int)
+		first := Eval(env, Car(cdr)).(int)
+		second := Eval(env, (Car(Cdr(cdr)))).(int)
 		return first > second
 	}))
 	return env
@@ -69,7 +69,7 @@ func setupBuiltins(env Environment) Environment {
 func MakeMethodInvoker() Closure {
 	return func(env Environment, cdr Pair) Value {
 		//see  http://stackoverflow.com/questions/14116840/dynamically-call-method-on-interface-regardless-of-receiver-type
-		obj := Eval(cdr.Car(), env)
+		obj := Eval(env, cdr.Car())
 		fmt.Println("obj: ", obj)
 		name := cdr.Cdr().Car().(Symbol).GetValue()
 		fmt.Println("to invoke:", name)

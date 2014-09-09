@@ -43,7 +43,7 @@ func Repl(in io.Reader) {
 			}
 			fmt.Println("input:", expr)
 
-			got, err := try2Eval(expr, env)
+			got, err := try2Eval(env, expr)
 			if err != nil {
 				fmt.Println("Failed eval!")
 				fmt.Println(err)
@@ -80,12 +80,12 @@ func try2Build(c string) (expr Value, err error) {
 	return BuildSExpr(NewBuffered(strings.NewReader(c))), nil
 }
 
-func try2Eval(expr Value, env Environment) (result Value, err error) {
+func try2Eval(env Environment, expr Value) (result Value, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			result = nil
 			err = MyErr(e.(string))
 		}
 	}()
-	return Eval(expr, env), nil
+	return Eval(env, expr), nil
 }
