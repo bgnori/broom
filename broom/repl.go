@@ -9,7 +9,7 @@ import (
 
 func Repl(in io.Reader) {
 	env := NewGlobalRootFrame()
-	env.Bind("dump", Closure(func(dynamic Enviroment, cdr Pair) Value {
+	env.Bind("dump", Closure(func(dynamic Environment, cdr Pair) Value {
 		dynamic.Dump()
 		return nil
 	}))
@@ -80,7 +80,7 @@ func try2Build(c string) (expr Value, err error) {
 	return BuildSExpr(NewBuffered(strings.NewReader(c))), nil
 }
 
-func try2Eval(expr Value, env Enviroment) (result Value, err error) {
+func try2Eval(expr Value, env Environment) (result Value, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			result = nil

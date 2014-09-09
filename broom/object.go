@@ -78,7 +78,7 @@ func isPair(v Value) bool {
 
 //port?
 
-type Closure func(env Enviroment, cdr Pair) Value
+type Closure func(env Environment, cdr Pair) Value
 
 func isProcedure(v Value) bool {
 	//procedure?

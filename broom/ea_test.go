@@ -126,4 +126,3 @@ func TestEvalOr2(t *testing.T) {
 		fmt.Println(v)
 	}
 }
-

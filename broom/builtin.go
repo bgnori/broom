@@ -5,11 +5,11 @@ import (
 	"reflect"
 )
 
-func setupBuiltins(env Enviroment) Enviroment {
+func setupBuiltins(env Environment) Environment {
 	env.Bind("true", true)
 	env.Bind("false", false)
 	env.Bind(".", MakeMethodInvoker())
-	env.Bind("+", Closure(func(env Enviroment, cdr Pair) Value {
+	env.Bind("+", Closure(func(env Environment, cdr Pair) Value {
 		xs := List2Arr(Cdr(cdr))
 		acc := Eval(Car(cdr), env).(int)
 		for _, x := range xs {
@@ -17,7 +17,7 @@ func setupBuiltins(env Enviroment) Enviroment {
 		}
 		return acc
 	}))
-	env.Bind("*", Closure(func(env Enviroment, cdr Pair) Value {
+	env.Bind("*", Closure(func(env Environment, cdr Pair) Value {
 		xs := List2Arr(Cdr(cdr))
 		acc := Eval(Car(cdr), env).(int)
 		for _, x := range xs {
@@ -25,7 +25,7 @@ func setupBuiltins(env Enviroment) Enviroment {
 		}
 		return acc
 	}))
-	env.Bind("-", Closure(func(env Enviroment, cdr Pair) Value {
+	env.Bind("-", Closure(func(env Environment, cdr Pair) Value {
 		xs := List2Arr(Cdr(cdr))
 		acc, ok := Eval(Car(cdr), env).(int)
 		if !ok {
@@ -36,7 +36,7 @@ func setupBuiltins(env Enviroment) Enviroment {
 		}
 		return acc
 	}))
-	env.Bind("/", Closure(func(env Enviroment, cdr Pair) Value {
+	env.Bind("/", Closure(func(env Environment, cdr Pair) Value {
 		xs := List2Arr(Cdr(cdr))
 		acc := Eval(Car(cdr), env).(int)
 		for _, x := range xs {
@@ -44,21 +44,21 @@ func setupBuiltins(env Enviroment) Enviroment {
 		}
 		return acc
 	}))
-	env.Bind("sprintf", Closure(func(env Enviroment, cdr Pair) Value {
+	env.Bind("sprintf", Closure(func(env Environment, cdr Pair) Value {
 		format := Car(cdr).(string)
 		xs := List2Arr(Cdr(cdr))
 		return fmt.Sprintf(format, xs...)
 	}))
-	env.Bind("println", Closure(func(env Enviroment, cdr Pair) Value {
+	env.Bind("println", Closure(func(env Environment, cdr Pair) Value {
 		fmt.Println(Car(cdr))
 		return nil
 	}))
-	env.Bind("<", Closure(func(env Enviroment, cdr Pair) Value {
+	env.Bind("<", Closure(func(env Environment, cdr Pair) Value {
 		first := Eval(Car(cdr), env).(int)
 		second := Eval((Car(Cdr(cdr))), env).(int)
 		return first < second
 	}))
-	env.Bind(">", Closure(func(env Enviroment, cdr Pair) Value {
+	env.Bind(">", Closure(func(env Environment, cdr Pair) Value {
 		first := Eval(Car(cdr), env).(int)
 		second := Eval((Car(Cdr(cdr))), env).(int)
 		return first > second
@@ -67,7 +67,7 @@ func setupBuiltins(env Enviroment) Enviroment {
 }
 
 func MakeMethodInvoker() Closure {
-	return func(env Enviroment, cdr Pair) Value {
+	return func(env Environment, cdr Pair) Value {
 		//see  http://stackoverflow.com/questions/14116840/dynamically-call-method-on-interface-regardless-of-receiver-type
 		obj := Eval(cdr.Car(), env)
 		fmt.Println("obj: ", obj)

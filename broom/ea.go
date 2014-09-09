@@ -4,14 +4,14 @@ import (
 	"fmt"
 )
 
-type Enviroment interface {
+type Environment interface {
 	Bind(name string, v Value)
 	Resolve(name string) Value
 	Dump()
 }
 
-func FromLambda(cdr Pair, lexical Enviroment) Closure {
-	return func(dynamic Enviroment, args Pair) Value {
+func FromLambda(cdr Pair, lexical Environment) Closure {
+	return func(dynamic Environment, args Pair) Value {
 		e := NewEnvFrame(lexical)
 		formals := List2Arr(Car(cdr))
 		for i, a := range List2Arr(args) {
@@ -29,20 +29,20 @@ func FromLambda(cdr Pair, lexical Enviroment) Closure {
 	}
 }
 
-func setupSpecialForms(env Enviroment) Enviroment {
+func setupSpecialForms(env Environment) Environment {
 	//case sym("quote").Eq(car): //quoted?
-	env.Bind("quote", Closure(func(env Enviroment, cdr Pair) Value {
+	env.Bind("quote", Closure(func(env Environment, cdr Pair) Value {
 		return Car(cdr)
 	}))
 
 	//case sym("set!").Eq(car): //assignment?
-	env.Bind("set!", Closure(func(env Enviroment, cdr Pair) Value {
+	env.Bind("set!", Closure(func(env Environment, cdr Pair) Value {
 		panic("not implemented: set!")
 		return nil
 	}))
 
 	//case sym("define").Eq(car): //definition?
-	env.Bind("define", Closure(func(env Enviroment, cdr Pair) Value {
+	env.Bind("define", Closure(func(env Environment, cdr Pair) Value {
 		s, _ := Car(cdr).(Symbol)
 		v := Car(Cdr(cdr))
 		u := Eval(v, env)
@@ -51,7 +51,7 @@ func setupSpecialForms(env Enviroment) Enviroment {
 	}))
 
 	//case sym("if").Eq(car): //if?
-	env.Bind("if", Closure(func(env Enviroment, cdr Pair) Value {
+	env.Bind("if", Closure(func(env Environment, cdr Pair) Value {
 		cond := Car(cdr)
 		fmt.Println(cond)
 		if Eval(cond, env) == true {
@@ -66,12 +66,12 @@ func setupSpecialForms(env Enviroment) Enviroment {
 	}))
 
 	//case sym("lambda").Eq(car): //lambda?
-	env.Bind("lambda", Closure(func(env Enviroment, cdr Pair) Value {
+	env.Bind("lambda", Closure(func(env Environment, cdr Pair) Value {
 		return FromLambda(cdr, env)
 	}))
 
 	//case sym("begin").Eq(car): //begin?
-	env.Bind("begin", Closure(func(env Enviroment, cdr Pair) Value {
+	env.Bind("begin", Closure(func(env Environment, cdr Pair) Value {
 		var x Value
 		e := NewEnvFrame(env)
 		for _, b := range List2Arr(cdr) {
@@ -81,20 +81,20 @@ func setupSpecialForms(env Enviroment) Enviroment {
 	}))
 
 	//case sym("cond").Eq(car): //cond?
-	env.Bind("cond", Closure(func(env Enviroment, cdr Pair) Value {
+	env.Bind("cond", Closure(func(env Environment, cdr Pair) Value {
 		return nil
 	}))
 
 	// when macro
 	// http://www.shido.info/lisp/scheme_syntax.html
-	env.Bind("when", Closure(func(env Enviroment, cdr Pair) Value {
+	env.Bind("when", Closure(func(env Environment, cdr Pair) Value {
 		conv := List(sym("if"), Car(cdr),
 			Cons(sym("begin"), Cdr(cdr)))
 		return Eval(conv, env)
 	}))
 
 	// to be implemented
-	env.Bind("macroexpand", Closure(func(env Enviroment, cdr Pair) Value {
+	env.Bind("macroexpand", Closure(func(env Environment, cdr Pair) Value {
 		conv := List(sym("if"), Car(cdr),
 			Cons(sym("begin"), Cdr(cdr)))
 		return Eval(conv, env)
@@ -106,7 +106,7 @@ func setupSpecialForms(env Enviroment) Enviroment {
 	return env
 }
 
-func and(env Enviroment, cdr Pair) Value {
+func and(env Environment, cdr Pair) Value {
 	v := Eval(Car(cdr), env).(bool)
 	if v {
 		next := Cdr(cdr)
@@ -119,7 +119,7 @@ func and(env Enviroment, cdr Pair) Value {
 	return false
 }
 
-func or(env Enviroment, cdr Pair) Value {
+func or(env Environment, cdr Pair) Value {
 	v := Eval(Car(cdr), env).(bool)
 	if !v {
 		next := Cdr(cdr)
@@ -132,7 +132,7 @@ func or(env Enviroment, cdr Pair) Value {
 	return true
 }
 
-func Eval(expr Value, env Enviroment) Value {
+func Eval(expr Value, env Environment) Value {
 	/*
 	   (define (eval exp env)
 	     (cond ((self-evaluating? exp) exp)
@@ -173,10 +173,10 @@ func Eval(expr Value, env Enviroment) Value {
 
 type enviroment struct {
 	variables map[string]Value
-	outer     Enviroment
+	outer     Environment
 }
 
-func NewEnvFrame(outer Enviroment) *enviroment {
+func NewEnvFrame(outer Environment) *enviroment {
 	e := new(enviroment)
 	e.variables = make(map[string]Value)
 	e.outer = outer
