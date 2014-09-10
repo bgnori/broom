@@ -144,6 +144,21 @@ func EqMap(x, y interface{}) bool {
 	return true
 }
 
+func EqArray(x, y interface{}) bool {
+    println("EqArray")
+	xs, _ := x.([]interface{})
+	ys, _ := y.([]interface{})
+    if len(xs) != len(ys) {
+        return false
+    }
+    for i, v := range xs {
+        if !Eq(ys[i], v) {
+            return false
+        }
+    }
+    return true
+}
+
 func Eq(x, y interface{}) bool {
 	switch {
 	case isMap(x) && isMap(y):
@@ -154,6 +169,8 @@ func Eq(x, y interface{}) bool {
 		return sx.Eq(sy)
 	case isPair(x) && isPair(y):
 		return Eq(Car(x), Car(y)) && Eq(Cdr(x), Cdr(y))
+    case isArray(x) && isArray(y):
+        return EqArray(x, y)
 	default:
 		return x == y
 	}

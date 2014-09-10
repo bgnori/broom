@@ -101,3 +101,55 @@ func TestSprintf(t *testing.T) {
 		fmt.Println(r)
 	}
 }
+
+func TestisNull1(t *testing.T) {
+	e := NewGlobalRootFrame()
+
+	expr := List(sym("null?"), nil)
+	r := Eval(e, expr)
+	if r != true {
+		t.Error("expected true")
+		fmt.Println(r)
+	}
+}
+
+func TestisNull2(t *testing.T) {
+	e := NewGlobalRootFrame()
+
+	expr := List(sym("null?"), 1)
+	r := Eval(e, expr)
+	if r != false {
+		t.Error("expected true")
+		fmt.Println(r)
+	}
+}
+
+func TestisBoolean1(t *testing.T) {
+	e := NewGlobalRootFrame()
+
+	expr := List(sym("boolean?"), false)
+	r := Eval(e, expr)
+	if r != true {
+		t.Error("expected true")
+		fmt.Println(r)
+	}
+}
+
+func TestisBoolean2(t *testing.T) {
+	e := NewGlobalRootFrame()
+
+	expr := List(sym("boolean?"), 1)
+	r := Eval(e, expr)
+	if r != false {
+		t.Error("expected true")
+		fmt.Println(r)
+	}
+}
+
+
+
+
+
+
+
+

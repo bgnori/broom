@@ -1,7 +1,7 @@
 package broom
 
 import (
-	//"fmt"
+	"fmt"
 	"strings"
 	"testing"
 )
@@ -298,6 +298,15 @@ func TestMakeEmptyList(t *testing.T) {
 	}
 }
 
+func TestMakeEmptyArray(t *testing.T) {
+	buf := NewBuffered(strings.NewReader("[]"))
+	expr := BuildSExpr(buf)
+
+    if !Eq([]interface{}{}, expr) {
+		t.Error("[] is expected")
+	}
+}
+
 func TestMakeSomeList(t *testing.T) {
 	buf := NewBuffered(strings.NewReader("(1 2 3)"))
 	expr := BuildSExpr(buf)
@@ -320,8 +329,9 @@ func TestMakeSomeArray(t *testing.T) {
 	buf := NewBuffered(strings.NewReader("[1 2 3]"))
 	expr := BuildSExpr(buf)
 
-	if Eq([]int{1, 2, 3}, expr) {
+	if !Eq([]interface{}{1, 2, 3}, expr) {
 		t.Error("[1 2 3] is expected")
+        fmt.Println(expr)
 	}
 }
 

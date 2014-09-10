@@ -63,6 +63,22 @@ func setupBuiltins(env Environment) Environment {
 		second := Eval(env, (Car(Cdr(cdr)))).(int)
 		return first > second
 	}))
+    env.Bind("null?", Closure(func(env Environment, cdr Pair) interface {} {
+        return isNull(Eval(env, Car(cdr)))
+    }))
+    env.Bind("boolean?", Closure(func(env Environment, cdr Pair) interface {} {
+        return isBoolean(Eval(env, Car(cdr)))
+    }))
+    env.Bind("char?", isChar)
+    env.Bind("symbol?", isSymbol)
+    env.Bind("number?", isNumber)
+    env.Bind("pair?", isPair)
+    env.Bind("procedure?", isProcedure)
+    env.Bind("syntax?", isSyntax)
+    env.Bind("string?", isString)
+    env.Bind("array?", isArray)
+    env.Bind("map?", isMap)
+
 	return env
 }
 
