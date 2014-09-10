@@ -126,3 +126,27 @@ func TestEvalOr2(t *testing.T) {
 		fmt.Println(v)
 	}
 }
+
+func TestEvalCond(t *testing.T) {
+	e := NewGlobalRootFrame()
+	v := Eval(e, List(sym("cond"),
+		List(sym(">"), 0, 1), 1,
+		List(sym(">"), 3, 2), 2,
+		sym("else"), 3))
+	if v != 2 {
+		t.Error("expected 2")
+		fmt.Println(v)
+	}
+}
+
+func TestEvalCondElse(t *testing.T) {
+	e := NewGlobalRootFrame()
+	v := Eval(e, List(sym("cond"),
+		List(sym(">"), 0, 1), 1,
+		List(sym(">"), 0, 2), 2,
+		sym("else"), 3))
+	if v != 3 {
+		t.Error("expected 2")
+		fmt.Println(v)
+	}
+}

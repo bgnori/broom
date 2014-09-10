@@ -83,7 +83,20 @@ func setupSpecialForms(env Environment) Environment {
 
 	//case sym("cond").Eq(car): //cond?
 	env.Bind("cond", Closure(func(env Environment, cdr Pair) interface{} {
-		return nil
+		test := Car(cdr)
+		onTrue := Car(Cdr(cdr))
+		rest := Cdr(Cdr(cdr))
+		println(test, onTrue)
+		if v, ok := test.(Symbol); ok && v.GetValue() == "else" {
+			return Eval(env, onTrue)
+		}
+		if Eval(env, test) == true {
+			return Eval(env, onTrue)
+		}
+		if rest != nil {
+			return Eval(env, Cons(sym("cond"), rest))
+		}
+		return nil //undef
 	}))
 
 	// when macro
