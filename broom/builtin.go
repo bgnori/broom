@@ -69,15 +69,36 @@ func setupBuiltins(env Environment) Environment {
     env.Bind("boolean?", Closure(func(env Environment, cdr Pair) interface {} {
         return isBoolean(Eval(env, Car(cdr)))
     }))
-    env.Bind("char?", isChar)
-    env.Bind("symbol?", isSymbol)
-    env.Bind("number?", isNumber)
-    env.Bind("pair?", isPair)
-    env.Bind("procedure?", isProcedure)
-    env.Bind("syntax?", isSyntax)
-    env.Bind("string?", isString)
-    env.Bind("array?", isArray)
-    env.Bind("map?", isMap)
+    env.Bind("char?", Closure(func(env Environment, cdr Pair) interface {} {
+        return isChar(Eval(env, Car(cdr)))
+    }))
+    env.Bind("symbol?", Closure(func(env Environment, cdr Pair) interface {} {
+        return isSymbol(Eval(env, Car(cdr)))
+    }))
+    env.Bind("number?", Closure(func(env Environment, cdr Pair) interface {} {
+        return isNumber(Eval(env, Car(cdr)))
+    }))
+    env.Bind("pair?", Closure(func(env Environment, cdr Pair) interface {} {
+        return isPair(Eval(env, Car(cdr)))
+    }))
+    env.Bind("procedure?", Closure(func(env Environment, cdr Pair) interface {} {
+        return isProcedure(Eval(env, Car(cdr)))
+    }))
+    env.Bind("syntax?", Closure(func(env Environment, cdr Pair) interface {} {
+        return isSyntax(Eval(env, Car(cdr)))
+    }))
+
+    env.Bind("string?", Closure(func(env Environment, cdr Pair) interface {} {
+        return isString(Eval(env, Car(cdr)))
+    }))
+
+    env.Bind("array?", Closure(func(env Environment, cdr Pair) interface {} {
+        return isString(Eval(env, Car(cdr)))
+    }))
+
+    env.Bind("mpa?", Closure(func(env Environment, cdr Pair) interface {} {
+        return isString(Eval(env, Car(cdr)))
+    }))
 
 	return env
 }
