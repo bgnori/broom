@@ -7,20 +7,23 @@ import (
 type Environment interface {
 	Bind(name string, v Value)
 	Resolve(name string) Value
+    SetOuter(outer Environment)
 	Dump()
+}
+
+func Args(p Pair) Pair {
+    return Car(p).(Pair)
+}
+
+func Body(p Pair) Pair {
+    return Cdr(p).(Pair)
 }
 
 func FromLambda(cdr Pair, lexical Environment) Closure {
 	return func(dynamic Environment, args Pair) Value {
-		e := NewEnvFrame(lexical)
-		formals := List2Arr(Car(cdr))
-		for i, a := range List2Arr(args) {
-			v := Eval(dynamic, a)
-			s, _ := formals[i].(Symbol)
-			e.Bind(s.GetValue(), v)
-		}
+        e := NewFrameForApply(lexical, dynamic, args, Args(cdr))
 		var x Value
-		for _, b := range List2Arr(Cdr(cdr)) {
+		for _, b := range List2Arr(Body(cdr)) {
 			x = Eval(e, b)
 		}
 		return x
@@ -208,6 +211,10 @@ func (env *enviroment) Resolve(name string) Value {
 	return nil
 }
 
+func (env *enviroment) SetOuter (outer Environment) {
+    env.outer = outer
+}
+
 func (env *enviroment) Dump() {
 	fmt.Println("=====")
 	for key, value := range env.variables {
@@ -217,3 +224,21 @@ func (env *enviroment) Dump() {
 		env.outer.Dump()
 	}
 }
+
+func NewFrameForApply(lexical Environment, dynamic Environment, args Pair, formals Pair) Environment {
+	e := NewEnvFrame(lexical)
+    as := List2Arr(args)
+    for i, name := range List2Arr(formals) {
+        if len(as) <= i {
+            panic("not enough argument")
+        }
+        if s, ok := name.(Symbol); ok {
+		    v := Eval(dynamic, as[i])
+		    e.Bind(s.GetValue(), v)
+        } else {
+            panic("argument name must be symbol")
+        }
+    }
+    return e
+}
+
