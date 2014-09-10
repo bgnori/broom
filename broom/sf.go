@@ -47,7 +47,7 @@ func setupSpecialForms(env Environment) Environment {
 		return Eval(env, transformed) //fn
 	}))
 
-	//http://clojuredocs.org/clojure_core/clojure.core/fn
+	//idea from http://clojuredocs.org/clojure_core/clojure.core/fn
 	env.Bind("fn", Closure(func(lexical Environment, cdr Pair) interface{} {
 		return Closure(func(dynamic Environment, args Pair) interface{} {
 			e := NewFrameForApply(lexical, dynamic, args, Args(cdr))
@@ -57,6 +57,18 @@ func setupSpecialForms(env Environment) Environment {
 			}
 			return x
 		})
+	}))
+
+	//idea from http://clojuredocs.org/clojure_core/clojure.core/defn
+	// (defn name [params*] body)
+	env.Bind("defn", Closure(func(env Environment, cdr Pair) interface{} {
+		//sort of macro
+		name := Car(cdr)
+		xs := Car(Cdr(cdr))
+		body := Cdr(Cdr(cdr))
+		transformed := List(sym("define"), name, Cons(sym("fn"), Cons(xs, body)))
+		fmt.Println("transformed:", transformed)
+		return Eval(env, transformed)
 	}))
 
 	//case sym("begin").Eq(car): //begin?

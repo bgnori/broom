@@ -104,3 +104,13 @@ func Test_String(t *testing.T) {
 		t.Error("actually:", fmt.Sprint(xs))
 	}
 }
+
+func Test_Append(t *testing.T) {
+	xs := List(sym("a"), sym("b"), sym("c"))
+	ys := List(sym("d"), sym("e"), sym("f"))
+	got := Append(xs, ys)
+	if !Eq(got, List(sym("a"), sym("b"), sym("c"), sym("d"), sym("e"), sym("f"))) {
+		t.Error("Append not working right")
+		println(got)
+	}
+}

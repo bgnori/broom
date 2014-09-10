@@ -407,7 +407,7 @@ func BuildSExpr(buf *Buffered) interface{} {
 			if seq.typ != TOKEN_LEFT_BRACKET {
 				panic("PAREN does not match")
 			}
-            fmt.Println("seq.items", seq.items)
+			fmt.Println("seq.items", seq.items)
 			builder.push(seq.items)
 		case TOKEN_LEFT_BRACE:
 			builder.startSeq(tk.id)

@@ -302,7 +302,7 @@ func TestMakeEmptyArray(t *testing.T) {
 	buf := NewBuffered(strings.NewReader("[]"))
 	expr := BuildSExpr(buf)
 
-    if !Eq([]interface{}{}, expr) {
+	if !Eq([]interface{}{}, expr) {
 		t.Error("[] is expected")
 	}
 }
@@ -331,7 +331,7 @@ func TestMakeSomeArray(t *testing.T) {
 
 	if !Eq([]interface{}{1, 2, 3}, expr) {
 		t.Error("[1 2 3] is expected")
-        fmt.Println(expr)
+		fmt.Println(expr)
 	}
 }
 

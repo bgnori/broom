@@ -61,6 +61,19 @@ func TestEvalfn(t *testing.T) {
 	}
 }
 
+func TestEvaldefn(t *testing.T) {
+	e := NewGlobalRootFrame()
+	Eval(e, List(sym("defn"), sym("foo"), []interface{}{sym("x")}, sym("x")))
+	f := Eval(e, sym("foo"))
+	if _, ok := f.(Closure); !ok {
+		t.Error("expected Procedure")
+	}
+	v := Eval(e, List(f, 123))
+	if v != 123 {
+		t.Error("expected 123")
+	}
+}
+
 func TestEvalWhen(t *testing.T) {
 	e := NewGlobalRootFrame()
 	v := Eval(e, List(sym("when"), true, 1, 2, 3))

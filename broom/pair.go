@@ -80,6 +80,14 @@ func List(xs ...interface{}) Pair {
 	return Cons(xs[0], List(xs[1:]...))
 }
 
+func Append(xs Pair, cdr Pair) Pair {
+	if Cdr(xs) == nil {
+		return Cons(Car(xs), cdr)
+	} else {
+		return Cons(Car(xs), Append(Cdr(xs), cdr))
+	}
+}
+
 func isList(xs interface{}) bool {
 	if isNull(xs) {
 		return true

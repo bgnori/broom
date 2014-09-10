@@ -145,11 +145,3 @@ func TestisBoolean2(t *testing.T) {
 		fmt.Println(r)
 	}
 }
-
-
-
-
-
-
-
-
