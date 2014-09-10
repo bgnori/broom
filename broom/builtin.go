@@ -44,11 +44,13 @@ func setupBuiltins(env Environment) Environment {
 		}
 		return acc
 	}))
-	env.Bind("sprintf", Closure(func(env Environment, cdr Pair) Value {
-		format := Car(cdr).(string)
-		xs := List2Arr(Cdr(cdr))
-		return fmt.Sprintf(format, xs...)
-	}))
+	/*
+		env.Bind("sprintf", Closure(func(env Environment, cdr Pair) Value {
+			format := Car(cdr).(string)
+			xs := List2Arr(Cdr(cdr))
+			return fmt.Sprintf(format, xs...)
+		}))
+	*/
 	env.Bind("println", Closure(func(env Environment, cdr Pair) Value {
 		fmt.Println(Car(cdr))
 		return nil

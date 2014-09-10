@@ -58,7 +58,7 @@ func (p *pairImpl) String() string {
 	return "(" + strings.Join(ss, " ") + ")"
 }
 
-func sub(v Value, xs []interface{}) [](interface{}) {
+func sub(v Value, xs []Value) [](Value) {
 	if v == nil {
 		return xs
 	} else {
@@ -67,8 +67,8 @@ func sub(v Value, xs []interface{}) [](interface{}) {
 	}
 }
 
-func List2Arr(v Value) []interface{} {
-	return sub(v, make([]interface{}, 0))
+func List2Arr(v Value) []Value {
+	return sub(v, make([]Value, 0))
 }
 
 func List(xs ...Value) Pair {

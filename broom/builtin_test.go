@@ -92,6 +92,7 @@ func TestNumDiv(t *testing.T) {
 	}
 }
 
+/*
 func TestSprintf(t *testing.T) {
 	e := NewGlobalRootFrame()
 	expr := List(sym("sprintf"), "Answer is %d", 42)
@@ -100,4 +101,4 @@ func TestSprintf(t *testing.T) {
 		t.Error("expected \"Answer is 42\"")
 		fmt.Println(r)
 	}
-}
+}*/
