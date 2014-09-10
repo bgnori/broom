@@ -329,7 +329,7 @@ func TestMakeSomeMap(t *testing.T) {
 	buf := NewBuffered(strings.NewReader("{1 \"one\" \"two\" \"二\" 3 \"III\"}"))
 	expr := BuildSExpr(buf)
 
-	if !Eq(map[Value]Value{1: "one", "two": "二", 3: "III"}, expr) {
+	if !Eq(map[interface{}]interface{}{1: "one", "two": "二", 3: "III"}, expr) {
 		t.Error("{1:\"one\" \"two\":\"二\" 3:\"III\"} is expected")
 		DumpMap(expr)
 	}

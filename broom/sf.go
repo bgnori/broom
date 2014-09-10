@@ -6,18 +6,18 @@ import (
 
 func setupSpecialForms(env Environment) Environment {
 	//case sym("quote").Eq(car): //quoted?
-	env.Bind("quote", Closure(func(env Environment, cdr Pair) Value {
+	env.Bind("quote", Closure(func(env Environment, cdr Pair) interface{} {
 		return Car(cdr)
 	}))
 
 	//case sym("set!").Eq(car): //assignment?
-	env.Bind("set!", Closure(func(env Environment, cdr Pair) Value {
+	env.Bind("set!", Closure(func(env Environment, cdr Pair) interface{} {
 		panic("not implemented: set!")
 		return nil
 	}))
 
 	//case sym("define").Eq(car): //definition?
-	env.Bind("define", Closure(func(env Environment, cdr Pair) Value {
+	env.Bind("define", Closure(func(env Environment, cdr Pair) interface{} {
 		s, _ := Car(cdr).(Symbol)
 		v := Car(Cdr(cdr))
 		u := Eval(env, v)
@@ -26,7 +26,7 @@ func setupSpecialForms(env Environment) Environment {
 	}))
 
 	//case sym("if").Eq(car): //if?
-	env.Bind("if", Closure(func(env Environment, cdr Pair) Value {
+	env.Bind("if", Closure(func(env Environment, cdr Pair) interface{} {
 		cond := Car(cdr)
 		if Eval(env, cond) == true {
 			clauseThen := Car(Cdr(cdr))
@@ -38,7 +38,7 @@ func setupSpecialForms(env Environment) Environment {
 		return nil
 	}))
 
-	env.Bind("lambda", Closure(func(env Environment, cdr Pair) Value {
+	env.Bind("lambda", Closure(func(env Environment, cdr Pair) interface{} {
 		//sort of macro
 		xs := List2Arr(Car(cdr).(Pair))
 		body := Cdr(cdr).(Pair)
@@ -48,10 +48,10 @@ func setupSpecialForms(env Environment) Environment {
 	}))
 
 	//http://clojuredocs.org/clojure_core/clojure.core/fn
-	env.Bind("fn", Closure(func(lexical Environment, cdr Pair) Value {
-		return Closure(func(dynamic Environment, args Pair) Value {
+	env.Bind("fn", Closure(func(lexical Environment, cdr Pair) interface{} {
+		return Closure(func(dynamic Environment, args Pair) interface{} {
 			e := NewFrameForApply(lexical, dynamic, args, Args(cdr))
-			var x Value
+			var x interface{}
 			for _, b := range List2Arr(Body(cdr)) {
 				x = Eval(e, b)
 			}
@@ -60,8 +60,8 @@ func setupSpecialForms(env Environment) Environment {
 	}))
 
 	//case sym("begin").Eq(car): //begin?
-	env.Bind("begin", Closure(func(env Environment, cdr Pair) Value {
-		var x Value
+	env.Bind("begin", Closure(func(env Environment, cdr Pair) interface{} {
+		var x interface{}
 		e := NewEnvFrame(env)
 		for _, b := range List2Arr(cdr) {
 			x = Eval(e, b)
@@ -70,20 +70,20 @@ func setupSpecialForms(env Environment) Environment {
 	}))
 
 	//case sym("cond").Eq(car): //cond?
-	env.Bind("cond", Closure(func(env Environment, cdr Pair) Value {
+	env.Bind("cond", Closure(func(env Environment, cdr Pair) interface{} {
 		return nil
 	}))
 
 	// when macro
 	// http://www.shido.info/lisp/scheme_syntax.html
-	env.Bind("when", Closure(func(env Environment, cdr Pair) Value {
+	env.Bind("when", Closure(func(env Environment, cdr Pair) interface{} {
 		conv := List(sym("if"), Car(cdr),
 			Cons(sym("begin"), Cdr(cdr)))
 		return Eval(env, conv)
 	}))
 
 	// to be implemented
-	env.Bind("macroexpand", Closure(func(env Environment, cdr Pair) Value {
+	env.Bind("macroexpand", Closure(func(env Environment, cdr Pair) interface{} {
 		conv := List(sym("if"), Car(cdr),
 			Cons(sym("begin"), Cdr(cdr)))
 		return Eval(env, conv)
@@ -95,7 +95,7 @@ func setupSpecialForms(env Environment) Environment {
 	return env
 }
 
-func and(env Environment, cdr Pair) Value {
+func and(env Environment, cdr Pair) interface{} {
 	v := Eval(env, Car(cdr)).(bool)
 	if v {
 		next := Cdr(cdr)
@@ -108,7 +108,7 @@ func and(env Environment, cdr Pair) Value {
 	return false
 }
 
-func or(env Environment, cdr Pair) Value {
+func or(env Environment, cdr Pair) interface{} {
 	v := Eval(env, Car(cdr)).(bool)
 	if !v {
 		next := Cdr(cdr)

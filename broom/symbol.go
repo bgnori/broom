@@ -12,7 +12,7 @@ func (s *symbolImpl) GetValue() string {
 	return s.value
 }
 
-func (s *symbolImpl) Eq(other Value) bool {
+func (s *symbolImpl) Eq(other interface{}) bool {
 	if t, ok := other.(*symbolImpl); ok {
 		return s.value == t.value
 	} else {

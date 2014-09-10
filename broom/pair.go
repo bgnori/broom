@@ -6,15 +6,15 @@ import (
 )
 
 type pairImpl struct {
-	car Value
+	car interface{}
 	cdr Pair
 }
 
-func Cons(car Value, cdr Pair) Pair {
+func Cons(car interface{}, cdr Pair) Pair {
 	return &pairImpl{car: car, cdr: cdr}
 }
 
-func Car(v Value) Value {
+func Car(v interface{}) interface{} {
 	u, ok := v.(Pair)
 	if !ok {
 		panic("non pair object for Car()")
@@ -22,7 +22,7 @@ func Car(v Value) Value {
 	return u.Car()
 }
 
-func Cdr(v Value) Pair {
+func Cdr(v interface{}) Pair {
 	u, ok := v.(Pair)
 	if !ok {
 		panic("non pair object for Cdr()")
@@ -30,7 +30,7 @@ func Cdr(v Value) Pair {
 	return u.Cdr()
 }
 
-func (p *pairImpl) Car() Value {
+func (p *pairImpl) Car() interface{} {
 	return p.car
 }
 
@@ -38,7 +38,7 @@ func (p *pairImpl) Cdr() Pair {
 	return p.cdr
 }
 
-func (p *pairImpl) SetCar(v Value) Undef {
+func (p *pairImpl) SetCar(v interface{}) Undef {
 	p.car = v
 	return nil
 }
@@ -58,7 +58,7 @@ func (p *pairImpl) String() string {
 	return "(" + strings.Join(ss, " ") + ")"
 }
 
-func sub(v Value, xs []Value) [](Value) {
+func sub(v interface{}, xs []interface{}) [](interface{}) {
 	if v == nil {
 		return xs
 	} else {
@@ -67,11 +67,11 @@ func sub(v Value, xs []Value) [](Value) {
 	}
 }
 
-func List2Arr(v Value) []Value {
-	return sub(v, make([]Value, 0))
+func List2Arr(v interface{}) []interface{} {
+	return sub(v, make([]interface{}, 0))
 }
 
-func List(xs ...Value) Pair {
+func List(xs ...interface{}) Pair {
 	//(list obj... )
 	// this function supports . cdr, for none proper list
 	if len(xs) == 0 {
@@ -80,7 +80,7 @@ func List(xs ...Value) Pair {
 	return Cons(xs[0], List(xs[1:]...))
 }
 
-func isList(xs Value) bool {
+func isList(xs interface{}) bool {
 	if isNull(xs) {
 		return true
 	}
@@ -90,7 +90,7 @@ func isList(xs Value) bool {
 	return false
 }
 
-func Length(xs Value) int {
+func Length(xs interface{}) int {
 	if isNull(xs) {
 		return 0
 	}

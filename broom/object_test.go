@@ -6,7 +6,7 @@ import (
 )
 
 func Test_Symbol(t *testing.T) {
-	var v Value
+	var v interface{}
 	v = sym("a")
 	if !isSymbol(v) {
 		t.Error("(Symbol? 'a) must be true.")
@@ -28,7 +28,7 @@ func Test_Symbol(t *testing.T) {
 }
 
 func Test_isNull(t *testing.T) {
-	var v Value
+	var v interface{}
 	v = nil
 	if !isNull(v) {
 		t.Error("nil must be null? true.")
@@ -36,7 +36,7 @@ func Test_isNull(t *testing.T) {
 }
 
 func Test_isBoolean(t *testing.T) {
-	var v Value
+	var v interface{}
 	v = true
 	if !isBoolean(v) {
 		t.Error("v must be boolean? true.")
@@ -54,7 +54,7 @@ func Test_isBoolean(t *testing.T) {
 }
 
 func Test_isChar(t *testing.T) {
-	var v Value
+	var v interface{}
 	v = 'あ'
 	if !isChar(v) {
 		t.Error("v must be char? true.")
@@ -62,7 +62,7 @@ func Test_isChar(t *testing.T) {
 }
 
 func xTest_isSymbol(t *testing.T) {
-	var v Value
+	var v interface{}
 	v = 'あ'
 	if !isChar(v) {
 		t.Error("v must be char? true.")
@@ -70,7 +70,7 @@ func xTest_isSymbol(t *testing.T) {
 }
 
 func Test_isNumber(t *testing.T) {
-	var v Value
+	var v interface{}
 	v = 123
 	if !isNumber(v) {
 		t.Error("v must be number? true.")
@@ -86,7 +86,7 @@ func Test_isNumber(t *testing.T) {
 }
 
 func Test_isPair(t *testing.T) {
-	var v Value
+	var v interface{}
 	v = nil
 	if isPair(v) {
 		t.Error("nil must not be pair")
@@ -94,7 +94,7 @@ func Test_isPair(t *testing.T) {
 }
 
 func Test_isString(t *testing.T) {
-	var v Value
+	var v interface{}
 	v = "abcd"
 	if !isString(v) {
 		t.Error("string must be string? true")

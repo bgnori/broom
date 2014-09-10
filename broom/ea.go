@@ -5,13 +5,13 @@ import (
 )
 
 type Environment interface {
-	Bind(name string, v Value)
-	Resolve(name string) Value
+	Bind(name string, v interface{})
+	Resolve(name string) interface{}
 	SetOuter(outer Environment)
 	Dump()
 }
 
-func Eval(env Environment, expr Value) Value {
+func Eval(env Environment, expr interface{}) interface{} {
 	/*
 	   (define (eval exp env)
 	     (cond ((self-evaluating? exp) exp)
@@ -51,13 +51,13 @@ func Eval(env Environment, expr Value) Value {
 }
 
 type enviroment struct {
-	variables map[string]Value
+	variables map[string]interface{}
 	outer     Environment
 }
 
 func NewEnvFrame(outer Environment) *enviroment {
 	e := new(enviroment)
-	e.variables = make(map[string]Value)
+	e.variables = make(map[string]interface{})
 	e.outer = outer
 	e.Bind("_env", e)
 	e.Bind("_outer", outer)
@@ -68,7 +68,7 @@ func NewGlobalRootFrame() *enviroment {
 	e := NewEnvFrame(nil)
 	setupSpecialForms(e)
 	setupBuiltins(e)
-	e.Bind("eval", Closure(func(env Environment, cdr Pair) Value {
+	e.Bind("eval", Closure(func(env Environment, cdr Pair) interface{} {
 		given := Eval(env, Car(cdr)).(Environment)
 		given.Dump()
 		return Eval(given, Car(Cdr(cdr)))
@@ -76,11 +76,11 @@ func NewGlobalRootFrame() *enviroment {
 	return e
 }
 
-func (env *enviroment) Bind(name string, v Value) {
+func (env *enviroment) Bind(name string, v interface{}) {
 	env.variables[name] = v
 }
 
-func (env *enviroment) Resolve(name string) Value {
+func (env *enviroment) Resolve(name string) interface{} {
 	if v, ok := env.variables[name]; ok {
 		return v
 	}
@@ -105,15 +105,15 @@ func (env *enviroment) Dump() {
 	}
 }
 
-func Args(p Pair) []Value {
-	return Car(p).([]Value)
+func Args(p Pair) []interface{} {
+	return Car(p).([]interface{})
 }
 
 func Body(p Pair) Pair {
 	return Cdr(p).(Pair)
 }
 
-func NewFrameForApply(lexical Environment, dynamic Environment, args Pair, formals []Value) Environment {
+func NewFrameForApply(lexical Environment, dynamic Environment, args Pair, formals []interface{}) Environment {
 	e := NewEnvFrame(lexical)
 	as := List2Arr(args)
 	for i, name := range formals {

@@ -4,41 +4,41 @@ import (
 	"fmt"
 )
 
-type Value interface{} // Anything.
+//type interface{} interface{} // Anything.
 
 type Undef interface{} // T.B.D.
 
 type Symbol interface {
 	//T.B.D.
 	GetValue() string
-	Eq(other Value) bool
+	Eq(other interface{}) bool
 }
 
 type Pair interface {
-	Car() Value
+	Car() interface{}
 	Cdr() Pair
-	SetCar(v Value) Undef
+	SetCar(v interface{}) Undef
 	SetCdr(p Pair) Undef
 }
 
-func isNull(v Value) bool {
+func isNull(v interface{}) bool {
 	//null?
 	return v == nil
 }
 
-func isBoolean(v Value) bool {
+func isBoolean(v interface{}) bool {
 	//boolean?
 	_, ok := v.(bool)
 	return ok
 }
 
-func isChar(v Value) bool {
+func isChar(v interface{}) bool {
 	//char?
 	_, ok := v.(rune)
 	return ok
 }
 
-func isSymbol(v Value) bool {
+func isSymbol(v interface{}) bool {
 	//symbol?
 	_, ok := v.(Symbol) //FIXME
 	return ok
@@ -46,7 +46,7 @@ func isSymbol(v Value) bool {
 
 //eof-object?
 
-func isNumber(v Value) bool {
+func isNumber(v interface{}) bool {
 	//number?
 	//see golang builtin
 	switch v.(type) {
@@ -70,7 +70,7 @@ func isNumber(v Value) bool {
 	return true
 }
 
-func isPair(v Value) bool {
+func isPair(v interface{}) bool {
 	//pair?
 	_, ok := v.(Pair)
 	return ok
@@ -78,9 +78,9 @@ func isPair(v Value) bool {
 
 //port?
 
-type Closure func(env Environment, cdr Pair) Value
+type Closure func(env Environment, cdr Pair) interface{}
 
-func isProcedure(v Value) bool {
+func isProcedure(v interface{}) bool {
 	//procedure?
 	_, ok := v.(Closure)
 	return ok
@@ -88,43 +88,43 @@ func isProcedure(v Value) bool {
 
 type Syntax Closure
 
-func isSyntax(v Value) bool {
+func isSyntax(v interface{}) bool {
 	//syntax?
 	_, ok := v.(Syntax)
 	return ok
 }
 
-func isString(v Value) bool {
+func isString(v interface{}) bool {
 	//string?
 	_, ok := v.(string)
 	return ok
 }
 
 // vector?
-func isArray(v Value) bool {
-	_, ok := v.([]Value)
+func isArray(v interface{}) bool {
+	_, ok := v.([]interface{})
 	return ok
 }
 
 // bytevector?
 // define-record-type
 
-func isMap(v Value) bool {
-	_, ok := v.(map[Value]Value)
+func isMap(v interface{}) bool {
+	_, ok := v.(map[interface{}]interface{})
 	return ok
 }
 
-func DumpMap(x Value) {
-	mx, _ := x.(map[Value]Value)
+func DumpMap(x interface{}) {
+	mx, _ := x.(map[interface{}]interface{})
 	fmt.Println("Dumping", mx)
 	for k, vx := range mx {
 		fmt.Println(k, vx)
 	}
 }
 
-func EqMap(x, y Value) bool {
-	mx, _ := x.(map[Value]Value)
-	my, _ := y.(map[Value]Value)
+func EqMap(x, y interface{}) bool {
+	mx, _ := x.(map[interface{}]interface{})
+	my, _ := y.(map[interface{}]interface{})
 	for k, vx := range mx {
 		vy, in := my[k]
 		if in && vx == vy {
@@ -144,7 +144,7 @@ func EqMap(x, y Value) bool {
 	return true
 }
 
-func Eq(x, y Value) bool {
+func Eq(x, y interface{}) bool {
 	switch {
 	case isMap(x) && isMap(y):
 		return EqMap(x, y)

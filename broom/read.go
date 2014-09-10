@@ -349,7 +349,7 @@ func (r *Reader) MakeQuasiQuote() Token {
 
 type tokenSeq struct {
 	typ   int
-	items []Value
+	items []interface{}
 }
 
 type SExprBuilder struct {
@@ -365,7 +365,7 @@ func (b *SExprBuilder) Len() int {
 	return len(b.stack)
 }
 
-func (b *SExprBuilder) push(expr Value) {
+func (b *SExprBuilder) push(expr interface{}) {
 	top := b.Len() - 1
 	seq := b.stack[top]
 	seq.items = append(seq.items, expr)
@@ -375,7 +375,7 @@ func (b *SExprBuilder) push(expr Value) {
 func (b *SExprBuilder) startSeq(typ int) {
 	seq := new(tokenSeq)
 	seq.typ = typ
-	seq.items = make([]Value, 0)
+	seq.items = make([]interface{}, 0)
 	b.stack = append(b.stack, seq)
 }
 
@@ -386,7 +386,7 @@ func (b *SExprBuilder) endSeq() *tokenSeq {
 	return seq
 }
 
-func BuildSExpr(buf *Buffered) Value {
+func BuildSExpr(buf *Buffered) interface{} {
 	reader := NewReader(buf)
 	builder := NewSExprBuilder()
 	builder.startSeq(-1)
@@ -416,8 +416,8 @@ func BuildSExpr(buf *Buffered) Value {
 				panic("PAREN does not match")
 			}
 			println("iter over", seq.items)
-			m := make(map[Value]Value)
-			var key Value
+			m := make(map[interface{}]interface{})
+			var key interface{}
 			for i, v := range seq.items {
 				println("got", i, v)
 				if i%2 == 0 {

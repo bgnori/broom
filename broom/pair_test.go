@@ -6,7 +6,7 @@ import (
 )
 
 func Test_ConsCarCdr(t *testing.T) {
-	var v Value
+	var v interface{}
 	v = Cons(1, Cons(2, nil))
 	if isNull(v) {
 		t.Error("(null? v) must be null? false.")

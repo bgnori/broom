@@ -51,7 +51,7 @@ func TestEvalLambda(t *testing.T) {
 
 func TestEvalfn(t *testing.T) {
 	e := NewGlobalRootFrame()
-	f := Eval(e, List(sym("fn"), []Value{sym("x")}, sym("x")))
+	f := Eval(e, List(sym("fn"), []interface{}{sym("x")}, sym("x")))
 	if _, ok := f.(Closure); !ok {
 		t.Error("expected Procedure")
 	}
