@@ -15,9 +15,7 @@ func FromLambda(cdr Pair, lexical Environment) Closure {
 		e := NewEnvFrame(lexical)
 		formals := List2Arr(Car(cdr))
 		for i, a := range List2Arr(args) {
-			fmt.Println(formals[i], "Eval", a)
 			v := Eval(dynamic, a)
-			fmt.Println(formals[i], "Bind", v)
 			s, _ := formals[i].(Symbol)
 			e.Bind(s.GetValue(), v)
 		}
@@ -53,10 +51,8 @@ func setupSpecialForms(env Environment) Environment {
 	//case sym("if").Eq(car): //if?
 	env.Bind("if", Closure(func(env Environment, cdr Pair) Value {
 		cond := Car(cdr)
-		fmt.Println(cond)
 		if Eval(env, cond) == true {
 			clauseThen := Car(Cdr(cdr))
-			fmt.Println(clauseThen)
 			return Eval(env, clauseThen)
 		} else {
 			clauseElse := Car(Cdr(Cdr(cdr)))
@@ -189,6 +185,11 @@ func NewGlobalRootFrame() *enviroment {
 	e := NewEnvFrame(nil)
 	setupSpecialForms(e)
 	setupBuiltins(e)
+	e.Bind("eval", Closure(func (env Environment, cdr Pair) Value {
+        given := Eval(env, Car(cdr)).(Environment)
+        given.Dump()
+        return Eval(given, Car(Cdr(cdr)))
+    }))
 	return e
 }
 
