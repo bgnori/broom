@@ -1,0 +1,182 @@
+; 退避
+(define builtin-eval eval)
+(define builtin-cond cond)
+
+
+(defn error [msg] (sprintf msg))
+
+(defn eval [env exp]
+  (cond (self-evaluating? exp) exp
+        (variable? exp) (lookup-variable-value exp env)
+        (quoted? exp) (text-of-quotation exp)
+        (assignment? exp) (eval-assignment exp env)
+        (definition? exp) (eval-definition exp env)
+        (if? exp) (eval-if exp env)
+        (lambda? exp)
+         (make-procedure (lambda-parameters exp)
+                         (lambda-body exp)
+                         env)
+        (begin? exp) 
+         (eval-sequence (begin-actions exp) env)
+        (cond? exp) (eval (cond->if exp) env)
+        (application? exp)
+         (apply (eval env (operator exp))
+                (list-of-values (operands exp) env))
+        else
+         (error "Unknown expression type -- EVAL" exp)))
+
+(defn apply [procedure arguments]
+  (cond (primitive-procedure? procedure)
+         (apply-primitive-procedure procedure arguments)
+        (compound-procedure? procedure)
+         (eval-sequence
+           (procedure-body procedure)
+           (extend-environment
+             (procedure-parameters procedure)
+             arguments
+             (procedure-environment procedure)))
+        else
+         (error
+          "Unknown procedure type -- APPLY" procedure)))
+
+(defn list-of-values [exps env]
+  (if (no-operands? exps)
+      '()
+      (cons (eval env (first-operand exps))
+            (list-of-values (rest-operands exps) env))))
+
+(defn eval-if [exp env]
+  (if (true? (eval env (if-predicate exp)))
+      (eval env (if-consequent exp))
+      (eval env (if-alternative exp))))
+
+(defn eval-sequence [exps env]
+  (cond ((last-exp? exps) (eval (first-exp exps) env))
+        (else (eval env (first-exp exps))
+              (eval-sequence (rest-exps exps) env))))
+
+
+(defn eval-assignment [exp env]
+  (set-variable-value! (assignment-variable exp)
+                       (eval env (assignment-value exp))
+                       env)
+  'ok)
+
+
+(defn eval-definition [exp env]
+  (defn-variable! (definition-variable exp)
+                    (eval env (definition-value exp))
+                    env)
+  'ok)
+
+(defn self-evaluating? [exp]
+  (cond (number? exp) true
+        (string? exp) true
+        else false))
+
+(defn variable? [exp] (symbol? exp))
+
+(defn quoted? [exp]
+  (tagged-list? exp 'quote))
+
+(defn text-of-quotation [exp] (cadr exp))
+
+(defn tagged-list? [exp tag]
+  (if (pair? exp)
+      (eq? (car exp) tag)
+      false))
+
+(defn assignment? [exp]
+  (tagged-list? exp 'set!))
+
+(defn assignment-variable [exp] (cadr exp))
+
+(defn assignment-value [exp] (caddr exp))
+
+(defn definition? [exp]
+  (tagged-list? exp 'define))
+
+(defn definition-value [exp]
+  (if (symbol? (cadr exp))
+      (caddr exp)
+      (make-lambda (cdadr exp)   ; 仮パラメタ
+                   (cddr exp)))) ; 本体
+
+(defn lambda? [exp] (tagged-list? exp 'lambda))
+
+(defn lambda-parameters [exp] (cadr exp))
+
+(defn lambda-body [exp] (cddr exp))
+
+(defn make-lambda [parameters body]
+  (cons 'lambda (cons parameters body)))
+
+(defn if? [exp] (tagged-list? exp 'if))
+
+(defn if-predicate [exp] (cadr exp))
+
+(defn if-consequent [exp] (caddr exp))
+
+(defn if-alternative [exp]
+  (if (not (null? (cdddr exp)))
+      (cadddr exp)
+      'false))
+
+(defn make-if [predicate consequent alternative]
+  (list 'if predicate consequent alternative))
+
+(defn begin? [exp] (tagged-list? exp 'begin))
+
+(defn begin-actions [exp] (cdr exp))
+
+(defn last-exp? [seq] (null? (cdr seq)))
+
+(defn first-exp [seq] (car seq))
+
+(defn rest-exps [seq] (cdr seq))
+
+(defn sequence->exp [seq]
+  (cond ((null? seq) seq)
+        ((last-exp? seq) (first-exp seq))
+        (else (make-begin seq))))
+
+(defn application? [exp] (pair? exp))
+
+(defn operator [exp] (car exp))
+
+(defn operands [exp] (cdr exp))
+
+(defn no-operands? [ops] (null? ops))
+
+(defn first-operand [ops] (car ops))
+
+(defn rest-operands [ops] (cdr ops))
+
+(defn cond? [exp] (tagged-list? exp 'cond))
+
+(defn cond-clauses [exp] (cdr exp))
+
+(defn cond-else-clause? [clause]
+  (eq? (cond-predicate clause) 'else))
+
+(defn cond-predicate [clause] (car clause))
+
+(defn cond-actions [clause] (cdr clause))
+
+(defn cond->if [exp]
+  (expand-clauses (cond-clauses exp)))
+
+(defn expand-clauses [clauses]
+  (if (null? clauses)
+      'false                          ; else節なし
+      (let ((first (car clauses))
+            (rest (cdr clauses)))
+        (if (cond-else-clause? first)
+            (if (null? rest)
+                (sequence->exp (cond-actions first))
+                (error "ELSE clause isn't last -- COND->IF"
+                       clauses))
+            (make-if (cond-predicate first)
+                     (sequence->exp (cond-actions first))
+                     (expand-clauses rest))))))
+

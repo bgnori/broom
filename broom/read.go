@@ -123,6 +123,30 @@ func isWhite(r rune) bool {
 	return r == ' ' || r == '\t' || r == '\v' || r == '\r' || r == '\n'
 }
 
+const (
+    MODE_NONE = iota
+    MODE_CR
+    MODE_LF
+    MODE_CRLF
+)
+
+func isEndOfLine(r1, r2 rune) (int, int) {
+    if r1 == '\r' && r2 == '\n' {
+        return 2, MODE_CRLF
+    }
+    if r1 == '\r' && r2 != '\n' {
+        return 1, MODE_CR
+    }
+    if r1 == '\n' {
+        return 1, MODE_LF
+    }
+    return 0, MODE_NONE
+}
+
+func isSemicolon(r rune) bool {
+    return r == ';'
+}
+
 type Reader struct {
 	buffer *Buffered
 	out    chan Token
@@ -200,11 +224,53 @@ func TopLevel(reader *Reader) ReaderState {
 	case isSharp(r):
 		reader.Emit(reader.MakeSharp())
 		return TopLevel
+    case isSemicolon(r):
+		reader.Emit(reader.MakeSemicolon())
+        return ZapToLineEnd
 	default:
 		reader.Emit(reader.tryChunk())
 		return TopLevel
 	}
 	panic("Should not reach here")
+}
+
+func ZapToLineEnd(reader *Reader) ReaderState {
+	r, eos := reader.buffer.Peek()
+	if eos {
+		reader.Emit(Token{id: TOKEN_ENDOFINPUT})
+		return nil
+	}
+    q := r
+    reader.buffer.Consume(1)
+    r, eos = reader.buffer.Peek()
+	if eos {
+		reader.Emit(Token{id: TOKEN_ENDOFINPUT})
+		return nil
+	}
+    for {
+        _, mode := isEndOfLine(q, r)
+        switch mode {
+        case MODE_NONE:
+            q = r
+            reader.buffer.Consume(1)
+            r, eos = reader.buffer.Peek()
+            if eos {
+                reader.Emit(Token{id: TOKEN_ENDOFINPUT})
+                return nil
+            }
+        case MODE_CR:
+            reader.Emit(Token{pos: reader.buffer.pos, id: TOKEN_ENDOFLINE})
+            return TopLevel
+        case MODE_LF:
+            reader.Emit(Token{pos: reader.buffer.pos, id: TOKEN_ENDOFLINE})
+            return TopLevel
+        case MODE_CRLF:
+            reader.Emit(Token{pos: reader.buffer.pos, id: TOKEN_ENDOFLINE})
+            reader.buffer.Consume(1)
+            return TopLevel
+        }
+    }
+    panic("Never reach")
 }
 
 func (reader *Reader) tryString() Token {
@@ -257,6 +323,7 @@ type Token struct {
 
 const (
 	TOKEN_ENDOFINPUT = iota
+	TOKEN_ENDOFLINE
 	TOKEN_SYMBOL
 	TOKEN_INT
 	TOKEN_STRING
@@ -334,6 +401,8 @@ func (r *Reader) MakeSemicolon() Token {
 	r.buffer.Consume(1)
 	return t
 }
+
+
 
 func (r *Reader) MakeQuote() Token {
 	t := Token{pos: r.buffer.pos, id: TOKEN_QUOTE}

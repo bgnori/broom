@@ -96,6 +96,118 @@ func TestReaderEmptyMap(t *testing.T) {
 	}
 }
 
+func TestReaderSemicolonCRLF(t *testing.T) {
+	buf := NewBuffered(strings.NewReader("(a ;\r\n)"))
+	reader := NewReader(buf)
+
+	if tkn := reader.Read(); tkn.id != TOKEN_LEFT_PAREN {
+		t.Error("bad token id.")
+		println(tkn.id)
+	}
+	if tkn := reader.Read(); tkn.id != TOKEN_SYMBOL {
+		t.Error("bad token id.")
+		println(tkn.id)
+	}
+	if tkn := reader.Read(); tkn.id != TOKEN_SEMICOLON {
+		t.Error("bad token id.")
+		println(tkn.id)
+	}
+	if tkn := reader.Read(); tkn.id != TOKEN_ENDOFLINE {
+		t.Error("bad token id.")
+		println(tkn.id)
+	}
+	if tkn := reader.Read(); tkn.id != TOKEN_RIGHT_PAREN {
+		t.Error("bad token id.")
+		println(tkn.id)
+	}
+	if tkn := reader.Read(); tkn.id != TOKEN_ENDOFINPUT {
+		t.Error("bad token id.")
+		println(tkn.id)
+	}
+}
+
+func TestReaderSemicolonCR(t *testing.T) {
+	buf := NewBuffered(strings.NewReader("(a ;\r)"))
+	reader := NewReader(buf)
+
+	if tkn := reader.Read(); tkn.id != TOKEN_LEFT_PAREN {
+		t.Error("bad token id.")
+		println(tkn.id)
+	}
+	if tkn := reader.Read(); tkn.id != TOKEN_SYMBOL {
+		t.Error("bad token id.")
+		println(tkn.id)
+	}
+	if tkn := reader.Read(); tkn.id != TOKEN_SEMICOLON {
+		t.Error("bad token id.")
+		println(tkn.id)
+	}
+	if tkn := reader.Read(); tkn.id != TOKEN_ENDOFLINE {
+		t.Error("bad token id.")
+		println(tkn.id)
+	}
+	if tkn := reader.Read(); tkn.id != TOKEN_RIGHT_PAREN {
+		t.Error("bad token id.")
+		println(tkn.id)
+	}
+	if tkn := reader.Read(); tkn.id != TOKEN_ENDOFINPUT {
+		t.Error("bad token id.")
+		println(tkn.id)
+	}
+}
+
+func TestReaderSemicolonLF(t *testing.T) {
+	buf := NewBuffered(strings.NewReader("(a ;\n)"))
+	reader := NewReader(buf)
+
+	if tkn := reader.Read(); tkn.id != TOKEN_LEFT_PAREN {
+		t.Error("bad token id.")
+		println(tkn.id)
+	}
+	if tkn := reader.Read(); tkn.id != TOKEN_SYMBOL {
+		t.Error("bad token id.")
+		println(tkn.id)
+	}
+	if tkn := reader.Read(); tkn.id != TOKEN_SEMICOLON {
+		t.Error("bad token id.")
+		println(tkn.id)
+	}
+	if tkn := reader.Read(); tkn.id != TOKEN_ENDOFLINE {
+		t.Error("bad token id.")
+		println(tkn.id)
+	}
+	if tkn := reader.Read(); tkn.id != TOKEN_RIGHT_PAREN {
+		t.Error("bad token id.")
+		println(tkn.id)
+	}
+	if tkn := reader.Read(); tkn.id != TOKEN_ENDOFINPUT {
+		t.Error("bad token id.")
+		println(tkn.id)
+	}
+}
+
+func TestReaderSemicolonEOS(t *testing.T) {
+	buf := NewBuffered(strings.NewReader("(a ;"))
+	reader := NewReader(buf)
+
+	if tkn := reader.Read(); tkn.id != TOKEN_LEFT_PAREN {
+		t.Error("bad token id.")
+		println(tkn.id)
+	}
+	if tkn := reader.Read(); tkn.id != TOKEN_SYMBOL {
+		t.Error("bad token id.")
+		println(tkn.id)
+	}
+	if tkn := reader.Read(); tkn.id != TOKEN_SEMICOLON {
+		t.Error("bad token id.")
+		println(tkn.id)
+	}
+	if tkn := reader.Read(); tkn.id != TOKEN_ENDOFINPUT{
+		t.Error("bad token id.")
+		println(tkn.id)
+	}
+}
+
 func TestReaderSomeList(t *testing.T) {
 	buf := NewBuffered(strings.NewReader("(a b (c d) e)"))
 	reader := NewReader(buf)
@@ -344,3 +456,25 @@ func TestMakeSomeMap(t *testing.T) {
 		DumpMap(expr)
 	}
 }
+
+func TestMakeSemicolonCRLF(t *testing.T) {
+	buf := NewBuffered(strings.NewReader("(a ;\r\n)"))
+	expr := BuildSExpr(buf)
+	if !Eq(List(sym("a")), expr) {
+		t.Error("(a) is expected")
+	}
+}
+
+func TestMakeSemicolonCRLFwithSomething(t *testing.T) {
+	buf := NewBuffered(strings.NewReader("(a ;\r\n) (b c)"))
+	reader := NewReader(buf)
+	builder := NewSExprBuilder()
+	seq := builder.Run(reader)
+	if !Eq(List(sym("a")), seq.items[0]) {
+		t.Error("(a) is expected")
+	}
+	if !Eq(List(sym("b"), sym("c")), seq.items[1]) {
+		t.Error("(b c) is expected")
+	}
+}
+
