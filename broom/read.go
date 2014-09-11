@@ -216,7 +216,11 @@ func TopLevel(reader *Reader) ReaderState {
 		reader.Emit(reader.MakeRightBrace())
 		return TopLevel
 	case isDoubleQuote(r):
-		reader.Emit(reader.tryString())
+        if token, err := reader.tryString(); err != nil {
+            panic(err)
+        } else {
+		    reader.Emit(token)
+        }
 		return TopLevel
 	case isVerticalBar(r):
 		reader.Emit(reader.MakeVerticalVar())
@@ -276,7 +280,7 @@ func ZapToLineEnd(reader *Reader) ReaderState {
 	panic("Never reach")
 }
 
-func (reader *Reader) tryString() Token {
+func (reader *Reader) tryString() (Token, error){
 	xs := make([]rune, 0)
 	pos := reader.buffer.pos
 	reader.buffer.Consume(1) // skip "
@@ -293,12 +297,12 @@ func (reader *Reader) tryString() Token {
 		r, eos = reader.buffer.Peek()
 	}
 	if eos {
-		panic("string must be closed")
+        return Token{id: TOKEN_ERROR}, &BuilderError{"string must be closed"}
 	}
 	if isDoubleQuote(r) {
 		reader.buffer.Consume(1) // skip "
 	}
-	return Token{id: TOKEN_STRING, v: string(xs), pos: pos}
+	return Token{id: TOKEN_STRING, v: string(xs), pos: pos}, nil
 }
 
 func (reader *Reader) tryChunk() Token {
@@ -343,6 +347,7 @@ const (
 	TOKEN_QUOTE
 	TOKEN_QUASIQUOTE
 	TOKEN_DOT
+    TOKEN_ERROR
 )
 
 func (r *Reader) MakeLeftParen() Token {
@@ -581,7 +586,7 @@ func (builder *SExprBuilder) Run(reader *Reader) (*tokenSeq, error) {
 	}
 	seq := builder.endSeq()
 	if seq.typ != -1 {
-		panic("expected TopLevel")
+        return nil, builder.Error("expected TopLevel")
 	}
 	return seq, nil
 }

@@ -13,12 +13,12 @@ func main() {
 	env := broom.NewGlobalRootFrame()
 
 	buf := broom.NewBuffered(strings.NewReader(tarai))
-        expr := broom.BuildSExpr(buf)
+	expr := broom.BuildSExpr(buf)
 	got := broom.Eval(env, expr)
-        fmt.Println("-->", got)
+	fmt.Println("-->", got)
 
 	buf = broom.NewBuffered(strings.NewReader(run))
-        expr = broom.BuildSExpr(buf)
-        got = broom.Eval(env, expr)
-        fmt.Println("-->", got)
+	expr = broom.BuildSExpr(buf)
+	got = broom.Eval(env, expr)
+	fmt.Println("-->", got)
 }
