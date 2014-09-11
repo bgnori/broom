@@ -352,6 +352,10 @@ type tokenSeq struct {
 	items []interface{}
 }
 
+func (t *tokenSeq) Items() []interface{} {
+	return t.items
+}
+
 type SExprBuilder struct {
 	stack []*tokenSeq
 }
@@ -386,9 +390,7 @@ func (b *SExprBuilder) endSeq() *tokenSeq {
 	return seq
 }
 
-func BuildSExpr(buf *Buffered) interface{} {
-	reader := NewReader(buf)
-	builder := NewSExprBuilder()
+func (builder *SExprBuilder) Run(reader *Reader) *tokenSeq {
 	builder.startSeq(-1)
 	for tk := reader.Read(); tk.id != TOKEN_ENDOFINPUT; tk = reader.Read() {
 		switch tk.id {
@@ -442,5 +444,12 @@ func BuildSExpr(buf *Buffered) interface{} {
 	if seq.typ != -1 {
 		panic("expected TopLevel")
 	}
+	return seq
+}
+
+func BuildSExpr(buf *Buffered) interface{} {
+	reader := NewReader(buf)
+	builder := NewSExprBuilder()
+	seq := builder.Run(reader)
 	return seq.items[0]
 }
