@@ -42,6 +42,23 @@ func TestReaderSymbol(t *testing.T) {
 	}
 }
 
+func TestReaderQuotedSymbol(t *testing.T) {
+	buf := NewBuffered(strings.NewReader("'a"))
+	reader := NewReader(buf)
+	if tkn := reader.Read(); tkn.id != TOKEN_QUOTE {
+		t.Error("bad token id.")
+		println(tkn.id)
+	}
+	if tkn := reader.Read(); tkn.id != TOKEN_SYMBOL {
+		t.Error("bad token id.")
+		println(tkn.id)
+	}
+	if tkn := reader.Read(); tkn.id != TOKEN_ENDOFINPUT {
+		t.Error("bad token id.")
+		println(tkn.id)
+	}
+}
+
 func TestReaderEmptyList(t *testing.T) {
 	buf := NewBuffered(strings.NewReader("()"))
 	reader := NewReader(buf)
@@ -202,7 +219,7 @@ func TestReaderSemicolonEOS(t *testing.T) {
 		t.Error("bad token id.")
 		println(tkn.id)
 	}
-	if tkn := reader.Read(); tkn.id != TOKEN_ENDOFINPUT{
+	if tkn := reader.Read(); tkn.id != TOKEN_ENDOFINPUT {
 		t.Error("bad token id.")
 		println(tkn.id)
 	}
@@ -397,6 +414,14 @@ func TestMakeSymbol(t *testing.T) {
 	buf := NewBuffered(strings.NewReader("a"))
 	expr := BuildSExpr(buf)
 	if !sym("a").Eq(expr) {
+		t.Error("a is expected")
+	}
+}
+
+func TestMakeQuotedSymbol(t *testing.T) {
+	buf := NewBuffered(strings.NewReader("'a"))
+	expr := BuildSExpr(buf)
+	if !Eq(List(sym("quote"), sym("a")), expr) {
 		t.Error("'a is expected")
 	}
 }
@@ -410,11 +435,39 @@ func TestMakeEmptyList(t *testing.T) {
 	}
 }
 
+func TestMakeQuotedEmptyList(t *testing.T) {
+	buf := NewBuffered(strings.NewReader("'()"))
+	expr := BuildSExpr(buf)
+
+	if !Eq(List(sym("quote"), List()), expr) {
+		t.Error("'() is expected")
+		fmt.Println(expr)
+	}
+}
+
+func TestMakeBadQuoteList(t *testing.T) {
+	defer func() {
+		recover()
+	}()
+	buf := NewBuffered(strings.NewReader("(')"))
+	BuildSExpr(buf)
+	t.Error("Should not be reached")
+}
+
 func TestMakeEmptyArray(t *testing.T) {
 	buf := NewBuffered(strings.NewReader("[]"))
 	expr := BuildSExpr(buf)
 
 	if !Eq([]interface{}{}, expr) {
+		t.Error("[] is expected")
+	}
+}
+
+func TestMakeQuotedEmptyArray(t *testing.T) {
+	buf := NewBuffered(strings.NewReader("'[]"))
+	expr := BuildSExpr(buf)
+
+	if !Eq(List(sym("quote"), []interface{}{}), expr) {
 		t.Error("[] is expected")
 	}
 }
@@ -469,7 +522,10 @@ func TestMakeSemicolonCRLFwithSomething(t *testing.T) {
 	buf := NewBuffered(strings.NewReader("(a ;\r\n) (b c)"))
 	reader := NewReader(buf)
 	builder := NewSExprBuilder()
-	seq := builder.Run(reader)
+	seq, err := builder.Run(reader)
+	if err != nil {
+		t.Error("got error")
+	}
 	if !Eq(List(sym("a")), seq.items[0]) {
 		t.Error("(a) is expected")
 	}
@@ -477,4 +533,3 @@ func TestMakeSemicolonCRLFwithSomething(t *testing.T) {
 		t.Error("(b c) is expected")
 	}
 }
-

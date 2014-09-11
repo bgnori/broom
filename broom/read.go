@@ -124,27 +124,27 @@ func isWhite(r rune) bool {
 }
 
 const (
-    MODE_NONE = iota
-    MODE_CR
-    MODE_LF
-    MODE_CRLF
+	MODE_NONE = iota
+	MODE_CR
+	MODE_LF
+	MODE_CRLF
 )
 
 func isEndOfLine(r1, r2 rune) (int, int) {
-    if r1 == '\r' && r2 == '\n' {
-        return 2, MODE_CRLF
-    }
-    if r1 == '\r' && r2 != '\n' {
-        return 1, MODE_CR
-    }
-    if r1 == '\n' {
-        return 1, MODE_LF
-    }
-    return 0, MODE_NONE
+	if r1 == '\r' && r2 == '\n' {
+		return 2, MODE_CRLF
+	}
+	if r1 == '\r' && r2 != '\n' {
+		return 1, MODE_CR
+	}
+	if r1 == '\n' {
+		return 1, MODE_LF
+	}
+	return 0, MODE_NONE
 }
 
 func isSemicolon(r rune) bool {
-    return r == ';'
+	return r == ';'
 }
 
 type Reader struct {
@@ -224,9 +224,12 @@ func TopLevel(reader *Reader) ReaderState {
 	case isSharp(r):
 		reader.Emit(reader.MakeSharp())
 		return TopLevel
-    case isSemicolon(r):
+	case isQuote(r):
+		reader.Emit(reader.MakeQuote())
+		return TopLevel
+	case isSemicolon(r):
 		reader.Emit(reader.MakeSemicolon())
-        return ZapToLineEnd
+		return ZapToLineEnd
 	default:
 		reader.Emit(reader.tryChunk())
 		return TopLevel
@@ -240,37 +243,37 @@ func ZapToLineEnd(reader *Reader) ReaderState {
 		reader.Emit(Token{id: TOKEN_ENDOFINPUT})
 		return nil
 	}
-    q := r
-    reader.buffer.Consume(1)
-    r, eos = reader.buffer.Peek()
+	q := r
+	reader.buffer.Consume(1)
+	r, eos = reader.buffer.Peek()
 	if eos {
 		reader.Emit(Token{id: TOKEN_ENDOFINPUT})
 		return nil
 	}
-    for {
-        _, mode := isEndOfLine(q, r)
-        switch mode {
-        case MODE_NONE:
-            q = r
-            reader.buffer.Consume(1)
-            r, eos = reader.buffer.Peek()
-            if eos {
-                reader.Emit(Token{id: TOKEN_ENDOFINPUT})
-                return nil
-            }
-        case MODE_CR:
-            reader.Emit(Token{pos: reader.buffer.pos, id: TOKEN_ENDOFLINE})
-            return TopLevel
-        case MODE_LF:
-            reader.Emit(Token{pos: reader.buffer.pos, id: TOKEN_ENDOFLINE})
-            return TopLevel
-        case MODE_CRLF:
-            reader.Emit(Token{pos: reader.buffer.pos, id: TOKEN_ENDOFLINE})
-            reader.buffer.Consume(1)
-            return TopLevel
-        }
-    }
-    panic("Never reach")
+	for {
+		_, mode := isEndOfLine(q, r)
+		switch mode {
+		case MODE_NONE:
+			q = r
+			reader.buffer.Consume(1)
+			r, eos = reader.buffer.Peek()
+			if eos {
+				reader.Emit(Token{id: TOKEN_ENDOFINPUT})
+				return nil
+			}
+		case MODE_CR:
+			reader.Emit(Token{pos: reader.buffer.pos, id: TOKEN_ENDOFLINE})
+			return TopLevel
+		case MODE_LF:
+			reader.Emit(Token{pos: reader.buffer.pos, id: TOKEN_ENDOFLINE})
+			return TopLevel
+		case MODE_CRLF:
+			reader.Emit(Token{pos: reader.buffer.pos, id: TOKEN_ENDOFLINE})
+			reader.buffer.Consume(1)
+			return TopLevel
+		}
+	}
+	panic("Never reach")
 }
 
 func (reader *Reader) tryString() Token {
@@ -402,8 +405,6 @@ func (r *Reader) MakeSemicolon() Token {
 	return t
 }
 
-
-
 func (r *Reader) MakeQuote() Token {
 	t := Token{pos: r.buffer.pos, id: TOKEN_QUOTE}
 	r.buffer.Consume(1)
@@ -417,8 +418,9 @@ func (r *Reader) MakeQuasiQuote() Token {
 }
 
 type tokenSeq struct {
-	typ   int
-	items []interface{}
+	typ    int
+	items  []interface{}
+	quoted bool
 }
 
 func (t *tokenSeq) Items() []interface{} {
@@ -426,11 +428,12 @@ func (t *tokenSeq) Items() []interface{} {
 }
 
 type SExprBuilder struct {
-	stack []*tokenSeq
+	stack         []*tokenSeq
+	quoteNextExpr bool
 }
 
 func NewSExprBuilder() *SExprBuilder {
-	b := &SExprBuilder{stack: make([]*tokenSeq, 0)}
+	b := &SExprBuilder{stack: make([]*tokenSeq, 0), quoteNextExpr: false}
 	return b
 }
 
@@ -439,6 +442,10 @@ func (b *SExprBuilder) Len() int {
 }
 
 func (b *SExprBuilder) push(expr interface{}) {
+	if b.quoteNextExpr {
+		expr = List(sym("quote"), expr)
+		b.quoteNextExpr = false
+	}
 	top := b.Len() - 1
 	seq := b.stack[top]
 	seq.items = append(seq.items, expr)
@@ -448,6 +455,10 @@ func (b *SExprBuilder) push(expr interface{}) {
 func (b *SExprBuilder) startSeq(typ int) {
 	seq := new(tokenSeq)
 	seq.typ = typ
+	if b.quoteNextExpr {
+		seq.quoted = true
+		b.quoteNextExpr = false
+	}
 	seq.items = make([]interface{}, 0)
 	b.stack = append(b.stack, seq)
 }
@@ -459,46 +470,105 @@ func (b *SExprBuilder) endSeq() *tokenSeq {
 	return seq
 }
 
-func (builder *SExprBuilder) Run(reader *Reader) *tokenSeq {
+func (b *SExprBuilder) quote() {
+	b.quoteNextExpr = true
+}
+
+type BuilderError struct {
+	msg string
+}
+
+func (err *BuilderError) Error() string {
+	return err.msg
+}
+
+func (b *SExprBuilder) Error(msg string) *BuilderError {
+	return &BuilderError{msg: msg}
+}
+
+func (b *SExprBuilder) MakeParenObject(seq *tokenSeq) (interface{}, error) {
+	if b.quoteNextExpr {
+		return nil, b.Error("found quote in front of ')'")
+	}
+	if seq.typ != TOKEN_LEFT_PAREN {
+		return nil, b.Error("PAREN does not match")
+	}
+	if seq.quoted {
+		return List(sym("quote"), List(seq.items...)), nil
+	} else {
+		return List(seq.items...), nil
+	}
+}
+
+func (b *SExprBuilder) MakeBracketObject(seq *tokenSeq) (interface{}, error) {
+	if b.quoteNextExpr {
+		return nil, b.Error("found quote in front of ']'")
+	}
+	if seq.typ != TOKEN_LEFT_BRACKET {
+		return nil, b.Error("PAREN does not match")
+	}
+	if seq.quoted {
+		return List(sym("quote"), seq.items), nil
+	} else {
+		return seq.items, nil
+	}
+}
+
+func (b *SExprBuilder) MakeBraceObject(seq *tokenSeq) (interface{}, error) {
+	if b.quoteNextExpr {
+		return nil, b.Error("found quote in front of '}'")
+	}
+	if seq.typ != TOKEN_LEFT_BRACE {
+		return nil, b.Error("PAREN does not match")
+	}
+	var key interface{}
+	m := make(map[interface{}]interface{})
+	for i, v := range seq.items {
+		println("got", i, v)
+		if i%2 == 0 {
+			key = v
+		} else {
+			println("putting", key, v)
+			m[key] = v
+		}
+	}
+	if seq.quoted {
+		return List(sym("quote"), m), nil
+	} else {
+		return m, nil
+	}
+}
+
+func (builder *SExprBuilder) Run(reader *Reader) (*tokenSeq, error) {
 	builder.startSeq(-1)
 	for tk := reader.Read(); tk.id != TOKEN_ENDOFINPUT; tk = reader.Read() {
 		switch tk.id {
+		case TOKEN_QUOTE:
+			builder.quote()
 		case TOKEN_LEFT_PAREN:
 			builder.startSeq(tk.id)
 		case TOKEN_RIGHT_PAREN:
-			seq := builder.endSeq()
-			if seq.typ != TOKEN_LEFT_PAREN {
-				panic("PAREN does not match")
+			obj, err := builder.MakeParenObject(builder.endSeq())
+			if err != nil {
+				return nil, err
 			}
-			builder.push(List(seq.items...))
+			builder.push(obj)
 		case TOKEN_LEFT_BRACKET:
 			builder.startSeq(tk.id)
 		case TOKEN_RIGHT_BRACKET:
-			seq := builder.endSeq()
-			if seq.typ != TOKEN_LEFT_BRACKET {
-				panic("PAREN does not match")
+			obj, err := builder.MakeBracketObject(builder.endSeq())
+			if err != nil {
+				return nil, err
 			}
-			fmt.Println("seq.items", seq.items)
-			builder.push(seq.items)
+			builder.push(obj)
 		case TOKEN_LEFT_BRACE:
 			builder.startSeq(tk.id)
 		case TOKEN_RIGHT_BRACE:
-			seq := builder.endSeq()
-			if seq.typ != TOKEN_LEFT_BRACE {
-				panic("PAREN does not match")
+			obj, err := builder.MakeBraceObject(builder.endSeq())
+			if err != nil {
+				return nil, err
 			}
-			m := make(map[interface{}]interface{})
-			var key interface{}
-			for i, v := range seq.items {
-				println("got", i, v)
-				if i%2 == 0 {
-					key = v
-				} else {
-					println("putting", key, v)
-					m[key] = v
-				}
-			}
-			builder.push(m)
+			builder.push(obj)
 		case TOKEN_INT:
 			var n int
 			fmt.Sscanf(tk.v, "%d", &n)
@@ -513,12 +583,12 @@ func (builder *SExprBuilder) Run(reader *Reader) *tokenSeq {
 	if seq.typ != -1 {
 		panic("expected TopLevel")
 	}
-	return seq
+	return seq, nil
 }
 
 func BuildSExpr(buf *Buffered) interface{} {
 	reader := NewReader(buf)
 	builder := NewSExprBuilder()
-	seq := builder.Run(reader)
+	seq, _ := builder.Run(reader)
 	return seq.items[0]
 }
