@@ -1,0 +1,20 @@
+; to be srfi-1
+(defn car [x] (. x Car))
+(defn cdr [x] (. x Cdr))
+
+(defn caar [x] (car (car x)))
+(defn cadr [x] (car (cdr x)))
+(defn cdar [x] (cdr (car x)))
+(defn cddr [x] (cdr (cdr x)))
+
+(defn caaar [x] (car (caar x)))
+(defn caadr [x] (car (cadr x)))
+(defn cadar [x] (car (cdar x)))
+(defn caddr [x] (car (cddr x)))
+
+(defn cdaar [x] (cdr (caar x)))
+(defn cdadr [x] (cdr (caar x)))
+(defn cddar [x] (cdr (caar x)))
+(defn cdddr [x] (cdr (caar x)))
+
+

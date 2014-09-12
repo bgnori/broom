@@ -7,8 +7,23 @@ import (
 	"strings"
 )
 
-func Repl(in io.Reader) {
-	env := NewGlobalRootFrame()
+
+func Load(file io.Reader, env Environment) error {
+	buf := NewBuffered(file)
+	reader := NewReader(buf)
+	builder := NewSExprBuilder()
+	prg, err := builder.Run(reader)
+	if err != nil {
+          return err
+	}
+	for _, expr := range prg.Items() {
+		got := Eval(env, expr)
+		fmt.Println("-->", got)
+	}
+        return nil
+}
+
+func Repl(in io.Reader, env Environment) {
 	env.Bind("dump", Closure(func(dynamic Environment, cdr Pair) interface{} {
 		dynamic.Dump()
 		return nil
