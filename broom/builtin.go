@@ -93,11 +93,11 @@ func setupBuiltins(env Environment) Environment {
 	}))
 
 	env.Bind("array?", Closure(func(env Environment, cdr Pair) interface{} {
-		return isString(Eval(env, Car(cdr)))
+		return isArray(Eval(env, Car(cdr)))
 	}))
 
 	env.Bind("mpa?", Closure(func(env Environment, cdr Pair) interface{} {
-		return isString(Eval(env, Car(cdr)))
+		return isMap(Eval(env, Car(cdr)))
 	}))
 
 	return env
