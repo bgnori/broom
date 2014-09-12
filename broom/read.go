@@ -216,11 +216,11 @@ func TopLevel(reader *Reader) ReaderState {
 		reader.Emit(reader.MakeRightBrace())
 		return TopLevel
 	case isDoubleQuote(r):
-        if token, err := reader.tryString(); err != nil {
-            panic(err)
-        } else {
-		    reader.Emit(token)
-        }
+		if token, err := reader.tryString(); err != nil {
+			panic(err)
+		} else {
+			reader.Emit(token)
+		}
 		return TopLevel
 	case isVerticalBar(r):
 		reader.Emit(reader.MakeVerticalVar())
@@ -280,7 +280,7 @@ func ZapToLineEnd(reader *Reader) ReaderState {
 	panic("Never reach")
 }
 
-func (reader *Reader) tryString() (Token, error){
+func (reader *Reader) tryString() (Token, error) {
 	xs := make([]rune, 0)
 	pos := reader.buffer.pos
 	reader.buffer.Consume(1) // skip "
@@ -297,7 +297,7 @@ func (reader *Reader) tryString() (Token, error){
 		r, eos = reader.buffer.Peek()
 	}
 	if eos {
-        return Token{id: TOKEN_ERROR}, &BuilderError{"string must be closed"}
+		return Token{id: TOKEN_ERROR}, &BuilderError{"string must be closed"}
 	}
 	if isDoubleQuote(r) {
 		reader.buffer.Consume(1) // skip "
@@ -347,7 +347,7 @@ const (
 	TOKEN_QUOTE
 	TOKEN_QUASIQUOTE
 	TOKEN_DOT
-    TOKEN_ERROR
+	TOKEN_ERROR
 )
 
 func (r *Reader) MakeLeftParen() Token {
@@ -529,11 +529,9 @@ func (b *SExprBuilder) MakeBraceObject(seq *tokenSeq) (interface{}, error) {
 	var key interface{}
 	m := make(map[interface{}]interface{})
 	for i, v := range seq.items {
-		println("got", i, v)
 		if i%2 == 0 {
 			key = v
 		} else {
-			println("putting", key, v)
 			m[key] = v
 		}
 	}
@@ -586,7 +584,7 @@ func (builder *SExprBuilder) Run(reader *Reader) (*tokenSeq, error) {
 	}
 	seq := builder.endSeq()
 	if seq.typ != -1 {
-        return nil, builder.Error("expected TopLevel")
+		return nil, builder.Error("expected TopLevel")
 	}
 	return seq, nil
 }

@@ -7,20 +7,19 @@ import (
 	"strings"
 )
 
-
 func Load(file io.Reader, env Environment) error {
 	buf := NewBuffered(file)
 	reader := NewReader(buf)
 	builder := NewSExprBuilder()
 	prg, err := builder.Run(reader)
 	if err != nil {
-          return err
+		return err
 	}
 	for _, expr := range prg.Items() {
 		got := Eval(env, expr)
 		fmt.Println("-->", got)
 	}
-        return nil
+	return nil
 }
 
 func Repl(in io.Reader, env Environment) {
