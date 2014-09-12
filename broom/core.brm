@@ -1,4 +1,33 @@
-; to be srfi-1
+; to be srfi-1?
+; see http://www.chino-js.com/ja/tech/srfi/srfi-1/srfi-1.html
+
+; constructors
+; cons is builtin
+; list is builtin
+; xcons
+(defn xcons [d a] (cons a d))
+; cons* not supported.
+; make-list [n fill] (make-list [4 c]) ->  (c c c c)
+; list-tabulate [n init-proc] not supported.
+; list-copy builtin
+; circular-list not supported.
+; iota not supported
+
+; predicates
+(defn proper-list? [x] (pair? x))
+; cdr of pair object always pair type.
+; circular-list? [x] not supported
+; dotted-list? [x] not supported
+
+; pair? is bultin
+; null? is builtin
+; null-list? not supported
+;(defn not-pair? [x] (not pair? x))
+; not will be implemented as built in
+
+; list=  Eq in object.go
+
+; selectors
 (defn car [x] (. x Car))
 (defn cdr [x] (. x Cdr))
 
@@ -16,5 +45,122 @@
 (defn cdadr [x] (cdr (caar x)))
 (defn cddar [x] (cdr (caar x)))
 (defn cdddr [x] (cdr (caar x)))
+
+; caaar ~ cdddr are to be implemented.
+
+(defn first [x] (car x))
+(defn second [x] (car (cdr x)))
+(defn third [x] (car (cdr (cdr x))))
+(defn fourth [x] (car (cdr (cdr (cdr x)))))
+(defn fifth [x] (car (cdr (cdr (cdr (cdr x))))))
+; sixth ~ tenth are not supported
+
+; take [xs i] -> builtin
+; drop [xs i] -> builtin
+
+; take-right not supported
+; drop-right not supported
+; last not supported
+; last-pair not supported
+
+; length -> builtin 
+; length+ not supported
+
+; append -> builtin
+; append! not supported
+
+; concatenate not implemented
+; concatenate! not supported
+
+; reverse not implemented
+; reverse! not supported
+
+; append-reverse not supported
+; append-reverse! not supported
+
+; zip [list..] (lambda lists (apply map list lists)) builtin
+
+; unzip1 builtin
+; unzip2 builtin
+; unzip3 not supported
+; unzip4 not supported
+; unzip5 not supported
+
+; count not supported
+; (defn count [perd clist1 clist2] )
+
+; high orders
+; fold -> builtin
+(defn fold1 [f init xs]
+  (if (null? xs)
+    init
+    (fold1 f (f (car xs) init) (cdr xs))))
+
+; fold-right -> builtin
+(defn fold-right1 [f init xs]
+  (if (null? xs)
+    init
+    (f (car xs) (fold-right1 f init (cdr xs)))))
+
+; pair-fold not supported
+(defn pair-fold1 [f init xs]
+  (if (null? xs)
+    init
+    (pair-fold1 f (f xs init) (cdr xs))))
+
+; pair-fold-right not supported
+(defn pair-fold-right1 [f init xs]
+  (if (null? xs)
+    init
+    (f xs (pair-fold-right1 f init (cdr xs)))))
+
+(defn reduce [f init xs]
+  (if (null? xs)
+    init
+    (fold1 f (car xs) (cdr xs))))
+
+(defn reduce-right [f init xs]
+  (fold-right1 f init xs))
+
+(defn unfold [pred f next seed tail-gen]
+  (if (pred seed)
+    (tail-gen seed)
+    (cons (f seed)
+          (unfold p f next (next seed) tail-gen))))
+
+; unfold-right  need loop to support this.
+
+; map to be implemented (builtin?)
+(defn map1 [f xs]
+  (if (null? xs)
+    '()
+    (cons (f (car xs)) (map1 f (cdr xs)))))
+
+; for-each not supported
+; append-map not supported
+; append-map! not supported
+; map! not supported
+; map-in-order not supported
+; pair-for-each not supported
+; fillter-map not supported
+
+; to be builtin
+(defn filter [pred xs]
+  (if (null? xs)
+    '()
+    (if (pred (car xs))
+      (cons (car xs) (filter pred (cdr xs)))
+      (filter pred (cdr xs)))))
+
+; partition to be supported
+; 「値を二つ返す」ってどういうこと?
+(defn remove [pred xs]
+  (filter (fn [x] (not (pred x))) xs))
+
+; filter! not supported
+; partition! not supported
+; remove! not supported
+
+
 
 

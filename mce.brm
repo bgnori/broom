@@ -2,8 +2,12 @@
 (define builtin-eval eval)
 (define builtin-cond cond)
 
-
+; 不足分
 (defn error [msg] (sprintf msg))
+
+(defn cadddr [x] (caddr (cdr x)))
+
+; 本体
 
 (defn eval [env exp]
   (cond (self-evaluating? exp) exp
@@ -179,4 +183,88 @@
             (make-if (cond-predicate first)
                      (sequence->exp (cond-actions first))
                      (expand-clauses rest))))))
+
+(defn true? [x]
+  (not (eq? x false)))
+
+(defn false? [x]
+  (eq? x false))
+
+(defn make-procedure [parameters body env]
+  (list 'procedure parameters body env))
+
+(defn compound-procedure? [p]
+  (tagged-list? p 'procedure))
+
+(defn procedure-parameters [p] (cadr p))
+
+(defn procedure-body [p] (caddr p))
+
+(defn procedure-environment [p] (cadddr p))
+
+(defn enclosing-environment [env] (cdr env))
+
+(defn first-frame [env] (car env))
+
+(defn the-empty-environment [] '())
+
+(defn make-frame [variables values]
+  (cons variables values))
+
+(defn frame-variables [frame] (car frame))
+
+(defn frame-values [frame] (cdr frame))
+
+(defn add-binding-to-frame! [var val frame]
+  (set-car! frame (cons var (car frame)))
+  (set-cdr! frame (cons val (cdr frame))))
+
+(defn extend-environment [vars vals base-env]
+  (if (= (length vars) (length vals))
+      (cons (make-frame vars vals) base-env)
+      (if (< (length vars) (length vals))
+          (error "Too many arguments supplied" vars vals)
+          (error "Too few arguments supplied" vars vals))))
+
+(defn lookup-variable-value [var env]
+  (defn env-loop [env]
+    (defn scan [vars vals]
+      (cond ((null? vars)
+             (env-loop (enclosing-environment env)))
+            ((eq? var (car vars))
+             (car vals))
+            (else (scan (cdr vars) (cdr vals)))))
+    (if (eq? env the-empty-environment)
+        (error "Unbound variable" var)
+        (let ((frame (first-frame env)))
+          (scan (frame-variables frame)
+                (frame-values frame)))))
+  (env-loop env))
+
+(defn set-variable-value! [var val env]
+  (defn env-loop [env]
+    (defn scan [vars vals]
+      (cond ((null? vars)
+             (env-loop (enclosing-environment env)))
+            ((eq? var (car vars))
+             (set-car! vals val))
+            (else (scan (cdr vars) (cdr vals)))))
+    (if (eq? env the-empty-environment)
+        (error "Unbound variable -- SET!" var)
+        (let ((frame (first-frame env)))
+          (scan (frame-variables frame)
+                (frame-values frame)))))
+  (env-loop env))
+
+(defn define-variable! [var val env]
+  (let ((frame (first-frame env)))
+    (defn scan [vars vals]
+      (cond ((null? vars)
+             (add-binding-to-frame! var val frame))
+            ((eq? var (car vars))
+             (set-car! vals val))
+            (else (scan (cdr vars) (cdr vals)))))
+    (scan (frame-variables frame)
+          (frame-values frame))))
+
 
