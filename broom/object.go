@@ -112,7 +112,7 @@ func (r *Recur) Update(xs []interface{}) {
 }
 
 func (r *Recur) Env() Environment {
-    return r.env
+	return r.env
 }
 
 func isRecur(v interface{}) bool {

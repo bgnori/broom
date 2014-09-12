@@ -17,7 +17,7 @@ func TestEvalQuotedSymbol(t *testing.T) {
 func TestEvalDefine(t *testing.T) {
 	e := NewGlobalRootFrame()
 	v := Eval(e, List(sym("define"), sym("A"), 42))
-        if found, err := e.Resolve("A"); err!=nil || found != 42 {
+	if found, err := e.Resolve("A"); err != nil || found != 42 {
 		t.Error("expected 42")
 	}
 	if !sym("A").Eq(v) {

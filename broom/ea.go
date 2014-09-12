@@ -15,11 +15,11 @@ type Environment interface {
 type EvalError string
 
 func (e EvalError) Error() string {
-    return string(e)
+	return string(e)
 }
 
 func Eval(env Environment, expr interface{}) interface{} {
-    if v, err := env.Resolve("_debug"); err == nil && v == true {
+	if v, err := env.Resolve("_debug"); err == nil && v == true {
 		fmt.Println("Eval", expr)
 	}
 	switch {
@@ -35,11 +35,11 @@ func Eval(env Environment, expr interface{}) interface{} {
 		return expr
 	case isSymbol(expr): // variables?
 		sym, _ := expr.(Symbol)
-        if v, err := env.Resolve(sym.GetValue()) ; err != nil {
-            panic(err)
-        }else{
-            return v
-        }
+		if v, err := env.Resolve(sym.GetValue()); err != nil {
+			panic(err)
+		} else {
+			return v
+		}
 	case isPair(expr):
 		car := Eval(env, Car(expr))
 		r, ok := car.(*Recur)
@@ -56,7 +56,7 @@ func Eval(env Environment, expr interface{}) interface{} {
 			panic("application error, expected SExprOperator, but got " + fmt.Sprintf("%v", car))
 		}
 		v := Cdr(expr)
-        if v, err := env.Resolve("_debug"); err == nil && v == true {
+		if v, err := env.Resolve("_debug"); err == nil && v == true {
 			fmt.Println("op", car, ":", v)
 		}
 		return op(env, v)
@@ -92,11 +92,10 @@ func NewGlobalRootFrame() *enviroment {
 	return e
 }
 
-
 func (env *enviroment) Bind(name string, v interface{}) {
-    if found, err := env.Resolve("_watch") ; err == nil && found == true {
-        fmt.Println("Env", env, name, "got", v)
-    }
+	if found, err := env.Resolve("_watch"); err == nil && found == true {
+		fmt.Println("Env", env, name, "got", v)
+	}
 	env.variables[name] = v
 }
 

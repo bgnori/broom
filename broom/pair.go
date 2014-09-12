@@ -11,7 +11,7 @@ type pairImpl struct {
 }
 
 func Cons(car interface{}, cdr Pair) Pair {
-    fmt.Println("Cons:", car, cdr)
+	fmt.Println("Cons:", car, cdr)
 	return &pairImpl{car: car, cdr: cdr}
 }
 

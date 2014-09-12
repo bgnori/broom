@@ -53,7 +53,7 @@ func setupSpecialForms(env Environment) Environment {
 
 	//idea from http://clojuredocs.org/clojure_core/clojure.core/fn
 	env.Bind("fn", Closure(func(lexical Environment, cdr Pair) interface{} {
-                r := Closure(func(dynamic Environment, args Pair) interface{} {
+		r := Closure(func(dynamic Environment, args Pair) interface{} {
 			e := NewFrameForApply(lexical, dynamic, args, Args(cdr))
 			var x interface{}
 			for _, b := range List2Arr(Body(cdr)) {
@@ -61,7 +61,7 @@ func setupSpecialForms(env Environment) Environment {
 			}
 			return x
 		})
-                return r
+		return r
 	}))
 
 	// (loop [i 1] (recur (+ i 1))) ... never stops
