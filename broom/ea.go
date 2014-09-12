@@ -6,14 +6,20 @@ import (
 
 type Environment interface {
 	Bind(name string, v interface{})
-	Resolve(name string) interface{}
+	Resolve(name string) (interface{}, error)
 	SetOuter(outer Environment)
 	Outer() Environment
 	Dump()
 }
 
+type EvalError string
+
+func (e EvalError) Error() string {
+    return string(e)
+}
+
 func Eval(env Environment, expr interface{}) interface{} {
-	if env.Resolve("_debug") != nil {
+    if v, err := env.Resolve("_debug"); err == nil && v == true {
 		fmt.Println("Eval", expr)
 	}
 	switch {
@@ -29,7 +35,11 @@ func Eval(env Environment, expr interface{}) interface{} {
 		return expr
 	case isSymbol(expr): // variables?
 		sym, _ := expr.(Symbol)
-		return env.Resolve(sym.GetValue())
+        if v, err := env.Resolve(sym.GetValue()) ; err != nil {
+            panic(err)
+        }else{
+            return v
+        }
 	case isPair(expr):
 		car := Eval(env, Car(expr))
 		r, ok := car.(*Recur)
@@ -46,7 +56,7 @@ func Eval(env Environment, expr interface{}) interface{} {
 			panic("application error, expected SExprOperator, but got " + fmt.Sprintf("%v", car))
 		}
 		v := Cdr(expr)
-		if env.Resolve("_debug") != nil {
+        if v, err := env.Resolve("_debug"); err == nil && v == true {
 			fmt.Println("op", car, ":", v)
 		}
 		return op(env, v)
@@ -78,22 +88,26 @@ func NewGlobalRootFrame() *enviroment {
 		return Eval(given, Car(Cdr(cdr)))
 	}))
 	e.Bind("_debug", true)
+	e.Bind("_watch", false)
 	return e
 }
 
+
 func (env *enviroment) Bind(name string, v interface{}) {
+    if found, err := env.Resolve("_watch") ; err == nil && found == true {
+        fmt.Println("Env", env, name, "got", v)
+    }
 	env.variables[name] = v
 }
 
-func (env *enviroment) Resolve(name string) interface{} {
+func (env *enviroment) Resolve(name string) (interface{}, error) {
 	if v, ok := env.variables[name]; ok {
-		return v
+		return v, nil
 	}
 	if env.outer != nil {
 		return env.outer.Resolve(name)
 	}
-	panic(fmt.Sprintf("Unbound variable %s", name))
-	return nil
+	return nil, EvalError(fmt.Sprintf("Unbound variable %s", name))
 }
 
 func (env *enviroment) SetOuter(outer Environment) {

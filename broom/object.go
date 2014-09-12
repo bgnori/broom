@@ -87,7 +87,7 @@ func NewRecur(outer Environment, xs interface{}) *Recur {
 	r := new(Recur)
 	r.env = NewEnvFrame(outer)
 	r.fomals = make([]Symbol, 0)
-	r.Bind("recur", r)
+	r.Env().Bind("recur", r)
 
 	ys, _ := xs.([]interface{})
 	var key Symbol
@@ -96,14 +96,14 @@ func NewRecur(outer Environment, xs interface{}) *Recur {
 			key = v.(Symbol)
 			r.fomals = append(r.fomals, key)
 		} else {
-			r.Bind(key.GetValue(), Eval(r, v))
+			r.Env().Bind(key.GetValue(), Eval(r.Env(), v))
 		}
 	}
 	return r
 }
 
 func (r *Recur) Update(xs []interface{}) {
-	next := NewEnvFrame(r.Outer())
+	next := NewEnvFrame(r.Env().Outer())
 	next.Bind("recur", r)
 	for i, key := range r.fomals {
 		next.Bind(key.GetValue(), xs[i])
@@ -111,24 +111,8 @@ func (r *Recur) Update(xs []interface{}) {
 	r.env = next
 }
 
-func (r *Recur) Bind(name string, v interface{}) {
-	r.env.Bind(name, v)
-}
-
-func (r *Recur) Resolve(name string) interface{} {
-	return r.env.Resolve(name)
-}
-
-func (r *Recur) SetOuter(outer Environment) {
-	r.env.SetOuter(outer)
-}
-
-func (r *Recur) Outer() Environment {
-	return r.env.Outer()
-}
-
-func (r *Recur) Dump() {
-	r.env.Dump()
+func (r *Recur) Env() Environment {
+    return r.env
 }
 
 func isRecur(v interface{}) bool {

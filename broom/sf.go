@@ -53,10 +53,7 @@ func setupSpecialForms(env Environment) Environment {
 
 	//idea from http://clojuredocs.org/clojure_core/clojure.core/fn
 	env.Bind("fn", Closure(func(lexical Environment, cdr Pair) interface{} {
-		if lexical.Resolve("_debug") != nil {
-			fmt.Println("fn", cdr, "in", lexical)
-		}
-		return Closure(func(dynamic Environment, args Pair) interface{} {
+                r := Closure(func(dynamic Environment, args Pair) interface{} {
 			e := NewFrameForApply(lexical, dynamic, args, Args(cdr))
 			var x interface{}
 			for _, b := range List2Arr(Body(cdr)) {
@@ -64,15 +61,16 @@ func setupSpecialForms(env Environment) Environment {
 			}
 			return x
 		})
+                return r
 	}))
 
-	// (loop [i 1]
+	// (loop [i 1] (recur (+ i 1))) ... never stops
 	env.Bind("loop", Closure(func(dynamic Environment, cdr Pair) interface{} {
 		r := NewRecur(dynamic, Car(cdr))
 		var x interface{}
 		for recuring := true; recuring; {
 			for _, b := range List2Arr(Body(cdr)) {
-				x = Eval(r, b)
+				x = Eval(r.Env(), b)
 			}
 			_, recuring := x.(*Recur)
 			if !recuring {
