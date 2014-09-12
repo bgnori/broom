@@ -8,44 +8,48 @@ type Environment interface {
 	Bind(name string, v interface{})
 	Resolve(name string) interface{}
 	SetOuter(outer Environment)
+	Outer() Environment
 	Dump()
 }
 
 func Eval(env Environment, expr interface{}) interface{} {
-	/*
-	   (define (eval exp env)
-	     (cond ((self-evaluating? exp) exp)
-	           ((variable? exp) (lookup-variable-value exp env))
-	           ((quoted? exp) (text-of-quotation exp))
-	           ((assignment? exp) (eval-assignment exp env))
-	           ((definition? exp) (eval-definition exp env))
-	           ((if? exp) (eval-if exp env))
-	           ((lambda? exp)
-	            (make-procedure (lambda-parameters exp)
-	                            (lambda-body exp)
-	                            env))
-	           ((begin? exp)
-	            (eval-sequence (begin-actions exp) env))
-	           ((cond? exp) (eval (cond->if exp) env))
-	           ((application? exp)
-	            (apply (eval (operator exp) env)
-	                   (list-of-values (operands exp) env)))
-	           (else
-	            (error "Unknown expression type -- EVAL" exp))))
-	*/
+	if env.Resolve("_debug") != nil {
+		fmt.Println("Eval", expr)
+	}
 	switch {
-	case isBoolean(expr) || isNumber(expr) || isString(expr) || isProcedure(expr) || isSyntax(expr): // self-evaluating?
+	case expr == nil:
+		return nil
+	case isBoolean(expr) ||
+		isNumber(expr) ||
+		isString(expr) ||
+		isProcedure(expr) ||
+		isSyntax(expr): // self-evaluating?
+		return expr
+	case isRecur(expr):
 		return expr
 	case isSymbol(expr): // variables?
 		sym, _ := expr.(Symbol)
 		return env.Resolve(sym.GetValue())
 	case isPair(expr):
 		car := Eval(env, Car(expr))
+		r, ok := car.(*Recur)
+		if ok {
+			xs := make([]interface{}, 0)
+			for _, v := range List2Arr(Cdr(expr)) {
+				xs = append(xs, Eval(env, v))
+			}
+			r.Update(xs)
+			return r
+		}
 		op, ok := car.(Closure)
 		if !ok {
 			panic("application error, expected SExprOperator, but got " + fmt.Sprintf("%v", car))
 		}
-		return op(env, Cdr(expr))
+		v := Cdr(expr)
+		if env.Resolve("_debug") != nil {
+			fmt.Println("op", car, ":", v)
+		}
+		return op(env, v)
 	}
 	return nil
 }
@@ -73,6 +77,7 @@ func NewGlobalRootFrame() *enviroment {
 		given.Dump()
 		return Eval(given, Car(Cdr(cdr)))
 	}))
+	e.Bind("_debug", true)
 	return e
 }
 
@@ -93,6 +98,9 @@ func (env *enviroment) Resolve(name string) interface{} {
 
 func (env *enviroment) SetOuter(outer Environment) {
 	env.outer = outer
+}
+func (env *enviroment) Outer() Environment {
+	return env.outer
 }
 
 func (env *enviroment) Dump() {

@@ -1,0 +1,7 @@
+
+(define xs (loop [i 0 xs '()]
+             (if (< i 3)
+               (recur (+ i 1) (cons (fn [x] i) xs))
+               xs)))
+
+

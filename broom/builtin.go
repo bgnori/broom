@@ -8,6 +8,18 @@ import (
 func setupBuiltins(env Environment) Environment {
 	env.Bind("true", true)
 	env.Bind("false", false)
+	env.Bind("cons", Closure(func(env Environment, body Pair) interface{} {
+		if env.Resolve("_debug") != nil {
+			fmt.Println("cons:", body)
+		}
+		car := Eval(env, Car(body))
+		cdr, ok := Eval(env, Car(Cdr(body))).(Pair)
+		if !ok {
+			cdr = nil
+		}
+		return Cons(car, cdr)
+	}))
+
 	env.Bind(".", MakeMethodInvoker())
 	env.Bind("+", Closure(func(env Environment, cdr Pair) interface{} {
 		xs := List2Arr(Cdr(cdr))

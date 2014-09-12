@@ -78,6 +78,64 @@ func isPair(v interface{}) bool {
 
 //port?
 
+type Recur struct {
+	env    Environment
+	fomals []Symbol
+}
+
+func NewRecur(outer Environment, xs interface{}) *Recur {
+	r := new(Recur)
+	r.env = NewEnvFrame(outer)
+	r.fomals = make([]Symbol, 0)
+	r.Bind("recur", r)
+
+	ys, _ := xs.([]interface{})
+	var key Symbol
+	for i, v := range ys {
+		if i%2 == 0 {
+			key = v.(Symbol)
+			r.fomals = append(r.fomals, key)
+		} else {
+			r.Bind(key.GetValue(), Eval(r, v))
+		}
+	}
+	return r
+}
+
+func (r *Recur) Update(xs []interface{}) {
+	next := NewEnvFrame(r.Outer())
+	next.Bind("recur", r)
+	for i, key := range r.fomals {
+		next.Bind(key.GetValue(), xs[i])
+	}
+	r.env = next
+}
+
+func (r *Recur) Bind(name string, v interface{}) {
+	r.env.Bind(name, v)
+}
+
+func (r *Recur) Resolve(name string) interface{} {
+	return r.env.Resolve(name)
+}
+
+func (r *Recur) SetOuter(outer Environment) {
+	r.env.SetOuter(outer)
+}
+
+func (r *Recur) Outer() Environment {
+	return r.env.Outer()
+}
+
+func (r *Recur) Dump() {
+	r.env.Dump()
+}
+
+func isRecur(v interface{}) bool {
+	_, ok := v.(*Recur)
+	return ok
+}
+
 type Closure func(env Environment, cdr Pair) interface{}
 
 func isProcedure(v interface{}) bool {

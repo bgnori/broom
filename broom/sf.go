@@ -7,6 +7,10 @@ import (
 func setupSpecialForms(env Environment) Environment {
 	//case sym("quote").Eq(car): //quoted?
 	env.Bind("quote", Closure(func(env Environment, cdr Pair) interface{} {
+		if cdr == nil {
+			println("got nil")
+			return nil
+		}
 		return Car(cdr)
 	}))
 
@@ -49,6 +53,9 @@ func setupSpecialForms(env Environment) Environment {
 
 	//idea from http://clojuredocs.org/clojure_core/clojure.core/fn
 	env.Bind("fn", Closure(func(lexical Environment, cdr Pair) interface{} {
+		if lexical.Resolve("_debug") != nil {
+			fmt.Println("fn", cdr, "in", lexical)
+		}
 		return Closure(func(dynamic Environment, args Pair) interface{} {
 			e := NewFrameForApply(lexical, dynamic, args, Args(cdr))
 			var x interface{}
@@ -57,6 +64,22 @@ func setupSpecialForms(env Environment) Environment {
 			}
 			return x
 		})
+	}))
+
+	// (loop [i 1]
+	env.Bind("loop", Closure(func(dynamic Environment, cdr Pair) interface{} {
+		r := NewRecur(dynamic, Car(cdr))
+		var x interface{}
+		for recuring := true; recuring; {
+			for _, b := range List2Arr(Body(cdr)) {
+				x = Eval(r, b)
+			}
+			_, recuring := x.(*Recur)
+			if !recuring {
+				return x
+			}
+		}
+		panic("never reach")
 	}))
 
 	//idea from http://clojuredocs.org/clojure_core/clojure.core/defn
