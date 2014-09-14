@@ -8,6 +8,10 @@ import (
 func setupBuiltins(env Environment) Environment {
 	env.Bind("true", true)
 	env.Bind("false", false)
+	env.Bind("not", Closure(func(env Environment, cdr Pair) interface{} {
+		x := Eval(env, Car(cdr)).(bool)
+		return !x
+	}))
 	env.Bind("cons", Closure(func(env Environment, body Pair) interface{} {
 		car := Eval(env, Car(body))
 		cdr, ok := Eval(env, Car(Cdr(body))).(Pair)

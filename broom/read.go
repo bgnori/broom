@@ -315,6 +315,12 @@ func (reader *Reader) tryChunk() Token {
 		r, eos = reader.buffer.Peek()
 	}
 	s := string(xs)
+    if s == "true" {
+		return Token{id: TOKEN_TRUE, v: s, pos: pos}
+    }
+    if s == "false" {
+		return Token{id: TOKEN_FALSE, v: s, pos: pos}
+    }
 	var n int
 	if _, err := fmt.Sscanf(s, "%d", &n); err == nil {
 		return Token{id: TOKEN_INT, v: s, pos: pos}
@@ -347,6 +353,8 @@ const (
 	TOKEN_QUOTE
 	TOKEN_QUASIQUOTE
 	TOKEN_DOT
+	TOKEN_TRUE
+	TOKEN_FALSE
 	TOKEN_ERROR
 )
 
@@ -576,6 +584,10 @@ func (builder *SExprBuilder) Run(reader *Reader) (*tokenSeq, error) {
 			var n int
 			fmt.Sscanf(tk.v, "%d", &n)
 			builder.push(n)
+		case TOKEN_TRUE:
+			builder.push(true)
+		case TOKEN_FALSE:
+			builder.push(false)
 		case TOKEN_SYMBOL:
 			builder.push(sym(tk.v))
 		case TOKEN_STRING:
