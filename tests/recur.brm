@@ -1,5 +1,3 @@
-(define _debug false)
-(define _watch false)
 (define xs (loop [i 0 xs '()]
              (if (< i 3)
                (recur (+ i 1) (cons (fn [x] i) xs))
@@ -7,4 +5,3 @@
 ((car xs) 'a)
 ((cadr xs) 'a)
 ((caddr xs) 'a)
-

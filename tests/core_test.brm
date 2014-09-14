@@ -2,12 +2,6 @@
 
 (reverse '(1 2 3 4 5 6)) ; (6 5 4 3 2 1)
 
-(define _debug false)
-
-(defn even? [x]
-  (if (= (mod x 2) 0)
-    true
-    false))
 
 (even? 1)
 (even? 2)

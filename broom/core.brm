@@ -1,3 +1,10 @@
+;
+(defn even? [x]
+  (if (= (mod x 2) 0)
+    true
+    false))
+
+
 ; to be srfi-1?
 ; see http://www.chino-js.com/ja/tech/srfi/srfi-1/srfi-1.html
 
