@@ -135,10 +135,10 @@ func MakeMethodInvoker() Closure {
 		//see  http://stackoverflow.com/questions/14116840/dynamically-call-method-on-interface-regardless-of-receiver-type
 		obj := Eval(env, cdr.Car())
 		name := cdr.Cdr().Car().(Symbol).GetValue()
-		xs := helper(cdr.Cdr().Cdr(), nil)
-
 		value := reflect.ValueOf(obj)
 		method := value.MethodByName(name)
+
+		xs := helper(env, cdr.Cdr().Cdr(), nil)
 		if method.IsValid() {
 			vs := method.Call(xs)
 			i := len(vs)
@@ -157,7 +157,7 @@ func MakeMethodInvoker() Closure {
 	}
 }
 
-func helper(args Pair, result []reflect.Value) []reflect.Value {
+func helper(env Environment, args Pair, result []reflect.Value) []reflect.Value {
 	if len(result) == 0 {
 		result = make([]reflect.Value, 0)
 	}
@@ -167,8 +167,8 @@ func helper(args Pair, result []reflect.Value) []reflect.Value {
 	car := Car(args)
 	cdr := Cdr(args)
 
-	v := reflect.ValueOf(car)
+	v := reflect.ValueOf(Eval(env, car))
 	result = append(result, v)
 
-	return helper(cdr, result)
+	return helper(env, cdr, result)
 }
