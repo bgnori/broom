@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func Load(file io.Reader, env Environment) error {
+func Load(file io.Reader, env Environment, verbose bool) error {
 	buf := NewBuffered(file)
 	reader := NewReader(buf)
 	builder := NewSExprBuilder()
@@ -16,8 +16,13 @@ func Load(file io.Reader, env Environment) error {
 		return err
 	}
 	for _, expr := range prg.Items() {
+		if verbose {
+			fmt.Println("in:", expr)
+		}
 		got := Eval(env, expr)
-		fmt.Println("-->", got)
+		if verbose {
+			fmt.Println("-->", got)
+		}
 	}
 	return nil
 }

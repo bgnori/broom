@@ -1,9 +1,5 @@
 package broom
 
-import (
-	"fmt"
-)
-
 func setupSpecialForms(env Environment) Environment {
 	//case sym("quote").Eq(car): //quoted?
 	env.Bind("quote", Closure(func(env Environment, cdr Pair) interface{} {
@@ -47,7 +43,6 @@ func setupSpecialForms(env Environment) Environment {
 		xs := List2Arr(Car(cdr).(Pair))
 		body := Cdr(cdr).(Pair)
 		transformed := Cons(sym("fn"), Cons(xs, body))
-		fmt.Println("transformed:", transformed)
 		return Eval(env, transformed) //fn
 	}))
 
@@ -88,7 +83,6 @@ func setupSpecialForms(env Environment) Environment {
 		xs := Car(Cdr(cdr))
 		body := Cdr(Cdr(cdr))
 		transformed := List(sym("define"), name, Cons(sym("fn"), Cons(xs, body)))
-		fmt.Println("transformed:", transformed)
 		return Eval(env, transformed)
 	}))
 
