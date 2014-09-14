@@ -127,6 +127,25 @@ func setupBuiltins(env Environment) Environment {
 		return isMap(Eval(env, Car(cdr)))
 	}))
 
+	env.Bind("go", Closure(func(env Environment, cdr Pair) interface{} {
+		proc := Eval(env, Car(cdr)).(Closure)
+		go proc(env, Cdr(cdr))
+		return nil
+	}))
+
+	env.Bind("defer", Closure(func(env Environment, cdr Pair) interface{} {
+		handler := Eval(env, Car(cdr)).(Closure)
+		target := Eval(env, Car(Cdr(cdr))).(Closure)
+		return Closure(func(dynamic Environment, arg Pair) interface{} {
+			defer func() {
+				//fmt.Println("evoking defered", handler)
+				handler(dynamic, Cons(1, nil))
+				//Eval(dynamic, Cons(handler, nil))
+			}()
+			return Eval(dynamic, Cons(target, arg))
+		})
+	}))
+
 	return env
 }
 

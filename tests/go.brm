@@ -1,0 +1,7 @@
+(defn greet [n]
+  (loop [i 0]
+    (if (< i n)
+      (begin
+        (println "hi")
+        (recur (+ i 1)))
+      (println "done"))))

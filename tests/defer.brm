@@ -1,0 +1,9 @@
+(define foo (defer 
+              (fn [] (println "defer is cool!"))
+              (fn [x] 
+                (begin
+                  (println "do something")
+                  (println x)
+                  (* 3 x)))
+              ))
+(foo 42)
