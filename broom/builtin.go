@@ -19,15 +19,15 @@ func setupBuiltins(env Environment) Environment {
 
 	env.Bind(".", MakeMethodInvoker())
 	env.Bind("=", Closure(func(env Environment, cdr Pair) interface{} {
-        x := Eval(env, Car(cdr))
-        y := Eval(env, Car(Cdr(cdr)))
-        return Eq(x, y)
-    }))
+		x := Eval(env, Car(cdr))
+		y := Eval(env, Car(Cdr(cdr)))
+		return Eq(x, y)
+	}))
 	env.Bind("mod", Closure(func(env Environment, cdr Pair) interface{} {
-        x := Eval(env, Car(cdr)).(int)
-        y := Eval(env, Car(Cdr(cdr))).(int)
-        return x % y
-    }))
+		x := Eval(env, Car(cdr)).(int)
+		y := Eval(env, Car(Cdr(cdr))).(int)
+		return x % y
+	}))
 	env.Bind("+", Closure(func(env Environment, cdr Pair) interface{} {
 		xs := List2Arr(Cdr(cdr))
 		acc := Eval(env, Car(cdr)).(int)
@@ -66,7 +66,7 @@ func setupBuiltins(env Environment) Environment {
 	env.Bind("sprintf", Closure(func(env Environment, cdr Pair) interface{} {
 		format := Eval(env, Car(cdr)).(string)
 		xs := List2Arr(Cdr(cdr))
-        ys := make([]interface{}, 0)
+		ys := make([]interface{}, 0)
 		for _, x := range xs {
 			ys = append(ys, Eval(env, x))
 		}
