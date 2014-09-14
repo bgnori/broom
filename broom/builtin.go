@@ -130,13 +130,7 @@ func MakeMethodInvoker() Closure {
 	return func(env Environment, cdr Pair) interface{} {
 		//see  http://stackoverflow.com/questions/14116840/dynamically-call-method-on-interface-regardless-of-receiver-type
 		obj := Eval(env, cdr.Car())
-	    if v, err := env.Resolve("_debug"); err == nil && v == true {
-		    fmt.Println("obj: ", obj)
-        }
 		name := cdr.Cdr().Car().(Symbol).GetValue()
-	    if v, err := env.Resolve("_debug"); err == nil && v == true {
-            fmt.Println("to invoke:", name)
-        }
 		xs := helper(cdr.Cdr().Cdr(), nil)
 
 		value := reflect.ValueOf(obj)

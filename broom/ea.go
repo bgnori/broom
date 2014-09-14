@@ -19,9 +19,6 @@ func (e EvalError) Error() string {
 }
 
 func Eval(env Environment, expr interface{}) interface{} {
-	if v, err := env.Resolve("_debug"); err == nil && v == true {
-		fmt.Println("Eval", expr)
-	}
 	switch {
 	case expr == nil:
 		return nil
@@ -56,9 +53,6 @@ func Eval(env Environment, expr interface{}) interface{} {
 			panic("application error, expected SExprOperator, but got " + fmt.Sprintf("%v", car))
 		}
 		v := Cdr(expr)
-		if v, err := env.Resolve("_debug"); err == nil && v == true {
-			fmt.Println("op", car, ":", v)
-		}
 		return op(env, v)
 	}
 	return nil
@@ -87,7 +81,6 @@ func NewGlobalRootFrame() *enviroment {
 		given.Dump()
 		return Eval(given, Car(Cdr(cdr)))
 	}))
-	e.Bind("_debug", true)
 	e.Bind("_watch", false)
 	return e
 }

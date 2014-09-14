@@ -107,7 +107,6 @@ func setupSpecialForms(env Environment) Environment {
 		test := Car(cdr)
 		onTrue := Car(Cdr(cdr))
 		rest := Cdr(Cdr(cdr))
-		println(test, onTrue)
 		if v, ok := test.(Symbol); ok && v.GetValue() == "else" {
 			return Eval(env, onTrue)
 		}
