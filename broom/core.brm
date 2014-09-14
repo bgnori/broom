@@ -240,7 +240,7 @@
       (recur (cdr src) (cons (f (car src)) result)))))
 
 ; for-each not supported
-(for-each [f xs] ; need test. side effect.
+(defn for-each [f xs] ; need test. side effect.
   (loop [src xs]
     (if (null? src)
       '() ; want Undef
@@ -277,4 +277,106 @@
       (null? rest) false
       (pred (car rest)) (car rest)
       else (recur (cdr rest)))))
+
+(defn find-tail [pred xs]
+  (loop [rest xs]
+    (cond 
+      (null? rest) false
+      (pred (car rest)) rest
+      else (recur (cdr rest)))))
+
+(defn take-while [pred xs]
+  (loop [rest xs result '()]
+    (cond
+      (null? rest) (reverse result)
+      (pred (car rest)) (recur (cdr rest) (cons (car rest) result))
+      else (reverse result))))
+
+(defn drop-while [pred xs]
+  (loop [rest xs]
+    (cond 
+      (null? rest) false
+      (pred (car rest)) (recur (cdr rest))
+      else rest)))
+
+; span
+; valuesが不明.
+; span! not supported
+; break
+; break! not supported
+
+
+; any 
+; need zip
+; 
+; in srfi-1, any1 might return not boolean value, but we don't
+;
+(defn any1 [f xs]
+  (loop [rest xs]
+    (cond
+      (null? rest) false
+      (f (car rest)) true
+      else (recur (cdr rest)))))
+
+(defn every1 [f xs]
+  (loop [rest xs]
+    (cond
+      (null? rest) true
+      (f (car rest)) (recur (cdr rest))
+      else false)))
+
+(defn list-index1 [pred xs] ;
+  (loop [rest xs i 0]
+    (cond
+      (null? rest) false
+      (pred (car rest)) i
+      else (recur (cdr rest) (+ i 1)))))
+
+; member not supported
+; memq not supported
+; memv not supported
+
+; not supported
+; delete
+; delete!
+; delete-duplicates
+; delete-duplicates!
+
+; associated list is not supported
+; since we have native map
+; assoc
+; assq
+; assv
+
+; alist-cons
+; alist-copy
+; alist-delete
+; alist-delete!
+
+; list-based set are not suppoted
+; use map
+; lset
+; lset=
+; lset-adjoin
+; lset-union
+; lset-intersection
+; lset-difference
+; lset-xor
+; lset-diff+intersection
+; lset-union!
+; lset-intersection!
+; lset-difference!
+; lset-xor!
+; lset-diff+intersection!
+
+
+; set-car!
+(defn set-car! [p v]
+  (. p SetCar v))
+
+; set-cdr!
+(defn set-cdr! [p v]
+  (. p SetCdr v))
+
+
 
