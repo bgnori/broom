@@ -1,9 +1,9 @@
 ;
 (defn even? [x]
-  (if (= (mod x 2) 0)
-    true
-    false))
+  (= (mod x 2) 0))
 
+(defn zero? [x]
+  (= x 0))
 
 ; to be srfi-1?
 ; see http://www.chino-js.com/ja/tech/srfi/srfi-1/srfi-1.html
@@ -195,9 +195,11 @@
     (f xs (pair-fold-right1 f init (cdr xs)))))
 
 (defn reduce [f init xs]
-  (if (null? xs)
-    init
-    (fold1 f (car xs) (cdr xs))))
+  (fold1 f init xs))
+; (defn reduce [f init xs]
+;   (if (null? xs)
+;     init
+;     (fold1 f (car xs) (cdr xs))))
 
 (defn reduce-right [f init xs]
   (fold-right1 f init xs))
@@ -206,17 +208,44 @@
   (if (pred seed)
     (tail-gen seed)
     (cons (f seed)
-          (unfold p f next (next seed) tail-gen))))
+          (unfold pred f next (next seed) tail-gen))))
 
-; unfold-right  need loop to support this.
+; this is wrong! Can't (car (tail-gen s))
+; (defn unfold [pred f next seed tail-gen]
+;   (loop [s seed result '()]
+;     (if (pred s)
+;       (reverse (cons (car (tail-gen s)) result))
+;       (recur (next s) (cons (f s) result)))))
+
+
+; unfold-right  
+(defn unfold-right [p f g seed tail]
+  (loop [i seed result tail]
+    (if (p i)
+      result
+      (recur (g i) (cons (f i) result)))))
+
 
 ; map to be implemented (builtin?)
-(defn map1 [f xs]
-  (if (null? xs)
-    '()
-    (cons (f (car xs)) (map1 f (cdr xs)))))
+; (defn map1 [f xs] ; recursive version
+;   (if (null? xs)
+;     '()
+;     (cons (f (car xs)) (map1 f (cdr xs)))))
+; 
+
+(defn map1 [f xs] ; loop version
+  (loop [src xs result '()]
+    (if (null? src)
+      (reverse result)
+      (recur (cdr src) (cons (f (car src)) result)))))
 
 ; for-each not supported
+(for-each [f xs] ; need test. side effect.
+  (loop [src xs]
+    (if (null? src)
+      '() ; want Undef
+      (recur (cdr src)))))
+
 ; append-map not supported
 ; append-map! not supported
 ; map! not supported

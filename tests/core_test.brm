@@ -1,3 +1,6 @@
+(zero? 0) ; true
+(zero? 1) ; false
+
 (even? 1) ; false
 (even? 2) ; true
 (even? 3) ; false
@@ -35,6 +38,30 @@
 (unzip1 '((1 one) (2 two) (3 three))) ; (1 2 3)
 
 (fold1 cons '() '(1 2 3 4)) ; (4 3 2 1)
+(fold1 cons '(1 2) '(3 4)) ; (4 3 2 1)
+
+(unfold (fn [x] (> x 10))
+        (fn [x] (* x x))
+        (fn [x] (+ x 1))
+        1
+        (fn [x] '()))
+; (1 4 9 16 25 36 49 64 81 100)
+
+(unfold-right zero?
+              (lambda (x) (* x x))
+              (lambda (x) (- x 1))
+              10
+              '())
+
+(map1 cadr '((a b) (d e) (g h))) ; (b e h)
+
+(defn expt [n m]
+  (loop [i 0 res 1]
+    (if (< i m)
+      (recur (+ i 1) (* res n))
+      res)))
+
+(map1 (fn [n] (expt n n)) '(1 2 3 4 5)) ; (1 4 27 256 3125)
 
 
 (filter even? '(1 2 3 4 5 6)) ; (2 4 6)
