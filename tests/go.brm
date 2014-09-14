@@ -1,7 +1,14 @@
-(defn greet [n]
+(GOMAXPROCS 4)
+
+(defn greet [n msg]
   (loop [i 0]
     (if (< i n)
       (begin
-        (println "hi")
+        (println msg)
         (recur (+ i 1)))
       (println "done"))))
+
+(defn run []
+  (begin
+    (go (fn [] (greet 10 "hi")))
+    (go (fn [] (greet 10 "bye")))))
