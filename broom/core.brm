@@ -62,29 +62,79 @@
 (defn fifth [x] (car (cdr (cdr (cdr (cdr x))))))
 ; sixth ~ tenth are not supported
 
-; take [xs i] -> builtin
-; drop [xs i] -> builtin
+(defn take [i xs] ; Clojure way. srfi says (take xs i)
+  (loop [count 0 src xs result '()]
+    (if (< count i)
+      (recur (+ count 1) (cdr src) (cons (car src) result))
+      (reverse result))))
+    
+(defn drop [i xs] ; Clojure way. srfi says (drop xs i)
+  (loop [count 0 src xs result '()]
+    (cond
+      (null? src) (reverse result)
+      (< count i) (recur (+ count 1) (cdr src) result)
+      else (recur count (cdr src) (cons (car src) result)))))
 
-; take-right not supported
-; drop-right not supported
-; last not supported
+(defn take-right [i xs] ; Clojure way. srfi says (take-right xs i)
+  (loop [count 0 src (reverse xs) result '()]
+    (if (< count i)
+      (recur (+ count 1) (cdr src) (cons (car src) result))
+      result)))
+
+(defn drop-right [i xs] ; Clojure way. srfi says (take-right xs i)
+  (loop [count 0 src (reverse xs) result '()]
+    (cond
+      (null? src) result
+      (< count i) (recur (+ count 1) (cdr src) result)
+      else (recur count (cdr src) (cons (car src) result)))))
+
+; take! not supported
+; drop-right! not supported
+
+; split-at 
+; values (take x i) (drop x i)
+; what is "values"?
+
+; split-at! not supported
+
+(defn last [xs]
+  (loop [src xs]
+    (if (null? (cdr src))
+      (car src)
+      (recur (cdr src)))))
+
 ; last-pair not supported
 
-; length -> builtin 
+(defn length [xs]
+  (loop [src xs count 0]
+    (if (null? src)
+      count
+      (recur (cdr src) (+ count 1)))))
+
 ; length+ not supported
 
-; append -> builtin
+; append not be supported
 ; append! not supported
+
+(defn concat [xs ys] ; from Clojure
+  (loop [src (reverse xs) result ys]
+    (if (null? src)
+      result
+      (recur (cdr src) (cons (car src) result)))))
+
 
 ; concatenate not implemented
 ; concatenate! not supported
 
 ; reverse 
+;(defn reverse [xs]
+;  (loop [src xs result '()]
+;    (if (null? src)
+;     result
+;     (recur (cdr src) (cons (car src) result)))))
+;
 (defn reverse [xs]
-  (loop [src xs result '()]
-    (if (null? src)
-      result
-      (recur (cdr src) (cons (car src) result)))))
+  (fold1 cons '() xs))
 
 ; reverse! not supported
 
@@ -92,9 +142,25 @@
 ; append-reverse! not supported
 
 ; zip [list..] (lambda lists (apply map list lists)) builtin
+(defn zip1 [xs1]
+  (loop [src xs1 result '()]
+    (if (null? src)
+      (reverse result)
+      (recur (cdr src) (cons (cons (car src) '()) result)))))
 
-; unzip1 builtin
-; unzip2 builtin
+(defn zip2 [xs1 xs2]
+  (loop [s1 xs1 s2 xs2 result '()]
+    (if (or (null? s1) (null? s2))
+      (reverse result)
+      (recur (cdr s1) (cdr s2) (cons (cons (car s1) (cons (car s2) '())) result)))))
+
+(defn unzip1 [xxs]
+  (loop [rest xxs result '()]
+    (if (null? rest)
+      (reverse result)
+      (recur (cdr rest) (cons (caar rest) result)))))
+
+; unzip2 values is needed
 ; unzip3 not supported
 ; unzip4 not supported
 ; unzip5 not supported
@@ -105,9 +171,10 @@
 ; high orders
 ; fold -> builtin
 (defn fold1 [f init xs]
-  (if (null? xs)
-    init
-    (fold1 f (f (car xs) init) (cdr xs))))
+  (loop [rest xs result init]
+    (if (null? rest)
+      result
+      (recur (cdr rest) (f (car rest) result)))))
 
 ; fold-right -> builtin
 (defn fold-right1 [f init xs]

@@ -1,11 +1,41 @@
+(even? 1) ; false
+(even? 2) ; true
+(even? 3) ; false
 
+(car '(1 2 3)) ; 1
+(cadr '(1 2 3)) ; 2
+(caddr '(1 2 3)) ; 3
+(fifth '(1 2 3 4 5 6)) ; 5
+
+(take 3 '(1 2 3 4 5 6)) ; (1 2 3)
+(drop 3 '(1 2 3 4 5 6)) ; (4 5 6)
+
+(take-right 2 '(a b c d e)) ; (d e)
+(drop-right 2 '(a b c d e)) ; (a b c)
+
+(last '(a b c)) ; c
+
+(length '(1 2 3 4)) ; 4
+
+; (append '(x) '(y))        ;  (x y)
+; (append '(a) '(b c d))    ;  (a b c d)
+; (append '(a (b)) '((c)))  ;  (a (b) (c))
+
+(concat '(a b) '(c d)) ; (a b c d)
+(concat '() '(c d)) ; (c d)
+(concat '(a b) '()) ; (a b)
 
 (reverse '(1 2 3 4 5 6)) ; (6 5 4 3 2 1)
 
+(zip1 '(1 2 3)) ; ((1) (2) (3))
+(zip2 '(1 2 3) '(a b c)) ; ((1 a) (2 b) (3 c))
+(zip2 '(1 2 3) '(a b)) ; ((1 a) (2 b))
+(zip2 '(1 2) '(a b c)) ; ((1 a) (2 b))
 
-(even? 1)
-(even? 2)
-(even? 3)
+(unzip1 '((1 one) (2 two) (3 three))) ; (1 2 3)
+
+(fold1 cons '() '(1 2 3 4)) ; (4 3 2 1)
+
 
 (filter even? '(1 2 3 4 5 6)) ; (2 4 6)
 
@@ -13,3 +43,6 @@
 (find (fn [x] (= x 5)) '(1 2 3 4 5 6))
 (find (fn [x] (= x 6)) '(1 2 3 4 5 6))
 (find (fn [x] (= x 7)) '(1 2 3 4 5 6))
+
+
+
