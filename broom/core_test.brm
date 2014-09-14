@@ -1,0 +1,21 @@
+
+
+(reverse '(1 2 3 4 5 6)) ; (6 5 4 3 2 1)
+
+(define _debug false)
+
+(defn even? [x]
+  (if (= (mod x 2) 0)
+    true
+    false))
+
+(even? 1)
+(even? 2)
+(even? 3)
+
+(filter even? '(1 2 3 4 5 6)) ; (2 4 6)
+
+
+(find (fn [x] (= x 5)) '(1 2 3 4 5 6))
+(find (fn [x] (= x 6)) '(1 2 3 4 5 6))
+(find (fn [x] (= x 7)) '(1 2 3 4 5 6))

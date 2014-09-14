@@ -72,7 +72,13 @@
 ; concatenate not implemented
 ; concatenate! not supported
 
-; reverse not implemented
+; reverse 
+(defn reverse [xs]
+  (loop [src xs result '()]
+    (if (null? src)
+      result
+      (recur (cdr src) (cons (car src) result)))))
+
 ; reverse! not supported
 
 ; append-reverse not supported
@@ -146,11 +152,11 @@
 
 ; to be builtin
 (defn filter [pred xs]
-  (if (null? xs)
-    '()
-    (if (pred (car xs))
-      (cons (car xs) (filter pred (cdr xs)))
-      (filter pred (cdr xs)))))
+  (loop [src xs result '()]
+    (cond
+      (null? src) (reverse result)
+      (pred (car src)) (recur (cdr src) (cons (car src) result))
+      else (recur (cdr src) result))))
 
 ; partition to be supported
 ; 「値を二つ返す」ってどういうこと?
@@ -161,6 +167,11 @@
 ; partition! not supported
 ; remove! not supported
 
-
-
+; 
+(defn find [pred xs] 
+  (loop [rest xs]
+    (cond
+      (null? rest) false
+      (pred (car rest)) (car rest)
+      else (recur (cdr rest)))))
 
