@@ -88,7 +88,11 @@ func try2Build(c string) (expr interface{}, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			expr = nil
-			err = MyErr(e.(string))
+                        if ee, ok := e.(EvalError); ok {
+                          err = MyErr(ee.Error())
+                        } else {
+                          err = MyErr(e.(string))
+                        }
 		}
 	}()
 	return BuildSExpr(NewBuffered(strings.NewReader(c))), nil
@@ -98,7 +102,11 @@ func try2Eval(env Environment, expr interface{}) (result interface{}, err error)
 	defer func() {
 		if e := recover(); e != nil {
 			result = nil
-			err = MyErr(e.(string))
+                        if ee, ok := e.(EvalError); ok {
+                          err = MyErr(ee.Error())
+                        } else {
+                          err = MyErr(e.(string))
+                        }
 		}
 	}()
 	return Eval(env, expr), nil
