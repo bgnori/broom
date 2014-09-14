@@ -18,6 +18,16 @@ func setupBuiltins(env Environment) Environment {
 	}))
 
 	env.Bind(".", MakeMethodInvoker())
+	env.Bind("=", Closure(func(env Environment, cdr Pair) interface{} {
+        x := Eval(env, Car(cdr))
+        y := Eval(env, Car(Cdr(cdr)))
+        return Eq(x, y)
+    }))
+	env.Bind("mod", Closure(func(env Environment, cdr Pair) interface{} {
+        x := Eval(env, Car(cdr)).(int)
+        y := Eval(env, Car(Cdr(cdr))).(int)
+        return x % y
+    }))
 	env.Bind("+", Closure(func(env Environment, cdr Pair) interface{} {
 		xs := List2Arr(Cdr(cdr))
 		acc := Eval(env, Car(cdr)).(int)
@@ -54,12 +64,16 @@ func setupBuiltins(env Environment) Environment {
 		return acc
 	}))
 	env.Bind("sprintf", Closure(func(env Environment, cdr Pair) interface{} {
-		format := Car(cdr).(string)
+		format := Eval(env, Car(cdr)).(string)
 		xs := List2Arr(Cdr(cdr))
-		return fmt.Sprintf(format, xs...)
+        ys := make([]interface{}, 0)
+		for _, x := range xs {
+			ys = append(ys, Eval(env, x))
+		}
+		return fmt.Sprintf(format, ys...)
 	}))
 	env.Bind("println", Closure(func(env Environment, cdr Pair) interface{} {
-		fmt.Println(Car(cdr))
+		fmt.Println(Eval(env, Car(cdr)))
 		return nil
 	}))
 	env.Bind("<", Closure(func(env Environment, cdr Pair) interface{} {
@@ -116,9 +130,13 @@ func MakeMethodInvoker() Closure {
 	return func(env Environment, cdr Pair) interface{} {
 		//see  http://stackoverflow.com/questions/14116840/dynamically-call-method-on-interface-regardless-of-receiver-type
 		obj := Eval(env, cdr.Car())
-		fmt.Println("obj: ", obj)
+	    if v, err := env.Resolve("_debug"); err == nil && v == true {
+		    fmt.Println("obj: ", obj)
+        }
 		name := cdr.Cdr().Car().(Symbol).GetValue()
-		fmt.Println("to invoke:", name)
+	    if v, err := env.Resolve("_debug"); err == nil && v == true {
+            fmt.Println("to invoke:", name)
+        }
 		xs := helper(cdr.Cdr().Cdr(), nil)
 
 		value := reflect.ValueOf(obj)
