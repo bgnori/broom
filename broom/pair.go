@@ -107,3 +107,15 @@ func Length(xs interface{}) int {
 	}
 	panic("proper list required")
 }
+
+func Chop2(xs Pair) []struct{header, body interface{}} {
+
+    ys := make([]struct{header, body interface{}}, 0)
+    for xs != nil {
+		header := Car(xs)
+		body := Car(Cdr(xs))
+		xs = Cdr(Cdr(xs))
+        ys = append(ys, struct{header, body interface{}}{header:header, body:body})
+    }
+    return ys
+}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"runtime"
+	"time"
 )
 
 func setupBuiltins(env Environment) Environment {
@@ -150,6 +151,81 @@ func setupBuiltins(env Environment) Environment {
 		n := Eval(env, Car(cdr)).(int)
         return runtime.GOMAXPROCS(n)
     }))
+	env.Bind("select", Closure(func(env Environment, cdr Pair) interface{} {
+        cases := make([]reflect.SelectCase, 0)
+        headers := make([][]interface{}, 0)
+        bodies := make([]interface{}, 0)
+        for _, chunk := range Chop2(cdr) {
+            select_case := chunk.header
+            body := chunk.body
+		    if v, ok := select_case.(Symbol); ok && v.GetValue() == "default" {
+                case_obj := reflect.SelectCase{Dir:reflect.SelectDefault} //, Chan: nil, Send: nil}
+                cases = append(cases, case_obj)
+                headers = append(headers, nil)
+                bodies = append(bodies, body)
+            } else {
+                dst := (select_case.([]interface{}))[0]
+                src := (select_case.([]interface{}))[1]
+                if s, ok := dst.(Symbol); ok {
+                    if v, err := env.Resolve(s.GetValue()) ; err == nil {
+                        // must be chan. Sending
+                        case_obj := reflect.SelectCase{
+                            Dir:reflect.SelectSend,
+                            Chan: v.(reflect.Value),
+                            Send: Eval(env, src).(reflect.Value)}
+                        cases = append(cases, case_obj)
+                        headers = append(headers, select_case.([]interface{}))
+                        bodies = append(bodies, body)
+                    } else {
+                        // s is target symbol. read and assign
+	                    ch := reflect.ValueOf(Eval(env, src))
+                        case_obj := reflect.SelectCase{
+                            Dir:reflect.SelectRecv,
+                            Chan: ch}
+                        cases = append(cases, case_obj)
+                        headers = append(headers, select_case.([]interface{}))
+                        bodies = append(bodies, body)
+                    }
+                } else {
+                    panic("Non-symbol in destination of select case.")
+                }
+            }
+        }
+
+        chosen, recv, recvOK := reflect.Select(cases)
+        h := headers[chosen]
+        b := bodies[chosen]
+        benv := NewEnvFrame(env)
+        if recvOK {
+            benv.Bind(h[0].(Symbol).GetValue(), recv)
+        }
+        return Eval(benv, b)
+    }))
+	env.Bind("make-chan-bool", Closure(func(env Environment, cdr Pair) interface{} {
+        return make(chan bool)
+    }))
+	env.Bind("make-chan-string", Closure(func(env Environment, cdr Pair) interface{} {
+        return make(chan string)
+    }))
+	env.Bind("recv", Closure(func(env Environment, cdr Pair) interface{} {
+	    ch := reflect.ValueOf(Eval(env, Car(cdr)))
+        if v, ok := ch.Recv(); ok {
+            return v
+        }
+        return nil
+    }))
+	env.Bind("send", Closure(func(env Environment, cdr Pair) interface{} {
+	    ch := reflect.ValueOf(Eval(env, Car(cdr)))
+	    to_send := reflect.ValueOf(Eval(env, Car(Cdr(cdr))))
+        ch.Send(to_send)
+        return nil
+    }))
+	env.Bind("time/Sleep", Closure(func(env Environment, cdr Pair) interface{} {
+        //d := Eval(env, Car(cdr)).(time.Duration)
+        time.Sleep(1 * time.Second)
+        return nil
+    }))
+	env.Bind("time/Second", time.Second)
 
 	return env
 }

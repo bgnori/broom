@@ -1,0 +1,29 @@
+; http://mattn.kaoriya.net/software/lang/go/20131112132831.htm
+;
+
+(begin
+  (define task (make-chan-string))
+  (define taskquit (make-chan-bool))
+  (define workerquit (make-chan-bool))
+  (go (fn []
+        (loop []
+          (select 
+            [_ taskquit]
+              (send workerquit true)
+            [job task]
+              (begin
+                (println job)
+                (recur))
+            ;default
+            ;  '()
+              ))))
+  (go (fn []
+        (loop [n 0]
+          (if (< n 3)
+            (begin
+              (send task (sprintf "お仕事%03d" (+ n 1)))
+              (time/Sleep) ; (* 1 time/Second))
+              (recur (+ n 1)))
+            '()))
+        (send taskquit true)))
+  (recv workerquit))

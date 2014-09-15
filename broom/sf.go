@@ -109,6 +109,9 @@ func setupSpecialForms(env Environment) Environment {
 		}
 		if rest != nil {
 			return Eval(env, Cons(sym("cond"), rest))
+                        // ugh! rewind as for loop!
+                        // * by using Chop2
+                        // * by macro
 		}
 		return nil //undef
 	}))
