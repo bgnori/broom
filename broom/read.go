@@ -315,12 +315,12 @@ func (reader *Reader) tryChunk() Token {
 		r, eos = reader.buffer.Peek()
 	}
 	s := string(xs)
-    if s == "true" {
+	if s == "true" {
 		return Token{id: TOKEN_TRUE, v: s, pos: pos}
-    }
-    if s == "false" {
+	}
+	if s == "false" {
 		return Token{id: TOKEN_FALSE, v: s, pos: pos}
-    }
+	}
 	var n int
 	if _, err := fmt.Sscanf(s, "%d", &n); err == nil {
 		return Token{id: TOKEN_INT, v: s, pos: pos}
