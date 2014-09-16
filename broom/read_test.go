@@ -410,6 +410,14 @@ func TestMakeInt(t *testing.T) {
 	}
 }
 
+func TestMakeFloat(t *testing.T) {
+	buf := NewBuffered(strings.NewReader("2.7182818284"))
+	expr := BuildSExpr(buf)
+	if expr != 2.7182818284 {
+		t.Error("2.7182818284 is expected")
+	}
+}
+
 func TestMakeSymbol(t *testing.T) {
 	buf := NewBuffered(strings.NewReader("a"))
 	expr := BuildSExpr(buf)

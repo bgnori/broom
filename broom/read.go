@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"strings"
 	"unicode/utf8"
 )
 
@@ -321,6 +322,13 @@ func (reader *Reader) tryChunk() Token {
 	if s == "false" {
 		return Token{id: TOKEN_FALSE, v: s, pos: pos}
 	}
+
+	if strings.Contains(s, ".") {
+		var f float64
+		if _, err := fmt.Sscanf(s, "%f", &f); err == nil {
+			return Token{id: TOKEN_FLOAT, v: s, pos: pos}
+		}
+	}
 	var n int
 	if _, err := fmt.Sscanf(s, "%d", &n); err == nil {
 		return Token{id: TOKEN_INT, v: s, pos: pos}
@@ -339,6 +347,7 @@ const (
 	TOKEN_ENDOFLINE
 	TOKEN_SYMBOL
 	TOKEN_INT
+	TOKEN_FLOAT
 	TOKEN_STRING
 	TOKEN_LEFT_PAREN
 	TOKEN_RIGHT_PAREN
@@ -584,6 +593,10 @@ func (builder *SExprBuilder) Run(reader *Reader) (*tokenSeq, error) {
 			var n int
 			fmt.Sscanf(tk.v, "%d", &n)
 			builder.push(n)
+		case TOKEN_FLOAT:
+			var f float64
+			fmt.Sscanf(tk.v, "%f", &f)
+			builder.push(f)
 		case TOKEN_TRUE:
 			builder.push(true)
 		case TOKEN_FALSE:
