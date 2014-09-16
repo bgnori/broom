@@ -401,7 +401,7 @@ func BinaryLessThan(x, y interface{}) interface{} {
 	case reflect.Complex128:
 		fallthrough
 	default:
-		panic("Div is not supported by this type.")
+		panic("Less than is not supported by this type.")
 	}
 }
 
@@ -431,11 +431,7 @@ func BinaryGreaterThan(x, y interface{}) interface{} {
 	case reflect.Complex128:
 		fallthrough
 	default:
-		panic("Div is not supported by this type.")
+		panic("Greater than is not supported by this type.")
 	}
 }
-
-
-
-
 
