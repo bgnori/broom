@@ -129,6 +129,24 @@ func TestBinaryAddIntXInt(t *testing.T) {
 	if v, ok := BinaryAdd(nano, nano).(time.Duration); !ok || v != 2 {
 		t.Errorf("Expected time.Duration value 2 but got %v %v", v, ok)
 	}
+	if v, ok := BinaryAdd(v_int8, v_int16).(int16); !ok || v != 2 {
+		t.Errorf("Expected int16 value 2 but got %v %v", v, ok)
+	}
+	if v, ok := BinaryAdd(v_int16, v_int8).(int16); !ok || v != 2 {
+		t.Errorf("Expected int16 value 2 but got %v %v", v, ok)
+	}
+	if v, ok := BinaryAdd(v_int8, v_int64).(int64); !ok || v != 2 {
+		t.Errorf("Expected int64 value 2 but got %v %v", v, ok)
+	}
+	if v, ok := BinaryAdd(v_int64, v_int8).(int64); !ok || v != 2 {
+		t.Errorf("Expected int64 value 2 but got %v %v", v, ok)
+	}
+	if v, ok := BinaryAdd(nano, v_int8).(time.Duration); !ok || v != 2 {
+		t.Errorf("Expected time.Duration value 2 but got %v %v", v, ok)
+	}
+	if v, ok := BinaryAdd(v_int8, nano).(time.Duration); !ok || v != 2 {
+		t.Errorf("Expected time.Duration value 2 but got %v %v", v, ok)
+	}
 }
 
 func TestBinaryAddFloat(t *testing.T) {
