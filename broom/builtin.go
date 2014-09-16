@@ -34,6 +34,11 @@ func setupBuiltins(env Environment) Environment {
 		y := Eval(env, Car(Cdr(cdr))).(int)
 		return x % y
 	}))
+	env.Bind("add", Closure(func(env Environment, cdr Pair) interface{} {
+		x := Eval(env, Car(cdr))
+		y := Eval(env, Car(Cdr(cdr)))
+		return BinaryAdd(x, y)
+	}))
 	env.Bind("+", Closure(func(env Environment, cdr Pair) interface{} {
 		xs := List2Arr(Cdr(cdr))
 		acc := Eval(env, Car(cdr)).(int)
