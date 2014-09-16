@@ -153,11 +153,20 @@ func TestBinaryAddFloat(t *testing.T) {
 	}
 }
 
-func xTestBinaryAddComplex(t *testing.T) {
-	var x, z interface{}
+func xTestBinaryAddComplexXFloat(t *testing.T) {
+	var x, y interface{}
 	x = 3.0
-	z = 4i
-	if v, ok := BinaryAdd(x, z).(complex128); !ok || v != 1+4i {
-		t.Errorf("Expected complex128 value 4.0 but got %v", v)
+	y = 4i
+	if v, ok := BinaryAdd(x, y).(complex128); !ok || v != 3.0+4i {
+		t.Errorf("Expected complex128 value 7.0i but got %v", v)
+	}
+}
+
+func TestBinaryAddComplex(t *testing.T) {
+	var x, y interface{}
+	x = 3.0i
+	y = 4i
+	if v, ok := BinaryAdd(x, y).(complex128); !ok || v != 3.0i+4i {
+		t.Errorf("Expected complex128 value 7.0i but got %v", v)
 	}
 }
