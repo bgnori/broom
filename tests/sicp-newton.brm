@@ -1,0 +1,27 @@
+;
+; http://sicp.iijlab.net/fulltext/x117.html
+;
+
+(defn mysqrt [x]
+  (loop [guess 1.0]
+    (if (good-enough? guess x)
+      guess
+      (recur (improve guess x)))))
+
+(defn square [x]
+  (mul x x))
+
+
+(defn improve [guess x]
+  (average guess (div x guess)))
+
+(defn average [x y]
+  (div (add x y) 2.0))
+
+(defn good-enough? [guess x]
+  (< (abs (sub (square guess) x)) 0.001))
+
+; (mysqrt 4)
+
+(mysqrt 9)
+; it would be something like 3.00009155413138

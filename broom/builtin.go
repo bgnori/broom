@@ -22,6 +22,31 @@ func setupBuiltins(env Environment) Environment {
 		}
 		return Cons(car, cdr)
 	}))
+	env.Bind("abs", Closure(func(env Environment, cdr Pair) interface{} {
+		v := reflect.ValueOf(Eval(env, Car(cdr)))
+		t := v.Type()
+		switch t.Kind() {
+		case reflect.Int8:
+			fallthrough
+		case reflect.Int16:
+			fallthrough
+		case reflect.Int32:
+			fallthrough
+		case reflect.Int64:
+			fallthrough
+		case reflect.Int:
+			if v.Int() < 0 {
+				return - v.Int()
+			}
+		case reflect.Float32:
+			fallthrough
+		case reflect.Float64:
+			if v.Float() < 0 {
+				return - v.Float()
+			}
+		}
+		return v.Interface()
+	}))
 
 	env.Bind(".", MakeMethodInvoker())
 	env.Bind("=", Closure(func(env Environment, cdr Pair) interface{} {
@@ -38,6 +63,21 @@ func setupBuiltins(env Environment) Environment {
 		x := Eval(env, Car(cdr))
 		y := Eval(env, Car(Cdr(cdr)))
 		return BinaryAdd(x, y)
+	}))
+	env.Bind("sub", Closure(func(env Environment, cdr Pair) interface{} {
+		x := Eval(env, Car(cdr))
+		y := Eval(env, Car(Cdr(cdr)))
+		return BinarySub(x, y)
+	}))
+	env.Bind("mul", Closure(func(env Environment, cdr Pair) interface{} {
+		x := Eval(env, Car(cdr))
+		y := Eval(env, Car(Cdr(cdr)))
+		return BinaryMul(x, y)
+	}))
+	env.Bind("div", Closure(func(env Environment, cdr Pair) interface{} {
+		x := Eval(env, Car(cdr))
+		y := Eval(env, Car(Cdr(cdr)))
+		return BinaryDiv(x, y)
 	}))
 	env.Bind("+", Closure(func(env Environment, cdr Pair) interface{} {
 		xs := List2Arr(Cdr(cdr))
@@ -88,14 +128,14 @@ func setupBuiltins(env Environment) Environment {
 		return nil
 	}))
 	env.Bind("<", Closure(func(env Environment, cdr Pair) interface{} {
-		first := Eval(env, Car(cdr)).(int)
-		second := Eval(env, (Car(Cdr(cdr)))).(int)
-		return first < second
+		first := Eval(env, Car(cdr))
+		second := Eval(env, (Car(Cdr(cdr))))
+		return BinaryLessThan(first, second)
 	}))
 	env.Bind(">", Closure(func(env Environment, cdr Pair) interface{} {
-		first := Eval(env, Car(cdr)).(int)
-		second := Eval(env, (Car(Cdr(cdr)))).(int)
-		return first > second
+		first := Eval(env, Car(cdr))
+		second := Eval(env, (Car(Cdr(cdr))))
+		return BinaryGreaterThan(first, second)
 	}))
 	env.Bind("null?", Closure(func(env Environment, cdr Pair) interface{} {
 		return isNull(Eval(env, Car(cdr)))

@@ -283,3 +283,159 @@ func BinaryAdd(x, y interface{}) interface{} {
 		panic("Add is not supported by this type.")
 	}
 }
+
+func BinarySub(x, y interface{}) interface{} {
+	xv, yv, t, ok := CoerceType(reflect.ValueOf(x), reflect.ValueOf(y))
+	if !ok || t == nil {
+		panic("Failed to coerce.")
+	}
+
+	switch t.Kind() {
+	case reflect.Int8:
+		fallthrough
+	case reflect.Int16:
+		fallthrough
+	case reflect.Int32:
+		fallthrough
+	case reflect.Int64:
+		fallthrough
+	case reflect.Int:
+		return reflect.ValueOf(xv.Int() - yv.Int()).Convert(t).Interface()
+	case reflect.Float32:
+		fallthrough
+	case reflect.Float64:
+		return reflect.ValueOf(xv.Float() - yv.Float()).Convert(t).Interface()
+	case reflect.Complex64:
+		fallthrough
+	case reflect.Complex128:
+		return reflect.ValueOf(xv.Complex() - yv.Complex()).Convert(t).Interface()
+	default:
+		panic("Sub is not supported by this type.")
+	}
+}
+
+func BinaryMul(x, y interface{}) interface{} {
+	xv, yv, t, ok := CoerceType(reflect.ValueOf(x), reflect.ValueOf(y))
+	if !ok || t == nil {
+		panic("Failed to coerce.")
+	}
+
+	switch t.Kind() {
+	case reflect.Int8:
+		fallthrough
+	case reflect.Int16:
+		fallthrough
+	case reflect.Int32:
+		fallthrough
+	case reflect.Int64:
+		fallthrough
+	case reflect.Int:
+		return reflect.ValueOf(xv.Int() * yv.Int()).Convert(t).Interface()
+	case reflect.Float32:
+		fallthrough
+	case reflect.Float64:
+		return reflect.ValueOf(xv.Float() * yv.Float()).Convert(t).Interface()
+	case reflect.Complex64:
+		fallthrough
+	case reflect.Complex128:
+		return reflect.ValueOf(xv.Complex() * yv.Complex()).Convert(t).Interface()
+	default:
+		panic("Mul is not supported by this type.")
+	}
+}
+
+func BinaryDiv(x, y interface{}) interface{} {
+	xv, yv, t, ok := CoerceType(reflect.ValueOf(x), reflect.ValueOf(y))
+	if !ok || t == nil {
+		panic("Failed to coerce.")
+	}
+
+	switch t.Kind() {
+	case reflect.Int8:
+		fallthrough
+	case reflect.Int16:
+		fallthrough
+	case reflect.Int32:
+		fallthrough
+	case reflect.Int64:
+		fallthrough
+	case reflect.Int:
+		return reflect.ValueOf(xv.Int() / yv.Int()).Convert(t).Interface()
+	case reflect.Float32:
+		fallthrough
+	case reflect.Float64:
+		return reflect.ValueOf(xv.Float() / yv.Float()).Convert(t).Interface()
+	case reflect.Complex64:
+		fallthrough
+	case reflect.Complex128:
+		return reflect.ValueOf(xv.Complex() / yv.Complex()).Convert(t).Interface()
+	default:
+		panic("Div is not supported by this type.")
+	}
+}
+
+func BinaryLessThan(x, y interface{}) interface{} {
+	xv, yv, t, ok := CoerceType(reflect.ValueOf(x), reflect.ValueOf(y))
+	if !ok || t == nil {
+		fmt.Println(xv, xv.Type(), yv, yv.Type())
+		panic("Failed to coerce.")
+	}
+
+	switch t.Kind() {
+	case reflect.Int8:
+		fallthrough
+	case reflect.Int16:
+		fallthrough
+	case reflect.Int32:
+		fallthrough
+	case reflect.Int64:
+		fallthrough
+	case reflect.Int:
+		return xv.Int() < yv.Int()
+	case reflect.Float32:
+		fallthrough
+	case reflect.Float64:
+		return xv.Float() < yv.Float()
+	case reflect.Complex64:
+		fallthrough
+	case reflect.Complex128:
+		fallthrough
+	default:
+		panic("Div is not supported by this type.")
+	}
+}
+
+func BinaryGreaterThan(x, y interface{}) interface{} {
+	xv, yv, t, ok := CoerceType(reflect.ValueOf(x), reflect.ValueOf(y))
+	if !ok || t == nil {
+		panic("Failed to coerce.")
+	}
+
+	switch t.Kind() {
+	case reflect.Int8:
+		fallthrough
+	case reflect.Int16:
+		fallthrough
+	case reflect.Int32:
+		fallthrough
+	case reflect.Int64:
+		fallthrough
+	case reflect.Int:
+		return xv.Int() > yv.Int()
+	case reflect.Float32:
+		fallthrough
+	case reflect.Float64:
+		return xv.Float() > yv.Float()
+	case reflect.Complex64:
+		fallthrough
+	case reflect.Complex128:
+		fallthrough
+	default:
+		panic("Div is not supported by this type.")
+	}
+}
+
+
+
+
+
