@@ -2,6 +2,7 @@ package broom
 
 import (
 	"fmt"
+	"reflect"
 )
 
 //type interface{} interface{} // Anything.
@@ -217,4 +218,68 @@ func Eq(x, y interface{}) bool {
 		return x == y
 	}
 	return false
+}
+
+func Wider(t1, t2 reflect.Type) int {
+	k1 := t1.Kind()
+	k2 := t2.Kind()
+	if k1 > k2 {
+		return 1
+	}
+	if k1 < k2 {
+		return -1
+	}
+	return 0
+}
+
+func CoerceType(xv, yv reflect.Value) (av, bv reflect.Value, t reflect.Type, ok bool) {
+	xt := xv.Type()
+	yt := yv.Type()
+
+	if xt == yt {
+		return xv, yv, xt, true
+	}
+
+	switch Wider(xt, yt) {
+	case -1:
+		if xt.ConvertibleTo(yt) {
+			return xv.Convert(yt), yv, yt, true
+		}
+
+	case 1:
+		if yt.ConvertibleTo(xt) {
+			return xv, yv.Convert(xt), xt, true
+		}
+	}
+	return xv, yv, nil, false
+}
+
+func BinaryAdd(x, y interface{}) interface{} {
+	xv, yv, t, ok := CoerceType(reflect.ValueOf(x), reflect.ValueOf(y))
+	if !ok || t == nil {
+		panic("Failed to coerce.")
+	}
+
+	switch t.Kind() {
+	case reflect.Int8:
+		fallthrough
+	case reflect.Int16:
+		fallthrough
+	case reflect.Int32:
+		fallthrough
+	case reflect.Int64:
+		fallthrough
+	case reflect.Int:
+		return reflect.ValueOf(xv.Int() + yv.Int()).Convert(t).Interface()
+	case reflect.Float32:
+		fallthrough
+	case reflect.Float64:
+		return reflect.ValueOf(xv.Float() + yv.Float()).Convert(t).Interface()
+	case reflect.Complex64:
+		fallthrough
+	case reflect.Complex128:
+		return reflect.ValueOf(xv.Complex() + yv.Complex()).Convert(t).Interface()
+	default:
+		panic("Add is not supported by this type.")
+	}
 }

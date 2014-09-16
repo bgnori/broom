@@ -3,6 +3,7 @@ package broom
 import (
 	"fmt"
 	"testing"
+	"time"
 )
 
 func Test_Symbol(t *testing.T) {
@@ -102,5 +103,61 @@ func Test_isString(t *testing.T) {
 	v = 1
 	if isString(v) {
 		t.Error("int must be string? false")
+	}
+}
+
+func TestBinaryAddIntXInt(t *testing.T) {
+	var v_int8, v_int16, v_int32, v_int64 interface{}
+	v_int8 = int8(1)
+	v_int16 = int16(1)
+	v_int32 = int32(1)
+	v_int64 = int64(1)
+	nano := time.Nanosecond
+
+	if v, ok := BinaryAdd(v_int8, v_int8).(int8); !ok || v != 2 {
+		t.Errorf("Expected int8 value 2 but got %v %v", v, ok)
+	}
+	if v, ok := BinaryAdd(v_int16, v_int16).(int16); !ok || v != 2 {
+		t.Errorf("Expected int16 value 2 but got %v %v", v, ok)
+	}
+	if v, ok := BinaryAdd(v_int32, v_int32).(int32); !ok || v != 2 {
+		t.Errorf("Expected int32 value 2 but got %v %v", v, ok)
+	}
+	if v, ok := BinaryAdd(v_int64, v_int64).(int64); !ok || v != 2 {
+		t.Errorf("Expected int64 value 2 but got %v %v", v, ok)
+	}
+	if v, ok := BinaryAdd(nano, nano).(time.Duration); !ok || v != 2 {
+		t.Errorf("Expected time.Duration value 2 but got %v %v", v, ok)
+	}
+}
+
+func TestBinaryAddFloat(t *testing.T) {
+	var x, y interface{}
+	x = 3.0
+	y = 3.1
+
+	if v, ok := BinaryAdd(x, 1).(float64); !ok || v != 3.0+1 {
+		t.Errorf("Expected float64 value 4.0 but got %v", v)
+	}
+	if v, ok := BinaryAdd(1, x).(float64); !ok || v != 1+3.0 {
+		t.Errorf("Expected float64 value 4.0 but got %v", v)
+	}
+	if v, ok := BinaryAdd(1, y).(float64); !ok || v != 1+3.1 {
+		t.Errorf("Expected float64 value 4.1 but got %v", v)
+	}
+	if v, ok := BinaryAdd(y, 1).(float64); !ok || v != 3.1+1 {
+		t.Errorf("Expected float64 value 4.1 but got %v", v)
+	}
+	if v, ok := BinaryAdd(x, y).(float64); !ok || v != 3.0+3.1 {
+		t.Errorf("Expected float64 value 6.1 but got %v", v)
+	}
+}
+
+func xTestBinaryAddComplex(t *testing.T) {
+	var x, z interface{}
+	x = 3.0
+	z = 4i
+	if v, ok := BinaryAdd(x, z).(complex128); !ok || v != 1+4i {
+		t.Errorf("Expected complex128 value 4.0 but got %v", v)
 	}
 }
