@@ -2,6 +2,7 @@ package broom
 
 import (
 	"fmt"
+	"sync"
 )
 
 type Environment interface {
@@ -59,14 +60,32 @@ func Eval(env Environment, expr interface{}) interface{} {
 }
 
 type enviroment struct {
+	rwm sync.RWMutex
 	variables map[string]interface{}
 	outer     Environment
 }
 
+func (env *enviroment)RLock() {
+	env.rwm.RLock()
+}
+
+func (env *enviroment)RUnlock() {
+	env.rwm.RUnlock()
+}
+
+func (env *enviroment)Lock() {
+	env.rwm.Lock()
+}
+
+func (env *enviroment)Unlock() {
+	env.rwm.Unlock()
+}
+
+
 func NewEnvFrame(outer Environment) *enviroment {
 	e := new(enviroment)
 	e.variables = make(map[string]interface{})
-	e.outer = outer
+	e.SetOuter(outer)
 	e.Bind("_env", e)
 	e.Bind("_outer", outer)
 	return e
@@ -81,35 +100,42 @@ func NewGlobalRootFrame() *enviroment {
 		given.Dump()
 		return Eval(given, Car(Cdr(cdr)))
 	}))
-	e.Bind("_watch", false)
 	return e
 }
 
 func (env *enviroment) Bind(name string, v interface{}) {
-	if found, err := env.Resolve("_watch"); err == nil && found == true {
-		fmt.Println("Env", env, name, "got", v)
-	}
+	env.Lock()
+	defer env.Unlock()
 	env.variables[name] = v
 }
 
 func (env *enviroment) Resolve(name string) (interface{}, error) {
+	env.RLock()
+	defer env.RUnlock()
 	if v, ok := env.variables[name]; ok {
 		return v, nil
 	}
-	if env.outer != nil {
-		return env.outer.Resolve(name)
+	outer := env.Outer()
+	if outer != nil {
+		return outer.Resolve(name)
 	}
 	return nil, EvalError(fmt.Sprintf("Unbound variable %s", name))
 }
 
 func (env *enviroment) SetOuter(outer Environment) {
+	env.Lock()
+	defer env.Unlock()
 	env.outer = outer
 }
 func (env *enviroment) Outer() Environment {
+	env.RLock()
+	defer env.RUnlock()
 	return env.outer
 }
 
 func (env *enviroment) Dump() {
+	env.RLock()
+	defer env.RUnlock()
 	fmt.Println("=====")
 	for key, value := range env.variables {
 		fmt.Println(key, ":", value)
