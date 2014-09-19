@@ -1,0 +1,375 @@
+; srfi-1
+; see http://www.chino-js.com/ja/tech/srfi/srfi-1/srfi-1.html
+
+; constructors
+; cons is builtin
+; list is builtin
+; xcons
+(defn xcons [d a] (cons a d))
+; cons* not supported.
+; make-list [n fill] (make-list [4 c]) ->  (c c c c)
+; list-tabulate [n init-proc] not supported.
+; list-copy builtin
+; circular-list not supported.
+; iota not supported
+
+; predicates
+(defn proper-list? [x] (pair? x))
+; cdr of pair object always pair type.
+; circular-list? [x] not supported
+; dotted-list? [x] not supported
+
+; pair? is bultin
+; null? is builtin
+; null-list? not supported
+;(defn not-pair? [x] (not pair? x))
+; not will be implemented as built in
+
+; list=  Eq in object.go
+
+; selectors
+(defn car [x] (. x Car))
+(defn cdr [x] (. x Cdr))
+
+(defn caar [x] (car (car x)))
+(defn cadr [x] (car (cdr x)))
+(defn cdar [x] (cdr (car x)))
+(defn cddr [x] (cdr (cdr x)))
+
+(defn caaar [x] (car (caar x)))
+(defn caadr [x] (car (cadr x)))
+(defn cadar [x] (car (cdar x)))
+(defn caddr [x] (car (cddr x)))
+
+(defn cdaar [x] (cdr (caar x)))
+(defn cdadr [x] (cdr (caar x)))
+(defn cddar [x] (cdr (caar x)))
+(defn cdddr [x] (cdr (caar x)))
+
+; caaar ~ cdddr are to be implemented.
+
+(defn first [x] (car x))
+(defn second [x] (car (cdr x)))
+(defn third [x] (car (cdr (cdr x))))
+(defn fourth [x] (car (cdr (cdr (cdr x)))))
+(defn fifth [x] (car (cdr (cdr (cdr (cdr x))))))
+; sixth ~ tenth are not supported
+
+(defn take [i xs] ; Clojure way. srfi says (take xs i)
+  (loop [count 0 src xs result '()]
+    (if (< count i)
+      (recur (+ count 1) (cdr src) (cons (car src) result))
+      (reverse result))))
+    
+(defn drop [i xs] ; Clojure way. srfi says (drop xs i)
+  (loop [count 0 src xs result '()]
+    (cond
+      (null? src) (reverse result)
+      (< count i) (recur (+ count 1) (cdr src) result)
+      else (recur count (cdr src) (cons (car src) result)))))
+
+(defn take-right [i xs] ; Clojure way. srfi says (take-right xs i)
+  (loop [count 0 src (reverse xs) result '()]
+    (if (< count i)
+      (recur (+ count 1) (cdr src) (cons (car src) result))
+      result)))
+
+(defn drop-right [i xs] ; Clojure way. srfi says (take-right xs i)
+  (loop [count 0 src (reverse xs) result '()]
+    (cond
+      (null? src) result
+      (< count i) (recur (+ count 1) (cdr src) result)
+      else (recur count (cdr src) (cons (car src) result)))))
+
+; take! not supported
+; drop-right! not supported
+
+; split-at 
+; values (take x i) (drop x i)
+; what is "values"?
+
+; split-at! not supported
+
+(defn last [xs]
+  (loop [src xs]
+    (if (null? (cdr src))
+      (car src)
+      (recur (cdr src)))))
+
+; last-pair not supported
+
+(defn length [xs]
+  (loop [src xs count 0]
+    (if (null? src)
+      count
+      (recur (cdr src) (+ count 1)))))
+
+; length+ not supported
+
+; append not be supported
+; append! not supported
+
+(defn concat [xs ys] ; from Clojure
+  (loop [src (reverse xs) result ys]
+    (if (null? src)
+      result
+      (recur (cdr src) (cons (car src) result)))))
+
+
+; concatenate not implemented
+; concatenate! not supported
+
+; reverse 
+;(defn reverse [xs]
+;  (loop [src xs result '()]
+;    (if (null? src)
+;     result
+;     (recur (cdr src) (cons (car src) result)))))
+;
+(defn reverse [xs]
+  (fold1 cons '() xs))
+
+; reverse! not supported
+
+; append-reverse not supported
+; append-reverse! not supported
+
+; zip [list..] (lambda lists (apply map list lists)) builtin
+(defn zip1 [xs1]
+  (loop [src xs1 result '()]
+    (if (null? src)
+      (reverse result)
+      (recur (cdr src) (cons (cons (car src) '()) result)))))
+
+(defn zip2 [xs1 xs2]
+  (loop [s1 xs1 s2 xs2 result '()]
+    (if (or (null? s1) (null? s2))
+      (reverse result)
+      (recur (cdr s1) (cdr s2) (cons (cons (car s1) (cons (car s2) '())) result)))))
+
+(defn unzip1 [xxs]
+  (loop [rest xxs result '()]
+    (if (null? rest)
+      (reverse result)
+      (recur (cdr rest) (cons (caar rest) result)))))
+
+; unzip2 values is needed
+; unzip3 not supported
+; unzip4 not supported
+; unzip5 not supported
+
+; count not supported
+; (defn count [perd clist1 clist2] )
+
+; high orders
+; fold -> builtin
+(defn fold1 [f init xs]
+  (loop [rest xs result init]
+    (if (null? rest)
+      result
+      (recur (cdr rest) (f (car rest) result)))))
+
+; fold-right -> builtin
+(defn fold-right1 [f init xs]
+  (if (null? xs)
+    init
+    (f (car xs) (fold-right1 f init (cdr xs)))))
+
+; pair-fold not supported
+(defn pair-fold1 [f init xs]
+  (if (null? xs)
+    init
+    (pair-fold1 f (f xs init) (cdr xs))))
+
+; pair-fold-right not supported
+(defn pair-fold-right1 [f init xs]
+  (if (null? xs)
+    init
+    (f xs (pair-fold-right1 f init (cdr xs)))))
+
+(defn reduce [f init xs]
+  (fold1 f init xs))
+; (defn reduce [f init xs]
+;   (if (null? xs)
+;     init
+;     (fold1 f (car xs) (cdr xs))))
+
+(defn reduce-right [f init xs]
+  (fold-right1 f init xs))
+
+(defn unfold [pred f next seed tail-gen]
+  (if (pred seed)
+    (tail-gen seed)
+    (cons (f seed)
+          (unfold pred f next (next seed) tail-gen))))
+
+; this is wrong! Can't (car (tail-gen s))
+; (defn unfold [pred f next seed tail-gen]
+;   (loop [s seed result '()]
+;     (if (pred s)
+;       (reverse (cons (car (tail-gen s)) result))
+;       (recur (next s) (cons (f s) result)))))
+
+
+; unfold-right  
+(defn unfold-right [p f g seed tail]
+  (loop [i seed result tail]
+    (if (p i)
+      result
+      (recur (g i) (cons (f i) result)))))
+
+
+; map to be implemented (builtin?)
+; (defn map1 [f xs] ; recursive version
+;   (if (null? xs)
+;     '()
+;     (cons (f (car xs)) (map1 f (cdr xs)))))
+; 
+
+(defn map1 [f xs] ; loop version
+  (loop [src xs result '()]
+    (if (null? src)
+      (reverse result)
+      (recur (cdr src) (cons (f (car src)) result)))))
+
+; for-each not supported
+(defn for-each [f xs] ; need test. side effect.
+  (loop [src xs]
+    (if (null? src)
+      '() ; want Undef
+      (recur (cdr src)))))
+
+; append-map not supported
+; append-map! not supported
+; map! not supported
+; map-in-order not supported
+; pair-for-each not supported
+; fillter-map not supported
+
+; to be builtin
+(defn filter [pred xs]
+  (loop [src xs result '()]
+    (cond
+      (null? src) (reverse result)
+      (pred (car src)) (recur (cdr src) (cons (car src) result))
+      else (recur (cdr src) result))))
+
+; partition to be supported
+; 「値を二つ返す」ってどういうこと?
+(defn remove [pred xs]
+  (filter (fn [x] (not (pred x))) xs))
+
+; filter! not supported
+; partition! not supported
+; remove! not supported
+
+; 
+(defn find [pred xs] 
+  (loop [rest xs]
+    (cond
+      (null? rest) false
+      (pred (car rest)) (car rest)
+      else (recur (cdr rest)))))
+
+(defn find-tail [pred xs]
+  (loop [rest xs]
+    (cond 
+      (null? rest) false
+      (pred (car rest)) rest
+      else (recur (cdr rest)))))
+
+(defn take-while [pred xs]
+  (loop [rest xs result '()]
+    (cond
+      (null? rest) (reverse result)
+      (pred (car rest)) (recur (cdr rest) (cons (car rest) result))
+      else (reverse result))))
+
+(defn drop-while [pred xs]
+  (loop [rest xs]
+    (cond 
+      (null? rest) false
+      (pred (car rest)) (recur (cdr rest))
+      else rest)))
+
+; span
+; valuesが不明.
+; span! not supported
+; break
+; break! not supported
+
+
+; any 
+; need zip
+; 
+; in srfi-1, any1 might return not boolean value, but we don't
+;
+(defn any1 [f xs]
+  (loop [rest xs]
+    (cond
+      (null? rest) false
+      (f (car rest)) true
+      else (recur (cdr rest)))))
+
+(defn every1 [f xs]
+  (loop [rest xs]
+    (cond
+      (null? rest) true
+      (f (car rest)) (recur (cdr rest))
+      else false)))
+
+(defn list-index1 [pred xs] ;
+  (loop [rest xs i 0]
+    (cond
+      (null? rest) false
+      (pred (car rest)) i
+      else (recur (cdr rest) (+ i 1)))))
+
+; member not supported
+; memq not supported
+; memv not supported
+
+; not supported
+; delete
+; delete!
+; delete-duplicates
+; delete-duplicates!
+
+; associated list is not supported
+; since we have native map
+; assoc
+; assq
+; assv
+
+; alist-cons
+; alist-copy
+; alist-delete
+; alist-delete!
+
+; list-based set are not suppoted
+; use map
+; lset
+; lset=
+; lset-adjoin
+; lset-union
+; lset-intersection
+; lset-difference
+; lset-xor
+; lset-diff+intersection
+; lset-union!
+; lset-intersection!
+; lset-difference!
+; lset-xor!
+; lset-diff+intersection!
+
+
+; set-car!
+(defn set-car! [p v]
+  (. p SetCar v))
+
+; set-cdr!
+(defn set-cdr! [p v]
+  (. p SetCdr v))
+
+
+
