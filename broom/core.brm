@@ -1,6 +1,7 @@
-(define defmacro
+
+(def defmacro
         (macro [name xs body]
-               (list 'define name (list 'macro xs body))))
+               (list 'def name (list 'macro xs body))))
 
 (defmacro identity [expr]
     expr)
@@ -12,8 +13,12 @@
     (list 'fn (List2Arr xs) body))
 
 (defmacro defn [name args body]
-    (list 'define name (list 'fn args body)))
+    (list 'def name (list 'fn args body)))
 
+(defmacro define [name expr] (list 'def name expr))
+;
+;    [(name args) body]
+;        ('defn name [args] body))
 
 (defn even? [x]
     (= (mod x 2) 0))

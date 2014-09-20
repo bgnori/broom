@@ -20,8 +20,8 @@ func setupSpecialForms(env Environment) Environment {
 		return nil
 	}))
 
-	//case sym("define").Eq(car): //definition?
-	env.Bind("define", Closure(func(env Environment, cdr Pair) interface{} {
+	//case sym("def").Eq(car): //definition?
+	env.Bind("def", Closure(func(env Environment, cdr Pair) interface{} {
 		s, _ := Car(cdr).(Symbol)
 		v := Car(Cdr(cdr))
 		u := Eval(env, v)
