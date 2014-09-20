@@ -60,27 +60,26 @@ func Eval(env Environment, expr interface{}) interface{} {
 }
 
 type enviroment struct {
-	rwm sync.RWMutex
+	rwm       sync.RWMutex
 	variables map[string]interface{}
 	outer     Environment
 }
 
-func (env *enviroment)RLock() {
+func (env *enviroment) RLock() {
 	env.rwm.RLock()
 }
 
-func (env *enviroment)RUnlock() {
+func (env *enviroment) RUnlock() {
 	env.rwm.RUnlock()
 }
 
-func (env *enviroment)Lock() {
+func (env *enviroment) Lock() {
 	env.rwm.Lock()
 }
 
-func (env *enviroment)Unlock() {
+func (env *enviroment) Unlock() {
 	env.rwm.Unlock()
 }
-
 
 func NewEnvFrame(outer Environment) *enviroment {
 	e := new(enviroment)

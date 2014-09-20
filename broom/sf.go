@@ -1,5 +1,9 @@
 package broom
 
+import (
+	"fmt"
+)
+
 func setupSpecialForms(env Environment) Environment {
 	//case sym("quote").Eq(car): //quoted?
 	env.Bind("quote", Closure(func(env Environment, cdr Pair) interface{} {
@@ -38,14 +42,6 @@ func setupSpecialForms(env Environment) Environment {
 		return nil
 	}))
 
-	env.Bind("lambda", Closure(func(env Environment, cdr Pair) interface{} {
-		//sort of macro
-		xs := List2Arr(Car(cdr).(Pair))
-		body := Cdr(cdr).(Pair)
-		transformed := Cons(sym("fn"), Cons(xs, body))
-		return Eval(env, transformed) //fn
-	}))
-
 	//idea from http://clojuredocs.org/clojure_core/clojure.core/fn
 	env.Bind("fn", Closure(func(lexical Environment, cdr Pair) interface{} {
 		r := Closure(func(dynamic Environment, args Pair) interface{} {
@@ -73,17 +69,6 @@ func setupSpecialForms(env Environment) Environment {
 			}
 		}
 		panic("never reach")
-	}))
-
-	//idea from http://clojuredocs.org/clojure_core/clojure.core/defn
-	// (defn name [params*] body)
-	env.Bind("defn", Closure(func(env Environment, cdr Pair) interface{} {
-		//sort of macro
-		name := Car(cdr)
-		xs := Car(Cdr(cdr))
-		body := Cdr(Cdr(cdr))
-		transformed := List(sym("define"), name, Cons(sym("fn"), Cons(xs, body)))
-		return Eval(env, transformed)
 	}))
 
 	//case sym("begin").Eq(car): //begin?
@@ -116,12 +101,29 @@ func setupSpecialForms(env Environment) Environment {
 		return nil //undef
 	}))
 
-	// when macro
-	// http://www.shido.info/lisp/scheme_syntax.html
-	env.Bind("when", Closure(func(env Environment, cdr Pair) interface{} {
-		conv := List(sym("if"), Car(cdr),
-			Cons(sym("begin"), Cdr(cdr)))
-		return Eval(env, conv)
+	//macro
+	env.Bind("macro", Closure(func(lexical Environment, cdr Pair) interface{} {
+		m := Closure(func(dynamic Environment, args Pair) interface{} {
+			env = NewEnvFrame(lexical)
+			env.Bind("_dynamic", dynamic)
+			as := List2Arr(args)
+			for i, v := range Args(cdr) {
+				s := v.(Symbol)
+				env.Bind(s.GetValue(), as[i])
+			}
+			env.Bind("exprs", args)
+
+			var transformed interface{}
+			for _, b := range List2Arr(Body(cdr)) {
+				transformed = Eval(env, b)
+			}
+			fmt.Println(cdr)
+			fmt.Println("--(macro)-->")
+			fmt.Println(transformed)
+			//Our macro is macor object. it won't expand until see it.
+			return Eval(dynamic, transformed)
+		})
+		return m
 	}))
 
 	// to be implemented

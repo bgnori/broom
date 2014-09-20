@@ -434,4 +434,3 @@ func BinaryGreaterThan(x, y interface{}) interface{} {
 		panic("Greater than is not supported by this type.")
 	}
 }
-

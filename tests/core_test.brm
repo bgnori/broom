@@ -7,4 +7,10 @@
 (even? 2) ; true
 (even? 3) ; false
 
+(identity (+ 1 2 3))
+
+(when true
+    (println "hi macro"))
+    
+    
 

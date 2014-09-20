@@ -22,6 +22,25 @@ func setupBuiltins(env Environment) Environment {
 		}
 		return Cons(car, cdr)
 	}))
+	env.Bind("List2Arr", Closure(func(env Environment, args Pair) interface{} {
+		list := Eval(env, Car(args))
+		return List2Arr(list)
+	}))
+	env.Bind("list", Closure(func(env Environment, args Pair) interface{} {
+		var head, tail Pair
+
+		for _, v := range List2Arr(args) {
+			x := Eval(env, v)
+			if head == nil && tail == nil {
+				head = Cons(x, nil)
+				tail = head
+			} else {
+				tail.SetCdr(Cons(x, nil))
+				tail = tail.Cdr()
+			}
+		}
+		return head
+	}))
 	env.Bind("abs", Closure(func(env Environment, cdr Pair) interface{} {
 		v := reflect.ValueOf(Eval(env, Car(cdr)))
 		t := v.Type()
@@ -36,13 +55,13 @@ func setupBuiltins(env Environment) Environment {
 			fallthrough
 		case reflect.Int:
 			if v.Int() < 0 {
-				return - v.Int()
+				return -v.Int()
 			}
 		case reflect.Float32:
 			fallthrough
 		case reflect.Float64:
 			if v.Float() < 0 {
-				return - v.Float()
+				return -v.Float()
 			}
 		}
 		return v.Interface()
@@ -297,7 +316,8 @@ func MakeMethodInvoker() Closure {
 				return List(ys...)
 			}
 		} else {
-			panic("no such method:" + name)
+			s := fmt.Sprintf("object %v (%v) does not have such method: %v", obj, cdr.Car(), name)
+			panic(s)
 		}
 	}
 }
