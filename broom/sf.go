@@ -59,7 +59,7 @@ func setupSpecialForms(env Environment) Environment {
 	env.Bind("loop", Closure(func(dynamic Environment, cdr Pair) interface{} {
 		r := NewRecur(dynamic, Car(cdr))
 		var x interface{}
-		for recuring := true; recuring; {
+		for {
 			for _, b := range List2Arr(Body(cdr)) {
 				x = Eval(r.Env(), b)
 			}
