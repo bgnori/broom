@@ -2,12 +2,13 @@ package broom
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 )
 
 func TestMethodInvocationA(t *testing.T) {
 	e := NewGlobalRootFrame()
-	expr := List(MakeMethodInvoker(), List(sym("quote"), List(1, 2)), sym("Car"))
+	expr := List(MakeMethodInvoker(nil), List(sym("quote"), List(1, 2)), sym("Car"))
 	r := Eval(e, expr)
 	if v, ok := r.(int); !ok || v != 1 {
 		t.Error("expected 1")
@@ -19,7 +20,7 @@ func TestMethodInvocationA(t *testing.T) {
 
 func TestMethodInvocationB(t *testing.T) {
 	e := NewGlobalRootFrame()
-	expr := List(MakeMethodInvoker(), List(sym("quote"), List(1, 2)), sym("String"))
+	expr := List(MakeMethodInvoker(nil), List(sym("quote"), List(1, 2)), sym("String"))
 	r := Eval(e, expr)
 	if r != "(1 2)" {
 		t.Error("expected (1 2)")
@@ -29,11 +30,20 @@ func TestMethodInvocationB(t *testing.T) {
 
 func xTestMethodInvocationC(t *testing.T) {
 	e := NewGlobalRootFrame()
-	expr := List(MakeMethodInvoker(), string("abcdef"), sym("At"), 3)
+	expr := List(MakeMethodInvoker(nil), string("abcdef"), sym("At"), 3)
 	r := Eval(e, expr)
 	if r != 'd' {
 		t.Error("expected 'd'")
 		fmt.Println(r)
+	}
+}
+
+func TestPackageFuncInvocation(t *testing.T) {
+	e := NewGlobalRootFrame()
+	expr := List(MakeMethodInvoker(MakeReflectPackage()), List(sym("quote"), sym("reflect.TypeOf")), 1)
+	r := Eval(e, expr)
+	if r != reflect.TypeOf(1) {
+		t.Error("expected reflect.Typo(1)")
 	}
 }
 

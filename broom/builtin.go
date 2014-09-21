@@ -67,7 +67,7 @@ func setupBuiltins(env Environment) Environment {
 		return v.Interface()
 	}))
 
-	env.Bind(".", MakeMethodInvoker())
+	env.Bind(".", MakeMethodInvoker(MakeReflectPackage()))
 	env.Bind("=", Closure(func(env Environment, cdr Pair) interface{} {
 		x := Eval(env, Car(cdr))
 		y := Eval(env, Car(Cdr(cdr)))
@@ -294,17 +294,27 @@ func setupBuiltins(env Environment) Environment {
 	return env
 }
 
-func MakeMethodInvoker() Closure {
+func MakeMethodInvoker(p *Package) Closure {
 	return func(env Environment, cdr Pair) interface{} {
 		//see  http://stackoverflow.com/questions/14116840/dynamically-call-method-on-interface-regardless-of-receiver-type
 		obj := Eval(env, cdr.Car())
-		name := cdr.Cdr().Car().(Symbol).GetValue()
-		value := reflect.ValueOf(obj)
-		method := value.MethodByName(name)
+		fmt.Println(obj)
 
-		xs := helper(env, cdr.Cdr().Cdr(), nil)
-		if method.IsValid() {
-			vs := method.Call(xs)
+		var name string
+		var f reflect.Value
+		var xs []reflect.Value
+		if s, ok := obj.(Symbol); ok  {
+			f = p.Query(s.GetValue())
+			xs = helper(env, cdr.Cdr(), nil)
+		} else {
+			value := reflect.ValueOf(obj)
+			name = cdr.Cdr().Car().(Symbol).GetValue()
+			f = value.MethodByName(name)
+			xs = helper(env, cdr.Cdr().Cdr(), nil)
+		}
+
+		if f.IsValid() {
+			vs := f.Call(xs)
 			i := len(vs)
 			if i == 1 {
 				return vs[0].Interface()
