@@ -16,7 +16,7 @@ func TestEvalQuotedSymbol(t *testing.T) {
 
 func TestEvalDefine(t *testing.T) {
 	e := NewGlobalRootFrame()
-	v := Eval(e, List(sym("define"), sym("A"), 42))
+	v := Eval(e, List(sym("def"), sym("A"), 42))
 	if found, err := e.Resolve("A"); err != nil || found != 42 {
 		t.Error("expected 42")
 	}
@@ -39,7 +39,7 @@ func TestEvalIF(t *testing.T) {
 
 func TestEvalLambda(t *testing.T) {
 	e := NewGlobalRootFrame()
-	f := Eval(e, List(sym("lambda"), List(sym("x")), sym("x")))
+	f := Eval(e, List(sym("fn"), []interface{}{sym("x")}, sym("x")))
 	if _, ok := f.(Closure); !ok {
 		t.Error("expected Procedure")
 	}
@@ -61,7 +61,8 @@ func TestEvalfn(t *testing.T) {
 	}
 }
 
-func TestEvaldefn(t *testing.T) {
+func xTestEvaldefn(t *testing.T) {
+	//defn is macro now
 	e := NewGlobalRootFrame()
 	Eval(e, List(sym("defn"), sym("foo"), []interface{}{sym("x")}, sym("x")))
 	f := Eval(e, sym("foo"))
@@ -74,7 +75,8 @@ func TestEvaldefn(t *testing.T) {
 	}
 }
 
-func TestEvalWhen(t *testing.T) {
+func xTestEvalWhen(t *testing.T) {
+	// when is macro
 	e := NewGlobalRootFrame()
 	v := Eval(e, List(sym("when"), true, 1, 2, 3))
 	if v != 3 {
