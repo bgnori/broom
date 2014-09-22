@@ -6,6 +6,7 @@ import (
 
 type Package struct {
 	objects map[string]reflect.Value
+	values map[reflect.Kind]reflect.Value
 }
 
 func (p *Package)register(name string, f interface{}) {
@@ -13,8 +14,29 @@ func (p *Package)register(name string, f interface{}) {
 	p.objects[name] = v
 }
 
+func (p *Package)setupValues(){
+	p.values = make(map[reflect.Kind]reflect.Value, reflect.UnsafePointer + 1)
+	p.values[reflect.Bool] = reflect.Zero(reflect.TypeOf(true))
+	p.values[reflect.Int] = reflect.Zero(reflect.TypeOf(0))
+	p.values[reflect.Int8] = reflect.Zero(reflect.TypeOf(int8(0)))
+	p.values[reflect.Int16] = reflect.Zero(reflect.TypeOf(int16(0)))
+	p.values[reflect.Int32] = reflect.Zero(reflect.TypeOf(int32(0)))
+	p.values[reflect.Int64] = reflect.Zero(reflect.TypeOf(int64(0)))
+	p.values[reflect.Uint] = reflect.Zero(reflect.TypeOf(uint(0)))
+	p.values[reflect.Uint8] = reflect.Zero(reflect.TypeOf(uint8(0)))
+	p.values[reflect.Uint16] = reflect.Zero(reflect.TypeOf(uint16(0)))
+	p.values[reflect.Uint32] = reflect.Zero(reflect.TypeOf(uint32(0)))
+	p.values[reflect.Uint64] = reflect.Zero(reflect.TypeOf(uint64(0)))
+	p.values[reflect.Uintptr] = reflect.Zero(reflect.TypeOf(uintptr(0)))
+	p.values[reflect.Float32] = reflect.Zero(reflect.TypeOf(float32(0)))
+	p.values[reflect.Float64] = reflect.Zero(reflect.TypeOf(float64(0)))
+	p.values[reflect.Complex64] = reflect.Zero(reflect.TypeOf(complex64(0)))
+	p.values[reflect.Complex128] = reflect.Zero(reflect.TypeOf(complex128(0)))
+}
+
 func MakeReflectPackage() *Package {
 	p := new(Package)
+	p.setupValues()
 	p.objects = make(map[string]reflect.Value)
 
 	p.register("reflect.Copy", reflect.Copy)
@@ -41,39 +63,41 @@ func MakeReflectPackage() *Package {
 
 	p.register("reflect.Select", reflect.Select)
 
-	p.register("reflect.KindFromString", func(name string) reflect.Value {
+	p.register("reflect.KindFromString", func(name string) reflect.Kind{
 		switch name {
-			case "Bool": return reflect.ValueOf(reflect.Bool)
-			case "Int": return reflect.ValueOf(reflect.Int)
-			case "Int8": return reflect.ValueOf(reflect.Int8)
-			case "Int16": return reflect.ValueOf(reflect.Int16)
-			case "Int32": return reflect.ValueOf(reflect.Int32)
-			case "Int64": return reflect.ValueOf(reflect.Int64)
-			case "Uint": return reflect.ValueOf(reflect.Uint)
-			case "Uint8": return reflect.ValueOf(reflect.Uint8)
-			case "Uint16": return reflect.ValueOf(reflect.Uint16)
-			case "Uint32": return reflect.ValueOf(reflect.Uint32)
-			case "Uint64": return reflect.ValueOf(reflect.Uint64)
-			case "Uintptr": return reflect.ValueOf(reflect.Uintptr)
-			case "Float32": return reflect.ValueOf(reflect.Float32)
-			case "Float64": return reflect.ValueOf(reflect.Float64)
-			case "Complex64": return reflect.ValueOf(reflect.Complex64)
-			case "Complex128": return reflect.ValueOf(reflect.Complex128)
-			case "Array": return reflect.ValueOf(reflect.Array)
-			case "Chan": return reflect.ValueOf(reflect.Chan)
-			case "Func": return reflect.ValueOf(reflect.Func)
-			case "Interface": return reflect.ValueOf(reflect.Interface)
-			case "Map": return reflect.ValueOf(reflect.Map)
-			case "Ptr": return reflect.ValueOf(reflect.Ptr)
-			case "Slice": return reflect.ValueOf(reflect.Slice)
-			case "String": return reflect.ValueOf(reflect.String)
-			case "Struct": return reflect.ValueOf(reflect.Struct)
-			case "UnsafePointer": return reflect.ValueOf(reflect.UnsafePointer)
+			case "Bool": return reflect.Bool
+			case "Int": return reflect.Int
+			case "Int8": return reflect.Int8
+			case "Int16": return reflect.Int16
+			case "Int32": return reflect.Int32
+			case "Int64": return reflect.Int64
+			case "Uint": return reflect.Uint
+			case "Uint8": return reflect.Uint8
+			case "Uint16": return reflect.Uint16
+			case "Uint32": return reflect.Uint32
+			case "Uint64": return reflect.Uint64
+			case "Uintptr": return reflect.Uintptr
+			case "Float32": return reflect.Float32
+			case "Float64": return reflect.Float64
+			case "Complex64": return reflect.Complex64
+			case "Complex128": return reflect.Complex128
+			case "Array": return reflect.Array
+			case "Chan": return reflect.Chan
+			case "Func": return reflect.Func
+			case "Interface": return reflect.Interface
+			case "Map": return reflect.Map
+			case "Ptr": return reflect.Ptr
+			case "Slice": return reflect.Slice
+			case "String": return reflect.String
+			case "Struct": return reflect.Struct
+			case "UnsafePointer": return reflect.UnsafePointer
 		default:
 			panic("bad name: "+name)
 		}
 	})
-
+	p.register("reflect.ZeroValueOf", func(k reflect.Kind) reflect.Value {
+		return p.values[k]
+	})
 	return p
 }
 
