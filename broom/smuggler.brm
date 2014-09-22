@@ -1,0 +1,6 @@
+(define KindString (. 'reflect.KindFromString "String"))
+
+(println KindString)
+
+(define KindComplex (. 'reflect.KindFromString "Complex128"))
+(println (. 'reflect.TypeByKind KindComplex))

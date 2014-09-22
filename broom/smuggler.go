@@ -6,7 +6,7 @@ import (
 
 type Package struct {
 	objects map[string]reflect.Value
-	values map[reflect.Kind]reflect.Value
+	types map[reflect.Kind]reflect.Type
 }
 
 func (p *Package)register(name string, f interface{}) {
@@ -15,23 +15,23 @@ func (p *Package)register(name string, f interface{}) {
 }
 
 func (p *Package)setupValues(){
-	p.values = make(map[reflect.Kind]reflect.Value, reflect.UnsafePointer + 1)
-	p.values[reflect.Bool] = reflect.Zero(reflect.TypeOf(true))
-	p.values[reflect.Int] = reflect.Zero(reflect.TypeOf(0))
-	p.values[reflect.Int8] = reflect.Zero(reflect.TypeOf(int8(0)))
-	p.values[reflect.Int16] = reflect.Zero(reflect.TypeOf(int16(0)))
-	p.values[reflect.Int32] = reflect.Zero(reflect.TypeOf(int32(0)))
-	p.values[reflect.Int64] = reflect.Zero(reflect.TypeOf(int64(0)))
-	p.values[reflect.Uint] = reflect.Zero(reflect.TypeOf(uint(0)))
-	p.values[reflect.Uint8] = reflect.Zero(reflect.TypeOf(uint8(0)))
-	p.values[reflect.Uint16] = reflect.Zero(reflect.TypeOf(uint16(0)))
-	p.values[reflect.Uint32] = reflect.Zero(reflect.TypeOf(uint32(0)))
-	p.values[reflect.Uint64] = reflect.Zero(reflect.TypeOf(uint64(0)))
-	p.values[reflect.Uintptr] = reflect.Zero(reflect.TypeOf(uintptr(0)))
-	p.values[reflect.Float32] = reflect.Zero(reflect.TypeOf(float32(0)))
-	p.values[reflect.Float64] = reflect.Zero(reflect.TypeOf(float64(0)))
-	p.values[reflect.Complex64] = reflect.Zero(reflect.TypeOf(complex64(0)))
-	p.values[reflect.Complex128] = reflect.Zero(reflect.TypeOf(complex128(0)))
+	p.types = make(map[reflect.Kind]reflect.Type, reflect.UnsafePointer + 1)
+	p.types[reflect.Bool] = reflect.TypeOf(true)
+	p.types[reflect.Int] = reflect.TypeOf(0)
+	p.types[reflect.Int8] = reflect.TypeOf(int8(0))
+	p.types[reflect.Int16] = reflect.TypeOf(int16(0))
+	p.types[reflect.Int32] = reflect.TypeOf(int32(0))
+	p.types[reflect.Int64] = reflect.TypeOf(int64(0))
+	p.types[reflect.Uint] = reflect.TypeOf(uint(0))
+	p.types[reflect.Uint8] = reflect.TypeOf(uint8(0))
+	p.types[reflect.Uint16] = reflect.TypeOf(uint16(0))
+	p.types[reflect.Uint32] = reflect.TypeOf(uint32(0))
+	p.types[reflect.Uint64] = reflect.TypeOf(uint64(0))
+	p.types[reflect.Uintptr] = reflect.TypeOf(uintptr(0))
+	p.types[reflect.Float32] = reflect.TypeOf(float32(0))
+	p.types[reflect.Float64] = reflect.TypeOf(float64(0))
+	p.types[reflect.Complex64] = reflect.TypeOf(complex64(0))
+	p.types[reflect.Complex128] = reflect.TypeOf(complex128(0))
 }
 
 func MakeReflectPackage() *Package {
@@ -95,8 +95,8 @@ func MakeReflectPackage() *Package {
 			panic("bad name: "+name)
 		}
 	})
-	p.register("reflect.ZeroValueOf", func(k reflect.Kind) reflect.Value {
-		return p.values[k]
+	p.register("reflect.TypeByKind", func(k reflect.Kind) reflect.Type{
+		return p.types[k]
 	})
 	return p
 }
