@@ -298,7 +298,7 @@ func MakeMethodInvoker(p *Package) Closure {
 	return func(env Environment, cdr Pair) interface{} {
 		//see  http://stackoverflow.com/questions/14116840/dynamically-call-method-on-interface-regardless-of-receiver-type
 		obj := Eval(env, cdr.Car())
-		fmt.Println(obj)
+		//fmt.Println(obj)
 
 		var name string
 		var f reflect.Value
@@ -309,6 +309,11 @@ func MakeMethodInvoker(p *Package) Closure {
 		} else {
 			value := reflect.ValueOf(obj)
 			name = cdr.Cdr().Car().(Symbol).GetValue()
+			//method or value?
+			field := value.FieldByName(name)
+			if field.IsValid() {
+				return field
+			}
 			f = value.MethodByName(name)
 			xs = helper(env, cdr.Cdr().Cdr(), nil)
 		}
@@ -326,7 +331,7 @@ func MakeMethodInvoker(p *Package) Closure {
 				return List(ys...)
 			}
 		} else {
-			s := fmt.Sprintf("object %v (%v) does not have such method: %v", obj, cdr.Car(), name)
+			s := fmt.Sprintf("object %v (%v) does not have such field or method: %v", obj, cdr.Car(), name)
 			panic(s)
 		}
 	}

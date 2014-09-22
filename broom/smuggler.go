@@ -40,6 +40,7 @@ func MakeReflectPackage() *Package {
 	p.objects = make(map[string]reflect.Value)
 
 	p.register("reflect.Copy", reflect.Copy)
+	p.register("reflect.ValueOf", reflect.ValueOf)
 	p.register("reflect.TypeOf", reflect.TypeOf)
 	p.register("reflect.DeepEqual", reflect.DeepEqual)
 
@@ -62,6 +63,51 @@ func MakeReflectPackage() *Package {
 	p.register("reflect.AppendSlice", reflect.AppendSlice)
 
 	p.register("reflect.Select", reflect.Select)
+
+	p.register("reflect.ChanDir", func(recv, send bool) reflect.ChanDir {
+		switch {
+		case recv && send:
+			return reflect.BothDir
+		case recv:
+			return reflect.RecvDir
+		case send:
+			return reflect.SendDir
+		default:
+			panic("never reach")
+		}
+	})
+
+	p.register("reflect.SelectCase",
+	func(Dir reflect.SelectDir, Chan reflect.Value, Send reflect.Value) *reflect.SelectCase {
+		return &reflect.SelectCase{Dir:Dir, Chan:Chan, Send:Send}
+	})
+
+	p.register("reflect.SliceHeader",
+	func(Data uintptr, Len int, Cap int) *reflect.SliceHeader {
+		return &reflect.SliceHeader{Data:Data, Len:Len, Cap:Cap}
+	})
+	p.register("reflect.StringHeader",
+	func(Data uintptr, Len int) *reflect.StringHeader {
+		return &reflect.StringHeader{Data:Data, Len:Len}
+	})
+	p.register("reflect.StructField",
+	func(Name string,
+		PkgPath string,
+		Type reflect.Type,
+		Tag reflect.StructTag,
+		Offset uintptr,
+		Index []int,
+		Anonymous bool) *reflect.StructField {
+		return &reflect.StructField{
+			Name:Name,
+			PkgPath:PkgPath,
+			Type:Type,
+			Tag:Tag,
+			Offset:Offset,
+			Index:Index,
+			Anonymous:Anonymous}
+	})
+
 
 	p.register("reflect.KindFromString", func(name string) reflect.Kind{
 		switch name {

@@ -4,3 +4,20 @@
 
 (define KindComplex (. 'reflect.KindFromString "Complex128"))
 (println (. 'reflect.TypeByKind KindComplex))
+
+(def pt2ev (. 'reflect.ValueOf _env))
+(def vofev (. pt2ev Elem))
+(. vofev NumField)
+
+(loop [i 0]
+    (if (< i (. vofev NumField))
+        (begin
+            (println i)
+            (def sf (. vofev Field i))
+            (println (. sf Type))
+            ;(println (. vofev FieldByIndex (. sf Index)))
+            (recur (+ i 1)))
+        '()))
+
+
+
