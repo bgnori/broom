@@ -307,7 +307,7 @@ func GolangInterop() Closure {
 		var xs []reflect.Value
 		name = cdr.Cdr().Car().(Symbol).GetValue()
 
-		if proxy, ok := obj.(*PackageProxy) ; ok {
+		if proxy, ok := obj.(*PackageProxy); ok {
 			//fmt.Println("getting from proxy, ", name)
 			f, ok = proxy.Find(name)
 			if !ok {

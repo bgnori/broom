@@ -6,26 +6,26 @@ import (
 )
 
 type PackageProxy struct {
-	name string
+	name  string
 	funcs map[string]reflect.Value
 }
 
-func (pp *PackageProxy) Name () string {
+func (pp *PackageProxy) Name() string {
 	return pp.name
 }
 
-func (pp *PackageProxy) Find (name string) (reflect.Value, bool) {
+func (pp *PackageProxy) Find(name string) (reflect.Value, bool) {
 	val, ok := pp.funcs[name]
 	return val, ok
 }
 
-func (pp *PackageProxy)register(name string, f interface{}) {
+func (pp *PackageProxy) register(name string, f interface{}) {
 	v := reflect.ValueOf(f)
 	pp.funcs[name] = v
 }
 
 func NewPackageProxy(name string) *PackageProxy {
-	p := &PackageProxy{name:name}
+	p := &PackageProxy{name: name}
 	p.funcs = make(map[string]reflect.Value)
 	return p
 }
@@ -71,35 +71,35 @@ func MakeReflectPackage() *PackageProxy {
 	})
 
 	p.register("SelectCase",
-	func(Dir reflect.SelectDir, Chan reflect.Value, Send reflect.Value) *reflect.SelectCase {
-		return &reflect.SelectCase{Dir:Dir, Chan:Chan, Send:Send}
-	})
+		func(Dir reflect.SelectDir, Chan reflect.Value, Send reflect.Value) *reflect.SelectCase {
+			return &reflect.SelectCase{Dir: Dir, Chan: Chan, Send: Send}
+		})
 
 	p.register("SliceHeader",
-	func(Data uintptr, Len int, Cap int) *reflect.SliceHeader {
-		return &reflect.SliceHeader{Data:Data, Len:Len, Cap:Cap}
-	})
+		func(Data uintptr, Len int, Cap int) *reflect.SliceHeader {
+			return &reflect.SliceHeader{Data: Data, Len: Len, Cap: Cap}
+		})
 	p.register("StringHeader",
-	func(Data uintptr, Len int) *reflect.StringHeader {
-		return &reflect.StringHeader{Data:Data, Len:Len}
-	})
+		func(Data uintptr, Len int) *reflect.StringHeader {
+			return &reflect.StringHeader{Data: Data, Len: Len}
+		})
 	p.register("StructField",
-	func(Name string,
-		PkgPath string,
-		Type reflect.Type,
-		Tag reflect.StructTag,
-		Offset uintptr,
-		Index []int,
-		Anonymous bool) *reflect.StructField {
-		return &reflect.StructField{
-			Name:Name,
-			PkgPath:PkgPath,
-			Type:Type,
-			Tag:Tag,
-			Offset:Offset,
-			Index:Index,
-			Anonymous:Anonymous}
-	})
+		func(Name string,
+			PkgPath string,
+			Type reflect.Type,
+			Tag reflect.StructTag,
+			Offset uintptr,
+			Index []int,
+			Anonymous bool) *reflect.StructField {
+			return &reflect.StructField{
+				Name:      Name,
+				PkgPath:   PkgPath,
+				Type:      Type,
+				Tag:       Tag,
+				Offset:    Offset,
+				Index:     Index,
+				Anonymous: Anonymous}
+		})
 
 	p.register("Bool", func() reflect.Kind { return reflect.Bool })
 	p.register("Int", func() reflect.Kind { return reflect.Int })
@@ -128,40 +128,50 @@ func MakeReflectPackage() *PackageProxy {
 	p.register("Struct", func() reflect.Kind { return reflect.Struct })
 	p.register("UnsafePointer", func() reflect.Kind { return reflect.UnsafePointer })
 
-	p.register("TypeByKind", func(k reflect.Kind) reflect.Type{
+	p.register("TypeByKind", func(k reflect.Kind) reflect.Type {
 		switch k {
-			case reflect.Bool: return reflect.TypeOf(true)
-			case reflect.Int: return reflect.TypeOf(0)
-			case reflect.Int8: return reflect.TypeOf(int8(0))
-			case reflect.Int16: return reflect.TypeOf(int16(0))
-			case reflect.Int32: return reflect.TypeOf(int32(0))
-			case reflect.Int64: return reflect.TypeOf(int64(0))
-			case reflect.Uint: return reflect.TypeOf(uint(0))
-			case reflect.Uint8: return reflect.TypeOf(uint8(0))
-			case reflect.Uint16: return reflect.TypeOf(uint16(0))
-			case reflect.Uint32: return reflect.TypeOf(uint32(0))
-			case reflect.Uint64: return reflect.TypeOf(uint64(0))
-			case reflect.Uintptr: return reflect.TypeOf(uintptr(0))
-			case reflect.Float32: return reflect.TypeOf(float32(0))
-			case reflect.Float64: return reflect.TypeOf(float64(0))
-			case reflect.Complex64: return reflect.TypeOf(complex64(0))
-			case reflect.Complex128: return reflect.TypeOf(complex128(0))
-			default:
-				panic(fmt.Sprintf("bad reflect.Kind: %d", k))
+		case reflect.Bool:
+			return reflect.TypeOf(true)
+		case reflect.Int:
+			return reflect.TypeOf(0)
+		case reflect.Int8:
+			return reflect.TypeOf(int8(0))
+		case reflect.Int16:
+			return reflect.TypeOf(int16(0))
+		case reflect.Int32:
+			return reflect.TypeOf(int32(0))
+		case reflect.Int64:
+			return reflect.TypeOf(int64(0))
+		case reflect.Uint:
+			return reflect.TypeOf(uint(0))
+		case reflect.Uint8:
+			return reflect.TypeOf(uint8(0))
+		case reflect.Uint16:
+			return reflect.TypeOf(uint16(0))
+		case reflect.Uint32:
+			return reflect.TypeOf(uint32(0))
+		case reflect.Uint64:
+			return reflect.TypeOf(uint64(0))
+		case reflect.Uintptr:
+			return reflect.TypeOf(uintptr(0))
+		case reflect.Float32:
+			return reflect.TypeOf(float32(0))
+		case reflect.Float64:
+			return reflect.TypeOf(float64(0))
+		case reflect.Complex64:
+			return reflect.TypeOf(complex64(0))
+		case reflect.Complex128:
+			return reflect.TypeOf(complex128(0))
+		default:
+			panic(fmt.Sprintf("bad reflect.Kind: %d", k))
 		}
 		panic("never reach")
 	})
 	return p
 }
 
-
 func MakeOSPackage() *PackageProxy {
 	p := NewPackageProxy("os")
 
 	return p
 }
-
-
-
-
-
