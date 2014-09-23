@@ -68,6 +68,7 @@ func setupBuiltins(env Environment) Environment {
 	}))
 
 	env.Bind("reflect", MakeReflectPackage())
+	env.Bind("os", MakeOSPackage())
 	env.Bind(".", GolangInterop())
 	env.Bind("=", Closure(func(env Environment, cdr Pair) interface{} {
 		x := Eval(env, Car(cdr))

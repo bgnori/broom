@@ -27,7 +27,11 @@ func (pp *PackageProxy)register(name string, f interface{}) {
 func NewPackageProxy(name string) *PackageProxy {
 	p := &PackageProxy{name:name}
 	p.funcs = make(map[string]reflect.Value)
+	return p
+}
 
+func MakeReflectPackage() *PackageProxy {
+	p := NewPackageProxy("reflect")
 	p.register("Copy", reflect.Copy)
 	p.register("ValueOf", reflect.ValueOf)
 	p.register("TypeOf", reflect.TypeOf)
@@ -147,12 +151,17 @@ func NewPackageProxy(name string) *PackageProxy {
 		}
 		panic("never reach")
 	})
+	return p
+}
+
+
+func MakeOSPackage() *PackageProxy {
+	p := NewPackageProxy("os")
 
 	return p
 }
 
-func MakeReflectPackage() *PackageProxy {
-	p := NewPackageProxy("reflect")
 
-	return p
-}
+
+
+
