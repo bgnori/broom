@@ -2,6 +2,7 @@ package broom
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 )
 
@@ -172,6 +173,32 @@ func MakeReflectPackage() *PackageProxy {
 
 func MakeOSPackage() *PackageProxy {
 	p := NewPackageProxy("os")
+
+	// CONSTANTS
+	p.register("O_RDONLY", func() int { return os.O_RDONLY })
+	p.register("O_WRONLY", func() int { return os.O_WRONLY })
+	p.register("O_RDWR  ", func() int { return os.O_RDWR   })
+	p.register("O_APPEND", func() int { return os.O_APPEND })
+	p.register("O_CREATE", func() int { return os.O_CREATE })
+	p.register("O_EXCL  ", func() int { return os.O_EXCL   })
+	p.register("O_SYNC  ", func() int { return os.O_SYNC   })
+	p.register("O_TRUNC ", func() int { return os.O_TRUNC  })
+	p.register("SEEK_SET", func() int { return os.SEEK_SET })
+	p.register("SEEK_CUR", func() int { return os.SEEK_CUR })
+	p.register("SEEK_END", func() int { return os.SEEK_END })
+	p.register("PathSeparator", func() rune { return os.PathSeparator })
+	p.register("PathListSeparator", func() rune { return os.PathListSeparator })
+	p.register("DevNull", func() string { return os.DevNull })
+
+	//VARIABLES
+	p.register("ErrInvalid", func() error { return os.ErrInvalid })
+	p.register("ErrPermission", func() error { return os.ErrPermission })
+	p.register("ErrExist", func() error { return os.ErrExist })
+	p.register("ErrNotExist", func() error { return os.ErrNotExist })
+	p.register("Stdin", func() *os.File { return os.Stdin })
+	p.register("Stdout", func() *os.File { return os.Stdout })
+	p.register("Stderr", func() *os.File { return os.Stderr })
+	p.register("Args", func() []string { return os.Args })
 
 	return p
 }

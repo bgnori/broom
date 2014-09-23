@@ -1,0 +1,4 @@
+
+(. os O_RDONLY)
+(. os Args)
+
