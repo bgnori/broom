@@ -307,7 +307,7 @@ func GolangInterop() Closure {
 		name = cdr.Cdr().Car().(Symbol).GetValue()
 
 		if proxy, ok := obj.(*PackageProxy) ; ok {
-			fmt.Println("getting from proxy, ", name)
+			//fmt.Println("getting from proxy, ", name)
 			f, ok = proxy.Find(name)
 			if !ok {
 				panic(fmt.Sprintf("package %s do not have %s", proxy.Name(), name))
@@ -326,6 +326,7 @@ func GolangInterop() Closure {
 				}
 			}
 			f = vogus.MethodByName(name)
+			//fmt.Println(name, vogus.Interface(), f.Kind())
 		}
 		xs = helper(env, cdr.Cdr().Cdr(), nil)
 

@@ -1,0 +1,22 @@
+
+(defn show [x]
+    (begin 
+    (def p (. reflect ValueOf x))
+    (def v (. p Elem))
+    (def t (. v Type))
+    (println t)
+    (println v)
+    (if (= (. t Kind) (. reflect Struct))
+        (begin 
+            (def upto (. v NumField))
+            (loop [i 0]
+                (if (< i upto)
+                    (begin 
+                        (println i)
+                        (println (. t Field i))
+                        (println (. v Field i))
+                        (recur (+ i 1)))
+                    '())))
+        '())))
+
+
