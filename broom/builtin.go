@@ -67,7 +67,8 @@ func setupBuiltins(env Environment) Environment {
 		return v.Interface()
 	}))
 
-	env.Bind(".", MakeMethodInvoker(MakeReflectPackage()))
+	env.Bind("reflect", MakeReflectPackage())
+	env.Bind(".", GolangInterop())
 	env.Bind("=", Closure(func(env Environment, cdr Pair) interface{} {
 		x := Eval(env, Car(cdr))
 		y := Eval(env, Car(Cdr(cdr)))
@@ -294,29 +295,39 @@ func setupBuiltins(env Environment) Environment {
 	return env
 }
 
-func MakeMethodInvoker(p *Package) Closure {
+func GolangInterop() Closure {
 	return func(env Environment, cdr Pair) interface{} {
 		//see  http://stackoverflow.com/questions/14116840/dynamically-call-method-on-interface-regardless-of-receiver-type
+
 		obj := Eval(env, cdr.Car())
-		//fmt.Println(obj)
 
 		var name string
 		var f reflect.Value
 		var xs []reflect.Value
-		if s, ok := obj.(Symbol); ok  {
-			f = p.Query(s.GetValue())
-			xs = helper(env, cdr.Cdr(), nil)
-		} else {
-			value := reflect.ValueOf(obj)
-			name = cdr.Cdr().Car().(Symbol).GetValue()
-			//method or value?
-			field := value.FieldByName(name)
-			if field.IsValid() {
-				return field
+		name = cdr.Cdr().Car().(Symbol).GetValue()
+
+		if proxy, ok := obj.(*PackageProxy) ; ok {
+			fmt.Println("getting from proxy, ", name)
+			f, ok = proxy.Find(name)
+			if !ok {
+				panic(fmt.Sprintf("package %s do not have %s", proxy.Name(), name))
 			}
-			f = value.MethodByName(name)
-			xs = helper(env, cdr.Cdr().Cdr(), nil)
+		} else {
+			// anything else is instance.
+			vogus := reflect.ValueOf(obj)
+
+			//method or value?
+			if vogus.Kind() == reflect.Struct {
+				if field := vogus.FieldByName(name); field.IsValid() {
+					if cdr.Cdr().Cdr() != nil {
+						panic(fmt.Sprintf("args are supplied to member, %s is not method.", name))
+					}
+					return field
+				}
+			}
+			f = vogus.MethodByName(name)
 		}
+		xs = helper(env, cdr.Cdr().Cdr(), nil)
 
 		if f.IsValid() {
 			vs := f.Call(xs)

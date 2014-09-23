@@ -1,12 +1,15 @@
-(define KindString (. 'reflect.KindFromString "String"))
+(println "smuggler.brm")
+(define KindString (. reflect String))
 
 (println KindString)
 
-(define KindComplex (. 'reflect.KindFromString "Complex128"))
-(println (. 'reflect.TypeByKind KindComplex))
+(define KindComplex (. reflect Complex128))
+(println (. reflect TypeByKind KindComplex))
 
-(def pt2ev (. 'reflect.ValueOf _env))
+(def pt2ev (. reflect ValueOf _env))
+
 (def vofev (. pt2ev Elem))
+
 (. vofev NumField)
 
 (loop [i 0]
