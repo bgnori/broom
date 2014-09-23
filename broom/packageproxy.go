@@ -200,5 +200,82 @@ func MakeOSPackage() *PackageProxy {
 	p.register("Stderr", func() *os.File { return os.Stderr })
 	p.register("Args", func() []string { return os.Args })
 
+
+	//FUNCTIONS
+	p.register("Chdir", os.Chdir)
+	p.register("Chmod", os.Chmod)
+	p.register("Chown", os.Chown)
+	p.register("Chtimes", os.Chtimes)
+	p.register("Clearenv", os.Clearenv)
+	p.register("Environ", os.Environ)
+	p.register("Exit", os.Exit)
+	p.register("Expand", os.Expand)
+	p.register("ExpandEnv", os.ExpandEnv)
+	p.register("Getegid", os.Getegid)
+	p.register("Getenv", os.Getenv)
+	p.register("Geteuid", os.Geteuid)
+	p.register("Getgid", os.Getgid)
+	p.register("Getgroups", os.Getgroups)
+	p.register("Getpagesize", os.Getpagesize)
+	p.register("Getpid", os.Getpid)
+	p.register("Getppid", os.Getppid)
+	p.register("Getuid", os.Getuid)
+	p.register("Getwd", os.Getwd)
+	p.register("Hostname", os.Hostname)
+	p.register("IsExist", os.IsExist)
+	p.register("IsNotExist", os.IsNotExist)
+	p.register("IsPathSeparator", os.IsPathSeparator)
+	p.register("IsPermission", os.IsPermission)
+	p.register("Lchown", os.Lchown)
+	p.register("Link", os.Link)
+	p.register("Mkdir", os.Mkdir)
+	p.register("MkdirAll", os.MkdirAll)
+	p.register("NewSyscallError", os.NewSyscallError)
+	p.register("Readlink", os.Readlink)
+	p.register("Remove", os.Remove)
+	p.register("RemoveAll", os.RemoveAll)
+	p.register("Rename", os.Rename)
+	p.register("SameFile", os.SameFile)
+	p.register("Setenv", os.Setenv)
+	p.register("Symlink", os.Symlink)
+	p.register("TempDir", os.TempDir)
+	p.register("Truncate", os.Truncate)
+
+	//TYPES
+	//File
+	p.register("Create", os.Create)
+	p.register("NewFile", os.NewFile)
+	p.register("Open", os.Open)
+	p.register("OpenFile", os.OpenFile)
+	p.register("Pipe", os.Pipe)
+	p.register("Lstat", os.Lstat)
+	p.register("Stat", os.Stat)
+
+	//type FileMode uint32
+	p.register("FileModeX", func(v int)os.FileMode {return os.FileMode(v)}) // Avoid stupod typing, 
+	p.register("FileMode", func(v uint32)os.FileMode {return os.FileMode(v)})
+	p.register("ModeDir", func() os.FileMode { return os.ModeDir })
+	p.register("ModeAppend", func() os.FileMode { return os.ModeAppend })
+	p.register("ModeExclusive", func() os.FileMode { return os.ModeExclusive })
+	p.register("ModeTemporary", func() os.FileMode { return os.ModeTemporary })
+	p.register("ModeSymlink", func() os.FileMode { return os.ModeSymlink })
+	p.register("ModeDevice", func() os.FileMode { return os.ModeDevice })
+	p.register("ModeNamedPipe", func() os.FileMode { return os.ModeNamedPipe })
+	p.register("ModeSocket", func() os.FileMode { return os.ModeSocket })
+	p.register("ModeSetuid", func() os.FileMode { return os.ModeSetuid })
+	p.register("ModeSetgid", func() os.FileMode { return os.ModeSetgid })
+	p.register("ModeCharDevice", func() os.FileMode { return os.ModeCharDevice })
+	p.register("ModeSticky", func() os.FileMode { return os.ModeSticky })
+	p.register("ModeType", func() os.FileMode { return os.ModeType })
+	p.register("ModePerm", func() os.FileMode { return os.ModePerm })
+
+	//Process
+	p.register("FindProcess", os.FindProcess)
+	p.register("StartProcess", os.StartProcess)
+
+	p.register("Interrupt", func() os.Signal { return os.Interrupt })
+	p.register("Kill", func() os.Signal { return os.Kill })
+
+
 	return p
 }

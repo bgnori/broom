@@ -2,3 +2,24 @@
 (. os O_RDONLY)
 (. os Args)
 
+(. os Getegid)
+(. os Getgroups)
+(. os Getwd)
+(. os Hostname)
+(def p (. os Open "main.go"))
+(def f (car p))
+(. f Name)
+(. f Fd)
+(. f Stat)
+(. f Close)
+(. os Lstat "main.go")
+(. os ModeDir) ; d-------
+
+(. os FileModeX 0) ; testing purpose
+
+(. (. os ModeDir) IsDir)
+
+(. os FindProcess 0) ; init
+(. os Interrupt)
+
+

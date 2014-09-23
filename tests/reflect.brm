@@ -5,3 +5,11 @@
 (println (. reflect TypeByKind KindComplex)) ; complex
 
 (show _env)
+
+
+(def t (. reflect TypeByKind (. reflect Uint32)))
+t
+(def v (. reflect Zero t))
+v
+;(. v SetUint 777) ; can't. need uint literal
+; v
