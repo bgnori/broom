@@ -1,0 +1,8 @@
+
+(let [x 1] x) ;expects 1
+(let [x 1 y (+ x 1) z (+ x y)] z) ; 3
+
+(def foo (let [x 1] (fn [y] (+ x y))))
+(foo 100) ; 101
+
+

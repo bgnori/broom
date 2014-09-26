@@ -55,6 +55,23 @@ func setupSpecialForms(env Environment) Environment {
 		return r
 	}))
 
+	env.Bind("let", Closure(func(env Environment, cdr Pair) interface{} {
+		//(let [x 1] ,body)
+		e := NewEnvFrame(env)
+		xs := Car(cdr).([]interface{})
+
+		for i:= 0 ; i < len(xs) ; i+=2 {
+			name := xs[i].(Symbol)
+			value := xs[i+1]
+			e.Bind(name.GetValue(), Eval(e, value))
+		}
+		var x interface{}
+		for _, b := range List2Arr(Body(cdr)) {
+			x = Eval(e, b)
+		}
+		return x
+	}))
+
 	// (loop [i 1] (recur (+ i 1))) ... never stops
 	env.Bind("loop", Closure(func(dynamic Environment, cdr Pair) interface{} {
 		r := NewRecur(dynamic, Car(cdr))
