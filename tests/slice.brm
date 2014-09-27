@@ -1,0 +1,31 @@
+
+
+(define my-slice-type (. reflect SliceOf
+                       (. reflect TypeByKind (. reflect Int))))
+
+
+(println my-slice-type)
+(define xs (. reflect MakeSlice my-slice-type 0 0))
+
+(let [ys (. reflect Append xs (. reflect ValueOf 1))]
+    (println (. ys Len))
+    (println (. (. ys Index 0) Interface)))
+
+(let [ys (. reflect Append
+            (. reflect Append 
+               (. reflect Append 
+                  xs 
+                  (. reflect ValueOf 1))
+               (. reflect ValueOf 2))
+            (. reflect ValueOf 3))
+      zs (. ys Slice 1 3)
+      as (. reflect AppendSlice ys zs)
+      ]
+    (println (. (. zs Index 0) Interface))
+    (println (. zs Len))
+    (println (. as Len))
+    )
+
+; Slice3
+
+
