@@ -163,6 +163,8 @@ func MakeReflectPackage() *PackageProxy {
 			return reflect.TypeOf(complex64(0))
 		case reflect.Complex128:
 			return reflect.TypeOf(complex128(0))
+		case reflect.String:
+			return reflect.TypeOf("abc")
 		default:
 			panic(fmt.Sprintf("bad reflect.Kind: %d", k))
 		}

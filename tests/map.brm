@@ -1,0 +1,17 @@
+
+(define my-map-type (. reflect MapOf 
+                       (. reflect TypeByKind (. reflect Int))
+                       (. reflect TypeByKind (. reflect String))))
+
+(println my-map-type)
+(define my-map (. reflect MakeMap my-map-type))
+
+(. my-map SetMapIndex (. reflect ValueOf 1) (. reflect ValueOf "abc"))
+(. my-map SetMapIndex (. reflect ValueOf 2) (. reflect ValueOf "def"))
+(. my-map SetMapIndex (. reflect ValueOf 3) (. reflect ValueOf "ghi"))
+
+(. my-map MapIndex (. reflect ValueOf 2)) ; def
+(. my-map MapKeys) ; [1 2 3]
+
+
+
