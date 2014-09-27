@@ -1,0 +1,14 @@
+
+
+(define my-chan-type (. reflect ChanOf
+                        (. reflect ChanDir true true)
+                        (. reflect TypeByKind (. reflect Int))))
+
+(define my-chan (. reflect MakeChan my-chan-type 1))
+
+(. my-chan TryRecv) ; (<invalid Value> false)
+(. my-chan TrySend (. reflect ValueOf 1)) ; true
+(. my-chan TrySend (. reflect ValueOf 1)) ; false
+(. my-chan TryRecv) ; (<int value> true)
+
+
