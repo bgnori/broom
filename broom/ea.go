@@ -160,8 +160,25 @@ func NewFrameForApply(lexical Environment, dynamic Environment, args Pair, forma
 			panic("not enough argument")
 		}
 		if s, ok := name.(Symbol); ok {
-			v := Eval(dynamic, as[i])
-			e.Bind(s.GetValue(), v)
+			n := s.GetValue()
+			if n == "&" {
+				if rest, ok := formals[i+1].(Symbol); ok {
+					n := rest.GetValue()
+					ys := make([]interface{}, 0)
+					for _, v := range as[i:] {
+						fmt.Println(v)
+						ys = append(ys, Eval(dynamic, v))
+					}
+					fmt.Println(n, ys)
+					e.Bind(n, ys)
+					break
+				} else {
+					panic("argument name must be symbol")
+				}
+			} else {
+				v := Eval(dynamic, as[i])
+				e.Bind(n, v)
+			}
 		} else {
 			panic("argument name must be symbol")
 		}
