@@ -2,6 +2,8 @@
              (if (< i 3)
                (recur (+ i 1) (cons (fn [x] i) xs))
                xs)))
+
+(println "defined.")
 ((car xs) 'a)
 ((cadr xs) 'a)
 ((caddr xs) 'a)

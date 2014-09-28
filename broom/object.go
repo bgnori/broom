@@ -81,35 +81,21 @@ func isPair(v interface{}) bool {
 
 type Recur struct {
 	env    Environment
-	fomals []Symbol
+	eb *EnvBuilder
 }
 
-func NewRecur(outer Environment, xs interface{}) *Recur {
+func NewRecur(outer Environment, xs []interface{}) *Recur {
 	r := new(Recur)
-	r.env = NewEnvFrame(outer)
-	r.fomals = make([]Symbol, 0)
+	r.eb = NewEnvBuilder(Evens(xs))
+	e := NewEnvFrame(outer)
+	r.env = r.eb.EvalAndBindAll(Odds(xs), e, e)
 	r.Env().Bind("recur", r)
-
-	ys, _ := xs.([]interface{})
-	var key Symbol
-	for i, v := range ys {
-		if i%2 == 0 {
-			key = v.(Symbol)
-			r.fomals = append(r.fomals, key)
-		} else {
-			r.Env().Bind(key.GetValue(), Eval(r.Env(), v))
-		}
-	}
 	return r
 }
 
-func (r *Recur) Update(xs []interface{}) {
-	next := NewEnvFrame(r.Env().Outer())
-	next.Bind("recur", r)
-	for i, key := range r.fomals {
-		next.Bind(key.GetValue(), xs[i])
-	}
-	r.env = next
+func (r *Recur) Update(xs []interface{}, env Environment) {
+	r.env = r.eb.EvalAndBindAll(xs, NewEnvFrame(r.Env().Outer()), env)
+	r.Env().Bind("recur", r)
 }
 
 func (r *Recur) Env() Environment {

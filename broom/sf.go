@@ -45,7 +45,8 @@ func setupSpecialForms(env Environment) Environment {
 	//idea from http://clojuredocs.org/clojure_core/clojure.core/fn
 	env.Bind("fn", Closure(func(lexical Environment, cdr Pair) interface{} {
 		r := Closure(func(dynamic Environment, args Pair) interface{} {
-			e := NewFrameForApply(lexical, dynamic, args, Args(cdr))
+			eb := NewEnvBuilder(Car(cdr).([]interface{}))
+			e := eb.EvalAndBindAll(List2Arr(args), NewEnvFrame(lexical), dynamic)
 			var x interface{}
 			for _, b := range List2Arr(Body(cdr)) {
 				x = Eval(e, b)
@@ -74,7 +75,7 @@ func setupSpecialForms(env Environment) Environment {
 
 	// (loop [i 1] (recur (+ i 1))) ... never stops
 	env.Bind("loop", Closure(func(dynamic Environment, cdr Pair) interface{} {
-		r := NewRecur(dynamic, Car(cdr))
+		r := NewRecur(dynamic, Car(cdr).([]interface{}))
 		var x interface{}
 		for {
 			for _, b := range List2Arr(Body(cdr)) {
@@ -123,11 +124,8 @@ func setupSpecialForms(env Environment) Environment {
 		m := Closure(func(dynamic Environment, args Pair) interface{} {
 			env = NewEnvFrame(lexical)
 			env.Bind("_dynamic", dynamic)
-			as := List2Arr(args)
-			for i, v := range Args(cdr) {
-				s := v.(Symbol)
-				env.Bind(s.GetValue(), as[i])
-			}
+			eb := NewEnvBuilder(Car(cdr).([]interface{}))
+			env = eb.BindAll(List2Arr(args), env)
 			env.Bind("exprs", args)
 
 			var transformed interface{}

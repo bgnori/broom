@@ -1,0 +1,30 @@
+(def foo (fn [x & xs]
+             (begin
+                 (println x)
+                 (println xs)
+                 xs)))
+(foo 1 2 3 4 5)
+    
+(defn bar [x & xs]
+    (begin
+        (println x)
+        (println xs)
+        xs))
+(bar 1 2 3 4 5)
+
+(defn buzz [x y z & rest] 
+    rest)
+(buzz 1 2 3 4 5)
+(buzz 1 2 3)
+
+((macro [x y z & rest]
+       (list '+ x y z)) 1 2 3 4 5)
+
+(defmacro moo [x y z & rest]
+       (list '+ x y z)) 
+(moo 1 2 3 4 5)
+
+(defmacro mar [x y z & rest]
+    rest)
+
+(mar 1 2 3 4 5)

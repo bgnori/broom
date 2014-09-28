@@ -42,11 +42,7 @@ func Eval(env Environment, expr interface{}) interface{} {
 		car := Eval(env, Car(expr))
 		r, ok := car.(*Recur)
 		if ok {
-			xs := make([]interface{}, 0)
-			for _, v := range List2Arr(Cdr(expr)) {
-				xs = append(xs, Eval(env, v))
-			}
-			r.Update(xs)
+			r.Update(List2Arr(Cdr(expr)), env)
 			return r
 		}
 		op, ok := car.(Closure)
@@ -144,44 +140,71 @@ func (env *enviroment) Dump() {
 	}
 }
 
-func Args(p Pair) []interface{} {
-	return Car(p).([]interface{})
+type EnvBuilder struct {
+	params []Symbol
+	variadic bool
+}
+
+func NewEnvBuilder(xs []interface{}) *EnvBuilder {
+	eb := &EnvBuilder{}
+
+	eb.params = make([]Symbol, 0)
+	for _, x := range xs {
+		if s, ok := x.(Symbol); !ok {
+			panic("Parameter must be symbol")
+		} else {
+			switch s.GetValue() {
+			case "&":
+				eb.variadic = true
+			default:
+				eb.params = append(eb.params, s)
+			}
+		}
+	}
+	return eb
+}
+
+func (eb *EnvBuilder) Len() int {
+	return len(eb.params)
+}
+
+func (eb *EnvBuilder) EvalAndBindAll(as []interface{}, to_bind, to_eval Environment) Environment {
+	if eb.variadic {
+		last := eb.Len() - 1
+		for i, s := range eb.params[:last] {
+			v := Eval(to_eval, as[i])
+			to_bind.Bind(s.GetValue(), v)
+		}
+		vs := make([]interface{}, 0)
+		for _, v := range as[last:]{
+			vs = append(vs, Eval(to_eval, v))
+		}
+		to_bind.Bind(eb.params[last].GetValue(), vs)
+	} else {
+		for i, s := range eb.params {
+			v := Eval(to_eval, as[i])
+			to_bind.Bind(s.GetValue(), v)
+		}
+	}
+	return to_bind
+}
+
+func (eb *EnvBuilder) BindAll(as []interface{}, env Environment) Environment {
+	if eb.variadic {
+		last := eb.Len() - 1
+		for i, s := range eb.params[:last] {
+			env.Bind(s.GetValue(), as[i])
+		}
+		env.Bind(eb.params[last].GetValue(), as[last:])
+	} else {
+		for i, s := range eb.params {
+			env.Bind(s.GetValue(), as[i])
+		}
+	}
+	return env
 }
 
 func Body(p Pair) Pair {
 	return Cdr(p).(Pair)
 }
 
-func NewFrameForApply(lexical Environment, dynamic Environment, args Pair, formals []interface{}) Environment {
-	e := NewEnvFrame(lexical)
-	as := List2Arr(args)
-	for i, name := range formals {
-		if len(as) <= i {
-			panic("not enough argument")
-		}
-		if s, ok := name.(Symbol); ok {
-			n := s.GetValue()
-			if n == "&" {
-				if rest, ok := formals[i+1].(Symbol); ok {
-					n := rest.GetValue()
-					ys := make([]interface{}, 0)
-					for _, v := range as[i:] {
-						fmt.Println(v)
-						ys = append(ys, Eval(dynamic, v))
-					}
-					fmt.Println(n, ys)
-					e.Bind(n, ys)
-					break
-				} else {
-					panic("argument name must be symbol")
-				}
-			} else {
-				v := Eval(dynamic, as[i])
-				e.Bind(n, v)
-			}
-		} else {
-			panic("argument name must be symbol")
-		}
-	}
-	return e
-}
