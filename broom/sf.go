@@ -47,40 +47,26 @@ func setupSpecialForms(env Environment) Environment {
 		r := Closure(func(dynamic Environment, args Pair) interface{} {
 			eb := NewEnvBuilder(Car(cdr).([]interface{}))
 			e := eb.EvalAndBindAll(List2Arr(args), NewEnvFrame(lexical), dynamic)
-			var x interface{}
-			for _, b := range List2Arr(Body(cdr)) {
-				x = Eval(e, b)
-			}
-			return x
+			return EvalExprs(e, List2Arr(Body(cdr)))
 		})
 		return r
 	}))
 
 	env.Bind("let", Closure(func(env Environment, cdr Pair) interface{} {
 		//(let [x 1] ,body)
-		e := NewEnvFrame(env)
 		xs := Car(cdr).([]interface{})
 
-		for i:= 0 ; i < len(xs) ; i+=2 {
-			name := xs[i].(Symbol)
-			value := xs[i+1]
-			e.Bind(name.GetValue(), Eval(e, value))
-		}
-		var x interface{}
-		for _, b := range List2Arr(Body(cdr)) {
-			x = Eval(e, b)
-		}
-		return x
+		e := NewEnvFrame(env)
+		eb := NewEnvBuilder(Evens(xs))
+		x := eb.EvalAndBindAll(Odds(xs), e, e)
+		return EvalExprs(x, List2Arr(Body(cdr)))
 	}))
 
 	// (loop [i 1] (recur (+ i 1))) ... never stops
 	env.Bind("loop", Closure(func(dynamic Environment, cdr Pair) interface{} {
 		r := NewRecur(dynamic, Car(cdr).([]interface{}))
-		var x interface{}
 		for {
-			for _, b := range List2Arr(Body(cdr)) {
-				x = Eval(r.Env(), b)
-			}
+			x := EvalExprs(r.Env(), List2Arr(Body(cdr)))
 			_, recuring := x.(*Recur)
 			if !recuring {
 				return x
@@ -91,12 +77,8 @@ func setupSpecialForms(env Environment) Environment {
 
 	//case sym("begin").Eq(car): //begin?
 	env.Bind("begin", Closure(func(env Environment, cdr Pair) interface{} {
-		var x interface{}
 		e := NewEnvFrame(env)
-		for _, b := range List2Arr(cdr) {
-			x = Eval(e, b)
-		}
-		return x
+		return EvalExprs(e, List2Arr(cdr))
 	}))
 
 	//case sym("cond").Eq(car): //cond?
@@ -128,10 +110,7 @@ func setupSpecialForms(env Environment) Environment {
 			env = eb.BindAll(List2Arr(args), env)
 			env.Bind("exprs", args)
 
-			var transformed interface{}
-			for _, b := range List2Arr(Body(cdr)) {
-				transformed = Eval(env, b)
-			}
+			transformed := EvalExprs(env, List2Arr(Body(cdr)))
 			fmt.Println(cdr)
 			fmt.Println("--(macro)-->")
 			fmt.Println(transformed)

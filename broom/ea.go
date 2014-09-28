@@ -55,6 +55,15 @@ func Eval(env Environment, expr interface{}) interface{} {
 	return nil
 }
 
+func EvalExprs(env Environment, xs []interface{}) interface{} {
+	var x interface{}
+	for _, b := range xs {
+		x = Eval(env, b)
+	}
+	return x
+}
+
+
 type enviroment struct {
 	rwm       sync.RWMutex
 	variables map[string]interface{}
