@@ -1,0 +1,12 @@
+
+runtime
+(. runtime Compiler)
+(. runtime GOARCH)
+(. runtime GOOS)
+(. runtime MemProfileRate)
+(. runtime NumCPU)
+(. runtime NumCgoCall)
+(. runtime NumGoroutine)
+(. runtime Version)
+
+
