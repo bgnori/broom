@@ -155,7 +155,12 @@ func setupBuiltins(env Environment) Environment {
 		return fmt.Sprintf(format, ys...)
 	}))
 	env.Bind("println", Closure(func(env Environment, cdr Pair) interface{} {
-		fmt.Println(Eval(env, Car(cdr)))
+		xs := List2Arr(cdr)
+		ys := make([]interface{}, 0)
+		for _, x := range xs {
+			ys = append(ys, Eval(env, x))
+		}
+		fmt.Println(ys)
 		return nil
 	}))
 	env.Bind("<", Closure(func(env Environment, cdr Pair) interface{} {
