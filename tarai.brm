@@ -1,0 +1,7 @@
+
+(defn tarai [x y z]
+    (if (> x y) 
+        (tarai (tarai (- x 1) y z) (tarai (- y 1) z x) (tarai (- z 1) x y))
+        y))
+;(tarai 3 2 1)
+;(tarai 12 6 0) ; takes long time.  calling itself 12,604,860 times.
