@@ -63,7 +63,6 @@ func EvalExprs(env Environment, xs []interface{}) interface{} {
 	return x
 }
 
-
 type enviroment struct {
 	rwm       sync.RWMutex
 	variables map[string]interface{}
@@ -150,7 +149,7 @@ func (env *enviroment) Dump() {
 }
 
 type EnvBuilder struct {
-	params []Symbol
+	params   []Symbol
 	variadic bool
 }
 
@@ -185,7 +184,7 @@ func (eb *EnvBuilder) EvalAndBindAll(as []interface{}, to_bind, to_eval Environm
 			to_bind.Bind(s.GetValue(), v)
 		}
 		vs := make([]interface{}, 0)
-		for _, v := range as[last:]{
+		for _, v := range as[last:] {
 			vs = append(vs, Eval(to_eval, v))
 		}
 		to_bind.Bind(eb.params[last].GetValue(), vs)
@@ -216,4 +215,3 @@ func (eb *EnvBuilder) BindAll(as []interface{}, env Environment) Environment {
 func Body(p Pair) Pair {
 	return Cdr(p).(Pair)
 }
-

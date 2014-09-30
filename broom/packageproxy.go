@@ -180,12 +180,12 @@ func MakeOSPackage() *PackageProxy {
 	// CONSTANTS
 	p.register("O_RDONLY", func() int { return os.O_RDONLY })
 	p.register("O_WRONLY", func() int { return os.O_WRONLY })
-	p.register("O_RDWR  ", func() int { return os.O_RDWR   })
+	p.register("O_RDWR  ", func() int { return os.O_RDWR })
 	p.register("O_APPEND", func() int { return os.O_APPEND })
 	p.register("O_CREATE", func() int { return os.O_CREATE })
-	p.register("O_EXCL  ", func() int { return os.O_EXCL   })
-	p.register("O_SYNC  ", func() int { return os.O_SYNC   })
-	p.register("O_TRUNC ", func() int { return os.O_TRUNC  })
+	p.register("O_EXCL  ", func() int { return os.O_EXCL })
+	p.register("O_SYNC  ", func() int { return os.O_SYNC })
+	p.register("O_TRUNC ", func() int { return os.O_TRUNC })
 	p.register("SEEK_SET", func() int { return os.SEEK_SET })
 	p.register("SEEK_CUR", func() int { return os.SEEK_CUR })
 	p.register("SEEK_END", func() int { return os.SEEK_END })
@@ -202,7 +202,6 @@ func MakeOSPackage() *PackageProxy {
 	p.register("Stdout", func() *os.File { return os.Stdout })
 	p.register("Stderr", func() *os.File { return os.Stderr })
 	p.register("Args", func() []string { return os.Args })
-
 
 	//FUNCTIONS
 	p.register("Chdir", os.Chdir)
@@ -255,8 +254,8 @@ func MakeOSPackage() *PackageProxy {
 	p.register("Stat", os.Stat)
 
 	//type FileMode uint32
-	p.register("FileModeX", func(v int)os.FileMode {return os.FileMode(v)}) // Avoid stupod typing, 
-	p.register("FileMode", func(v uint32)os.FileMode {return os.FileMode(v)})
+	p.register("FileModeX", func(v int) os.FileMode { return os.FileMode(v) }) // Avoid stupod typing,
+	p.register("FileMode", func(v uint32) os.FileMode { return os.FileMode(v) })
 	p.register("ModeDir", func() os.FileMode { return os.ModeDir })
 	p.register("ModeAppend", func() os.FileMode { return os.ModeAppend })
 	p.register("ModeExclusive", func() os.FileMode { return os.ModeExclusive })
@@ -279,7 +278,6 @@ func MakeOSPackage() *PackageProxy {
 	p.register("Interrupt", func() os.Signal { return os.Interrupt })
 	p.register("Kill", func() os.Signal { return os.Kill })
 
-
 	return p
 }
 
@@ -287,31 +285,31 @@ func MakeRuntimePackage() *PackageProxy {
 	p := NewPackageProxy("runtime")
 
 	//Const
-	p.register("Compiler", func() string { return runtime.Compiler})
-	p.register("GOARCH", func() string { return runtime.GOARCH})
-	p.register("GOOS", func() string { return runtime.GOOS})
+	p.register("Compiler", func() string { return runtime.Compiler })
+	p.register("GOARCH", func() string { return runtime.GOARCH })
+	p.register("GOOS", func() string { return runtime.GOOS })
 
 	//variables
 	p.register("MemProfileRate", func() int { return runtime.MemProfileRate })
-	p.register("BlockProfile", func(p []runtime.BlockProfileRecord) (n int, ok bool ) {
+	p.register("BlockProfile", func(p []runtime.BlockProfileRecord) (n int, ok bool) {
 		return runtime.BlockProfile(p)
 	})
-	p.register("Breakpoint", func() {runtime.Breakpoint()})
-	p.register("CPUProfile", func()[]byte {
+	p.register("Breakpoint", func() { runtime.Breakpoint() })
+	p.register("CPUProfile", func() []byte {
 		return runtime.CPUProfile()
 	})
-	p.register("Caller", func(skip int) (pc uintptr, file string, line int, ok bool){
+	p.register("Caller", func(skip int) (pc uintptr, file string, line int, ok bool) {
 		return runtime.Caller(skip)
 	})
 
 	p.register("Callers", func(skip int, pc []uintptr) int {
 		return runtime.Callers(skip, pc)
 	})
-	p.register("GC", func(){
+	p.register("GC", func() {
 		runtime.GC()
 		return
 	})
-	p.register("GOMAXPROCS", func (n int) int {
+	p.register("GOMAXPROCS", func(n int) int {
 		return runtime.GOMAXPROCS(n)
 	})
 	p.register("GOROOT", func() string {
@@ -325,17 +323,17 @@ func MakeRuntimePackage() *PackageProxy {
 		return runtime.GoroutineProfile(p)
 	})
 
-	p.register("Gosched", func(){
+	p.register("Gosched", func() {
 		runtime.Gosched()
 		return
 	})
 
-	p.register("LockOSThread", func(){
+	p.register("LockOSThread", func() {
 		runtime.LockOSThread()
 		return
 	})
 
-	p.register("UnlockOSThread", func(){
+	p.register("UnlockOSThread", func() {
 		runtime.UnlockOSThread()
 		return
 	})
@@ -392,16 +390,15 @@ func MakeRuntimePackage() *PackageProxy {
 		return runtime.FuncForPC(pc)
 	})
 
-//methods
-//func (f *Func) Entry() uintptr
-//func (f *Func) FileLine(pc uintptr) (file string, line int)
-//func (f *Func) Name() string
-//func (r *MemProfileRecord) InUseBytes() int64
-//func (r *MemProfileRecord) InUseObjects() int64
-//func (r *MemProfileRecord) Stack() []uintptr
-//func (e *TypeAssertionError) Error() string
-//func (*TypeAssertionError) RuntimeError()
+	//methods
+	//func (f *Func) Entry() uintptr
+	//func (f *Func) FileLine(pc uintptr) (file string, line int)
+	//func (f *Func) Name() string
+	//func (r *MemProfileRecord) InUseBytes() int64
+	//func (r *MemProfileRecord) InUseObjects() int64
+	//func (r *MemProfileRecord) Stack() []uintptr
+	//func (e *TypeAssertionError) Error() string
+	//func (*TypeAssertionError) RuntimeError()
 
 	return p
 }
-

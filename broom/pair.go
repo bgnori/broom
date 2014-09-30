@@ -123,7 +123,7 @@ func Chop2(xs Pair) []struct{ header, body interface{} } {
 func Odds(xs []interface{}) []interface{} {
 	ys := make([]interface{}, 0)
 	for i, v := range xs {
-		if i % 2 == 1 {
+		if i%2 == 1 {
 			ys = append(ys, v)
 		}
 	}
@@ -133,11 +133,9 @@ func Odds(xs []interface{}) []interface{} {
 func Evens(xs []interface{}) []interface{} {
 	ys := make([]interface{}, 0)
 	for i, v := range xs {
-		if i % 2 == 0 {
+		if i%2 == 0 {
 			ys = append(ys, v)
 		}
 	}
 	return ys
 }
-
-

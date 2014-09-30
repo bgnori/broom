@@ -80,8 +80,8 @@ func isPair(v interface{}) bool {
 //port?
 
 type Recur struct {
-	env    Environment
-	eb *EnvBuilder
+	env Environment
+	eb  *EnvBuilder
 }
 
 func NewRecur(outer Environment, xs []interface{}) *Recur {
