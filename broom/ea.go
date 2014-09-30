@@ -205,6 +205,9 @@ func (eb *EnvBuilder) BindAll(as []interface{}, env Environment) Environment {
 		}
 		env.Bind(eb.params[last].GetValue(), as[last:])
 	} else {
+		if len(as) < eb.Len() {
+			panic("not enough argument!")
+		}
 		for i, s := range eb.params {
 			env.Bind(s.GetValue(), as[i])
 		}

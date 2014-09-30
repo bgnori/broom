@@ -81,26 +81,6 @@ func setupSpecialForms(env Environment) Environment {
 		return EvalExprs(e, List2Arr(cdr))
 	}))
 
-	//case sym("cond").Eq(car): //cond?
-	env.Bind("cond", Closure(func(env Environment, cdr Pair) interface{} {
-		test := Car(cdr)
-		onTrue := Car(Cdr(cdr))
-		rest := Cdr(Cdr(cdr))
-		if v, ok := test.(Symbol); ok && v.GetValue() == "else" {
-			return Eval(env, onTrue)
-		}
-		if Eval(env, test) == true {
-			return Eval(env, onTrue)
-		}
-		if rest != nil {
-			return Eval(env, Cons(sym("cond"), rest))
-			// ugh! rewind as for loop!
-			// * by using Chop2
-			// * by macro
-		}
-		return nil //undef
-	}))
-
 	//macro
 	env.Bind("macro", Closure(func(lexical Environment, cdr Pair) interface{} {
 		m := Closure(func(dynamic Environment, args Pair) interface{} {

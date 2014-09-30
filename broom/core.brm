@@ -13,7 +13,10 @@
     (list 'fn (List2Arr xs) body))
 
 (defmacro defn [name args body]
-    (list 'def name (list 'fn args body)))
+    (let [_defn_arg args]
+        (if (array? _defn_arg)
+            (list 'def name (list 'fn _defn_arg body))
+            (panic "expectd array for parameter list"))))
 
 (defmacro define [name expr] (list 'def name expr))
 ;
@@ -26,5 +29,6 @@
 (defn zero? [x]
     (= x 0))
 
-(defmacro my-cond [test action & rest]
-    (list 'if test action (cons 'my-cond (Arr2List rest))))
+(def else true) ; for cond
+(defmacro cond [test action & rest]
+    (list 'if test action (cons 'cond (Arr2List rest))))

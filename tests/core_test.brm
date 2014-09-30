@@ -13,7 +13,7 @@
     (println "hi macro"))
 
 (defn fizzbuzz [n]
-    (my-cond 
+    (cond 
              (and (= (mod n 3) 0) (= (mod n 5) 0)) "fizzbuzz"
              (= (mod n 3) 0) "fizz"
              (= (mod n 5) 0) "buzz"
@@ -25,3 +25,4 @@
 (fizzbuzz 7)
 
 
+(defn hoge 1 2 3) ; should panic

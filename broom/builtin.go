@@ -10,7 +10,6 @@ import (
 func setupBuiltins(env Environment) Environment {
 	env.Bind("true", true)
 	env.Bind("false", false)
-	env.Bind("else", true) // for cond, etc
 	env.Bind("not", Closure(func(env Environment, cdr Pair) interface{} {
 		x := Eval(env, Car(cdr)).(bool)
 		return !x
@@ -122,6 +121,10 @@ func setupBuiltins(env Environment) Environment {
 			acc *= Eval(env, x).(int)
 		}
 		return acc
+	}))
+	env.Bind("panic", Closure(func(env Environment, cdr Pair) interface{} {
+		panic(Car(cdr))
+		return nil
 	}))
 	env.Bind("-", Closure(func(env Environment, cdr Pair) interface{} {
 		xs := List2Arr(Cdr(cdr))
