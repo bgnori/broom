@@ -291,6 +291,10 @@ func MakeRuntimePackage() *PackageProxy {
 
 	//variables
 	p.register("MemProfileRate", func() int { return runtime.MemProfileRate })
+
+	p.register("MakeArrayOfBlockProfileRecord", func(n int) []runtime.BlockProfileRecord {
+		return make([]runtime.BlockProfileRecord, n)
+	})
 	p.register("BlockProfile", func(p []runtime.BlockProfileRecord) (n int, ok bool) {
 		return runtime.BlockProfile(p)
 	})
@@ -319,6 +323,11 @@ func MakeRuntimePackage() *PackageProxy {
 		runtime.Goexit()
 		return
 	})
+
+	p.register("MakeArrayOfStackRecord", func(n int) []runtime.StackRecord {
+		return make([]runtime.StackRecord, n)
+	})
+
 	p.register("GoroutineProfile", func(p []runtime.StackRecord) (n int, ok bool) {
 		return runtime.GoroutineProfile(p)
 	})
@@ -338,6 +347,9 @@ func MakeRuntimePackage() *PackageProxy {
 		return
 	})
 
+	p.register("MakeArrayOfMemProfileRecord", func(n int) []runtime.MemProfileRecord {
+		return make([]runtime.MemProfileRecord, n)
+	})
 	p.register("MemProfile", func(p []runtime.MemProfileRecord, inuseZero bool) (n int, ok bool) {
 		return runtime.MemProfile(p, inuseZero)
 	})
@@ -352,6 +364,10 @@ func MakeRuntimePackage() *PackageProxy {
 
 	p.register("NumGoroutine", func() int {
 		return runtime.NumGoroutine()
+	})
+
+	p.register("NewMemStats", func() *runtime.MemStats {
+		return &runtime.MemStats{}
 	})
 
 	p.register("ReadMemStats", func(m *runtime.MemStats) {

@@ -8,5 +8,31 @@ runtime
 (. runtime NumCgoCall)
 (. runtime NumGoroutine)
 (. runtime Version)
+(define m (. runtime NewMemStats))
+(. runtime ReadMemStats m)
+(println m)
 
+(define sr (. runtime MakeArrayOfStackRecord 10))
+(. runtime GoroutineProfile sr)
 
+(define bpr (. runtime MakeArrayOfBlockProfileRecord 10))
+(. runtime BlockProfile bpr)
+
+(define mpr (. runtime MakeArrayOfMemProfileRecord 10))
+(. runtime MemProfile mpr false)
+
+"""
+(loop [i 400000]
+    (if (< i 800000)
+        (let [ui (. (. reflect ValueOf i) Convert
+                    (. reflect TypeByKind (. reflect Uintptr)))
+              p (. runtime FuncForPC (. ui Interface))]
+            (if (null? p)
+                '()
+                (begin 
+                       (println p)
+                       (println (. p Name))
+                       (println (. p Entry))))
+            (recur (+ i 1024)))
+        '()))
+"""
