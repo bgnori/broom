@@ -10,6 +10,7 @@ import (
 func setupBuiltins(env Environment) Environment {
 	env.Bind("true", true)
 	env.Bind("false", false)
+	env.Bind("else", true) // for cond, etc
 	env.Bind("not", Closure(func(env Environment, cdr Pair) interface{} {
 		x := Eval(env, Car(cdr)).(bool)
 		return !x
@@ -21,6 +22,10 @@ func setupBuiltins(env Environment) Environment {
 			cdr = nil
 		}
 		return Cons(car, cdr)
+	}))
+	env.Bind("Arr2List", Closure(func(env Environment, args Pair) interface{} {
+		xs := Eval(env, Car(args)).([]interface{})
+		return List(xs...)
 	}))
 	env.Bind("List2Arr", Closure(func(env Environment, args Pair) interface{} {
 		list := Eval(env, Car(args))
@@ -71,6 +76,7 @@ func setupBuiltins(env Environment) Environment {
 	env.Bind("os", MakeOSPackage())
 	env.Bind(".", GolangInterop())
 	env.Bind("=", Closure(func(env Environment, cdr Pair) interface{} {
+		fmt.Println(cdr)
 		x := Eval(env, Car(cdr))
 		y := Eval(env, Car(Cdr(cdr)))
 		return Eq(x, y)
@@ -191,7 +197,7 @@ func setupBuiltins(env Environment) Environment {
 		return isArray(Eval(env, Car(cdr)))
 	}))
 
-	env.Bind("mpa?", Closure(func(env Environment, cdr Pair) interface{} {
+	env.Bind("map?", Closure(func(env Environment, cdr Pair) interface{} {
 		return isMap(Eval(env, Car(cdr)))
 	}))
 

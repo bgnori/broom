@@ -1,13 +1,13 @@
 
 (def defmacro
-        (macro [name xs body]
-               (list 'def name (list 'macro xs body))))
+        (macro [name xs & body]
+               (list 'def name (cons 'macro (cons xs (Arr2List body))))))
 
 (defmacro identity [expr]
     expr)
 
-(defmacro when [expr form]
-    (list 'if expr form '()))
+(defmacro when [expr & form]
+    (list 'if expr (cons 'begin (Arr2List form)) '()))
 
 (defmacro lambda [xs body]
     (list 'fn (List2Arr xs) body))
@@ -26,3 +26,5 @@
 (defn zero? [x]
     (= x 0))
 
+(defmacro my-cond [test action & rest]
+    (list 'if test action (cons 'my-cond (Arr2List rest))))
