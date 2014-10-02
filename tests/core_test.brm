@@ -25,4 +25,7 @@
 (fizzbuzz 7)
 
 
-(defn hoge 1 2 3) ; should panic
+;(defn hoge 1 2 3) ; should panic
+(gensym)
+(gensym)
+

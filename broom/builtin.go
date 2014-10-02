@@ -21,6 +21,9 @@ func setupBuiltins(env Environment) Environment {
 		}
 		return Cons(car, cdr)
 	}))
+	env.Bind("gensym", Closure(func(env Environment, cdr Pair) interface {} {
+		return GenSym()
+	}))
 	env.Bind("Arr2List", Closure(func(env Environment, args Pair) interface{} {
 		xs := Eval(env, Car(args)).([]interface{})
 		return List(xs...)
