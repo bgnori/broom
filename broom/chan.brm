@@ -1,0 +1,63 @@
+(defmacro macro-select-case [kase]
+    ; return SelectCase object
+    (cond 
+          (= kase 'default) (. reflect SelectCase (. reflect SelectDefault))
+          (array? kase)
+          (let [dst (kase 0) ; array method is needed
+                src (kase 1)]
+              (if (symbol? dst)
+                  (if (bound? dst) ; bind this result as case.
+                      (. reflect SelectCase 
+                         (. reflect SelectSend)
+                         (. reflect ValueOf dst)
+                         (. reflect ValueOf src)); need Eval?
+                      (. reflect SelectCase 
+                         (. reflect SelectRecv)
+                         (. reflect ValueOf src))); need Eval?
+                  else (panic "expectd default or [s_chan value_to_send] [sym_to_bind r_chan]")))))
+
+(defmacro macro-select-hader [kase]
+    (cond 
+          (= kase 'default) '()
+          (array? kase) kase))
+
+
+
+(define interface-type (. reflect TypeByKind (. reflect Interface)))
+
+(defn arr [len cap]
+    (. reflect MakeSlice (. reflect SliceOf interface-type) len cap))
+
+(defn append [xs item]
+    (. reflect Append xs (. reflect ValueOf item)))
+
+(defmacro edit-select [xs]
+    (loop [ys xs
+           cases (arr 0 0)
+           headers (arr 0 0)
+           bodies (arr 0 0)]
+        (if (null? ys)
+            (list cases headers bodies)
+            (recur 
+                   (cdr (cdr ys))
+                   (append cases (macro-select-case (car ys)))
+                   (append heaers (macro-select-hader (car ys)))
+                   (append bodies (car (cdr ys))))))
+
+
+(defmacro my-select [xs]
+    (let [ys (edit-select xs)]
+        (let [idx (. reflect SelectCase (ys 0))])))
+;
+
+(defmacro select-with [cases headers bodies]
+ `(let [[chosen recv recvOK]  (. reflect SelectCase ,cases)]
+      )
+
+
+
+
+
+
+
+

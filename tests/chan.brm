@@ -12,3 +12,6 @@
 (. my-chan TryRecv) ; (<int value> true)
 
 
+
+(macro-select-case [my-chan 1] (print "sending"))
+
