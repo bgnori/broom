@@ -3,7 +3,6 @@ package broom
 import (
 	"fmt"
 	"reflect"
-	"runtime"
 	"time"
 )
 
@@ -227,10 +226,6 @@ func setupBuiltins(env Environment) Environment {
 			}()
 			return Eval(dynamic, Cons(target, arg))
 		})
-	}))
-	env.Bind("GOMAXPROCS", Closure(func(env Environment, cdr Pair) interface{} {
-		n := Eval(env, Car(cdr)).(int)
-		return runtime.GOMAXPROCS(n)
 	}))
 	env.Bind("select", Closure(func(env Environment, cdr Pair) interface{} {
 		cases := make([]reflect.SelectCase, 0)
