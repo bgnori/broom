@@ -57,8 +57,6 @@ func MakeReflectPackage() *PackageProxy {
 	p.register("Append", reflect.Append)
 	p.register("AppendSlice", reflect.AppendSlice)
 
-	p.register("Select", reflect.Select)
-
 	p.register("ChanDir", func(recv, send bool) reflect.ChanDir {
 		switch {
 		case recv && send:
@@ -70,6 +68,18 @@ func MakeReflectPackage() *PackageProxy {
 		default:
 			panic("never reach")
 		}
+	})
+
+	p.register("Select", reflect.Select)
+
+	p.register("SelectDefault", func() reflect.SelectDir {
+		return reflect.SelectDefault
+	})
+	p.register("SelectSend", func() reflect.SelectDir {
+		return reflect.SelectSend
+	})
+	p.register("SelectRecv", func() reflect.SelectDir {
+		return reflect.SelectRecv
 	})
 
 	p.register("SelectCase",
@@ -166,6 +176,9 @@ func MakeReflectPackage() *PackageProxy {
 			return reflect.TypeOf(complex128(0))
 		case reflect.String:
 			return reflect.TypeOf("abc")
+		case reflect.Interface:
+			var v interface{}
+			return reflect.TypeOf(&v).Elem()
 		default:
 			panic(fmt.Sprintf("bad reflect.Kind: %d", k))
 		}
