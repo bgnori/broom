@@ -45,6 +45,11 @@ func Eval(env Environment, expr interface{}) interface{} {
 			r.Update(List2Arr(Cdr(expr)), env)
 			return r
 		}
+		if xs, ok := car.([]interface{}); ok {
+			idx := Car(Cdr(expr)).(int)
+			return xs[idx]
+		}
+
 		op, ok := car.(Closure)
 		if !ok {
 			panic("application error, expected SExprOperator, but got " + fmt.Sprintf("%v", car))
