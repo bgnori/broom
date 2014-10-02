@@ -33,6 +33,10 @@ func (p* Pool)MakeSymbol(s string) *symbolImpl{
 	return &symbolImpl{id:n}
 }
 
+func (p* Pool)GenSymbol() *symbolImpl{
+	return pool.MakeSymbol(fmt.Sprintf("_symol-%d", len(p.xs)))
+}
+
 func (p* Pool)LookUp(s string) (*symbolImpl, bool) {
 	if n, ok := p.lookup[s]; ok {
 		return &symbolImpl{id:n}, true
@@ -84,3 +88,10 @@ func (s *symbolImpl) String() string {
 func (s *symbolImpl) DetailedPrint() string {
 	return fmt.Sprintf("#symbol-%d-:%s", s.id, s.GetValue())
 }
+
+func GenSym() *symbolImpl {
+	pool.Lock()
+	defer pool.Unlock()
+	return pool.GenSymbol()
+}
+
