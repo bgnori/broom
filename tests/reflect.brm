@@ -13,3 +13,13 @@ t
 v
 ;(. v SetUint 777) ; can't. need uint literal
 ; v
+
+(define interface-type (. reflect TypeByKind (. reflect Interface)))
+interface-type
+(def arr (. reflect MakeSlice (. reflect SliceOf interface-type) 0 0))
+
+(. reflect TypeOf arr)
+;(def xs (. reflect Append arr (. reflect ValueOf 1)))
+;(. (. reflect ValueOf xs) Len)
+
+
