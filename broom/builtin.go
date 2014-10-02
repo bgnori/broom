@@ -230,6 +230,13 @@ func setupBuiltins(env Environment) Environment {
 			return Eval(dynamic, Cons(target, arg))
 		})
 	}))
+	env.Bind("bound?", Closure(func(env Environment, cdr Pair) interface{} {
+		if s, ok := Car(cdr).(Symbol) ; ok {
+			_, err := env.Resolve(s.GetValue())
+			return err == nil
+		}
+		return false
+	}))
 	env.Bind("select", Closure(func(env Environment, cdr Pair) interface{} {
 		cases := make([]reflect.SelectCase, 0)
 		headers := make([][]interface{}, 0)
