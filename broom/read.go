@@ -120,6 +120,18 @@ func isQuasiQuote(r rune) bool {
 	return '`' == r
 }
 
+func isUnQuote(r rune) bool {
+	return ',' == r
+}
+
+func isSplicingQuote(r rune) bool {
+	return '@' == r
+}
+
+func isGenSymQuote(r rune) bool {
+	return '~' == r
+}
+
 func isWhite(r rune) bool {
 	return r == ' ' || r == '\t' || r == '\v' || r == '\r' || r == '\n'
 }
@@ -231,6 +243,12 @@ func TopLevel(reader *Reader) ReaderState {
 		return TopLevel
 	case isQuote(r):
 		reader.Emit(reader.MakeQuote())
+		return TopLevel
+	case isQuasiQuote(r):
+		reader.Emit(reader.MakeQuasiQuote())
+		return TopLevel
+	case isUnQuote(r):
+		reader.Emit(reader.MakeUnquote())
 		return TopLevel
 	case isSemicolon(r):
 		reader.Emit(reader.MakeSemicolon())
@@ -361,6 +379,9 @@ const (
 	TOKEN_COLON
 	TOKEN_QUOTE
 	TOKEN_QUASIQUOTE
+	TOKEN_UNQUOTE
+	TOKEN_SPLICINGQUOTE
+	TOKEN_GENSYMQUOTE
 	TOKEN_DOT
 	TOKEN_TRUE
 	TOKEN_FALSE
@@ -439,10 +460,31 @@ func (r *Reader) MakeQuasiQuote() Token {
 	return t
 }
 
+func (r *Reader) MakeUnquote() Token {
+	t := Token{pos: r.buffer.pos, id: TOKEN_UNQUOTE}
+	r.buffer.Consume(1)
+	return t
+}
+
+func (r *Reader) MakeSplicingQuote() Token {
+	t := Token{pos: r.buffer.pos, id: TOKEN_SPLICINGQUOTE}
+	r.buffer.Consume(1)
+	return t
+}
+
+func (r *Reader) MakeGenSymQuote() Token {
+	t := Token{pos: r.buffer.pos, id: TOKEN_GENSYMQUOTE}
+	r.buffer.Consume(1)
+	return t
+}
+
+
 type tokenSeq struct {
 	typ    int
 	items  []interface{}
 	quoted bool
+	quasiquoted bool
+	unquoted bool
 }
 
 func (t *tokenSeq) Items() []interface{} {
@@ -452,10 +494,15 @@ func (t *tokenSeq) Items() []interface{} {
 type SExprBuilder struct {
 	stack         []*tokenSeq
 	quoteNextExpr bool
+	qqNextExpr bool
+	uqNextExpr bool
 }
 
 func NewSExprBuilder() *SExprBuilder {
-	b := &SExprBuilder{stack: make([]*tokenSeq, 0), quoteNextExpr: false}
+	b := &SExprBuilder{stack: make([]*tokenSeq, 0),
+	quoteNextExpr: false,
+	qqNextExpr: false,
+	uqNextExpr: false}
 	return b
 }
 
@@ -468,6 +515,17 @@ func (b *SExprBuilder) push(expr interface{}) {
 		expr = List(sym("quote"), expr)
 		b.quoteNextExpr = false
 	}
+
+	if b.qqNextExpr {
+		expr = List(sym("qq"), expr)
+		b.qqNextExpr = false
+	}
+
+	if b.uqNextExpr{
+		expr = List(sym("uq"), expr)
+		b.uqNextExpr = false
+	}
+
 	top := b.Len() - 1
 	seq := b.stack[top]
 	seq.items = append(seq.items, expr)
@@ -477,10 +535,15 @@ func (b *SExprBuilder) push(expr interface{}) {
 func (b *SExprBuilder) startSeq(typ int) {
 	seq := new(tokenSeq)
 	seq.typ = typ
-	if b.quoteNextExpr {
-		seq.quoted = true
-		b.quoteNextExpr = false
-	}
+
+	seq.quoted = b.quoteNextExpr
+	seq.quasiquoted = b.qqNextExpr
+	seq.unquoted = b.uqNextExpr
+
+	b.quoteNextExpr = false
+	b.qqNextExpr = false
+	b.uqNextExpr = false
+
 	seq.items = make([]interface{}, 0)
 	b.stack = append(b.stack, seq)
 }
@@ -496,6 +559,14 @@ func (b *SExprBuilder) quote() {
 	b.quoteNextExpr = true
 }
 
+func (b *SExprBuilder) quasiquote() {
+	b.qqNextExpr = true
+}
+
+func (b *SExprBuilder) unquote() {
+	b.uqNextExpr = true
+}
+
 type BuilderError struct {
 	msg string
 }
@@ -509,36 +580,62 @@ func (b *SExprBuilder) Error(msg string) *BuilderError {
 }
 
 func (b *SExprBuilder) MakeParenObject(seq *tokenSeq) (interface{}, error) {
-	if b.quoteNextExpr {
+	switch {
+	case b.quoteNextExpr:
 		return nil, b.Error("found quote in front of ')'")
+	case b.qqNextExpr:
+		return nil, b.Error("found quasiquote in front of ')'")
+	case b.uqNextExpr:
+		return nil, b.Error("found unquote in front of ')'")
 	}
 	if seq.typ != TOKEN_LEFT_PAREN {
 		return nil, b.Error("PAREN does not match")
 	}
-	if seq.quoted {
+
+	switch {
+	case seq.quoted:
 		return List(sym("quote"), List(seq.items...)), nil
-	} else {
+	case seq.quasiquoted:
+		return List(sym("qq"), List(seq.items...)), nil
+	case seq.unquoted:
+		panic("tried to unqoute seqence!")
+	default:
 		return List(seq.items...), nil
 	}
 }
 
 func (b *SExprBuilder) MakeBracketObject(seq *tokenSeq) (interface{}, error) {
-	if b.quoteNextExpr {
+	switch {
+	case b.quoteNextExpr:
 		return nil, b.Error("found quote in front of ']'")
+	case b.qqNextExpr:
+		return nil, b.Error("found quasiquote in front of ']'")
+	case b.uqNextExpr:
+		return nil, b.Error("found unquote in front of ']'")
 	}
 	if seq.typ != TOKEN_LEFT_BRACKET {
 		return nil, b.Error("PAREN does not match")
 	}
-	if seq.quoted {
+	switch {
+	case seq.quoted:
 		return List(sym("quote"), seq.items), nil
-	} else {
+	case seq.quasiquoted:
+		return List(sym("qq"), seq.items), nil
+	case seq.unquoted:
+		panic("tried to unqoute []!")
+	default:
 		return seq.items, nil
 	}
 }
 
 func (b *SExprBuilder) MakeBraceObject(seq *tokenSeq) (interface{}, error) {
-	if b.quoteNextExpr {
+	switch {
+	case b.quoteNextExpr:
 		return nil, b.Error("found quote in front of '}'")
+	case b.qqNextExpr:
+		return nil, b.Error("found quasiquote in front of '}'")
+	case b.uqNextExpr:
+		return nil, b.Error("found unquote in front of '}'")
 	}
 	if seq.typ != TOKEN_LEFT_BRACE {
 		return nil, b.Error("PAREN does not match")
@@ -552,9 +649,14 @@ func (b *SExprBuilder) MakeBraceObject(seq *tokenSeq) (interface{}, error) {
 			m[key] = v
 		}
 	}
-	if seq.quoted {
+	switch {
+	case seq.quoted:
 		return List(sym("quote"), m), nil
-	} else {
+	case seq.quasiquoted: //wtf
+		return List(sym("qq"), m), nil
+	case seq.unquoted:
+		panic("tried to unqoute {}!")
+	default:
 		return m, nil
 	}
 }
@@ -565,6 +667,10 @@ func (builder *SExprBuilder) Run(reader *Reader) (*tokenSeq, error) {
 		switch tk.id {
 		case TOKEN_QUOTE:
 			builder.quote()
+		case TOKEN_QUASIQUOTE:
+			builder.quasiquote()
+		case TOKEN_UNQUOTE:
+			builder.unquote()
 		case TOKEN_LEFT_PAREN:
 			builder.startSeq(tk.id)
 		case TOKEN_RIGHT_PAREN:

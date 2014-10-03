@@ -1,0 +1,16 @@
+
+
+(define x 1)
+(define y 4)
+(pair? 1)
+
+'(0 x 2 3 y 5)
+`(0 x 2 3 y 5)
+
+`(0 ,x 2 3 ,y 5)
+
+(defmacro foo [p q]
+    `(list 0 ,p 2 3 ,q 5))
+;    `(0 ,p 2 3 ,q 5))
+
+(foo 1 4) ; => (0 1 2 3 4 5)

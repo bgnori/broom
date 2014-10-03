@@ -6,12 +6,38 @@ import (
 	"time"
 )
 
+func qq(env Environment, cdr Pair) Pair {
+	if isNull(cdr) {
+		return nil
+	}
+	x := Car(cdr)
+	if p, ok := x.(Pair); ok {
+		if s, ok := Car(p).(Symbol); ok {
+			if s.GetValue() == "uq" {
+				v, _ := env.Resolve(Car(Cdr(p)).(Symbol).GetValue())
+				return Cons(v, qq(env, Cdr(cdr)))
+			}
+		}
+		return Cons(qq(env, p), qq(env, Cdr(cdr)))
+	}
+	return Cons(x, qq(env, Cdr(cdr)))
+}
+
 func setupBuiltins(env Environment) Environment {
 	env.Bind("true", true)
 	env.Bind("false", false)
 	env.Bind("not", Closure(func(env Environment, cdr Pair) interface{} {
 		x := Eval(env, Car(cdr)).(bool)
 		return !x
+	}))
+	env.Bind("eval", Closure(func(env Environment, cdr Pair) interface{} {
+		given_env := Car(cdr).(Environment)
+		v := Car(Cdr(cdr)).(interface{})
+		fmt.Println(given_env, v)
+		return Eval(given_env, v)
+	}))
+	env.Bind("qq", Closure(func(env Environment, cdr Pair) interface{} {
+		return qq(env, Car(cdr).(Pair))
 	}))
 	env.Bind("cons", Closure(func(env Environment, body Pair) interface{} {
 		car := Eval(env, Car(body))
