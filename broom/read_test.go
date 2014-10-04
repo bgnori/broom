@@ -439,7 +439,7 @@ func TestMakeEmptyList(t *testing.T) {
 	expr := BuildSExpr(buf)
 
 	if expr != nil {
-		t.Error("nil is expected")
+		t.Errorf("nil is expected, but got %v", expr)
 	}
 }
 
@@ -448,8 +448,7 @@ func TestMakeQuotedEmptyList(t *testing.T) {
 	expr := BuildSExpr(buf)
 
 	if !Eq(List(sym("quote"), List()), expr) {
-		t.Error("'() is expected")
-		fmt.Println(expr)
+		t.Errorf("'() is expected %v", expr)
 	}
 }
 

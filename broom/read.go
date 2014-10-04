@@ -250,6 +250,9 @@ func TopLevel(reader *Reader) ReaderState {
 	case isUnQuote(r):
 		reader.Emit(reader.MakeUnquote())
 		return TopLevel
+	case isSplicingQuote(r):
+		reader.Emit(reader.MakeSplicingQuote())
+		return TopLevel
 	case isSemicolon(r):
 		reader.Emit(reader.MakeSemicolon())
 		return ZapToLineEnd
@@ -482,89 +485,144 @@ func (r *Reader) MakeGenSymQuote() Token {
 type tokenSeq struct {
 	typ    int
 	items  []interface{}
-	quoted bool
-	quasiquoted bool
-	unquoted bool
+	deco *Decorator
+}
+
+func NewTokenSeq(typ int, deco *Decorator) *tokenSeq {
+	seq := new(tokenSeq)
+	seq.typ = typ
+
+	seq.items = make([]interface{}, 0)
+	seq.deco = deco
+	return seq
+}
+
+type SeqError struct {
+	msg string
+}
+
+func (err *SeqError) Error() string {
+	return err.msg
+}
+
+func (t *tokenSeq) Error(msg string) *SeqError {
+	return &SeqError{msg: msg}
 }
 
 func (t *tokenSeq) Items() []interface{} {
 	return t.items
 }
 
+func (t *tokenSeq) Append(expr interface{}) {
+	t.items = append(t.items, expr)
+}
+
+func (t *tokenSeq) CloseParen() (interface{}, error) {
+	if t.typ != TOKEN_LEFT_PAREN {
+		return nil, t.Error("PAREN does not match")
+	}
+	return t.deco.Apply(List(t.Items()...)), nil
+}
+
+func (t *tokenSeq) CloseBracket() (interface{}, error) {
+	if t.typ != TOKEN_LEFT_BRACKET {
+		return nil, t.Error("PAREN does not match")
+	}
+	return t.deco.Apply(t.Items()), nil
+}
+
+func (t *tokenSeq) CloseBrace() (interface{}, error) {
+	if t.typ != TOKEN_LEFT_BRACE {
+		return nil, t.Error("PAREN does not match")
+	}
+	var key interface{}
+	m := make(map[interface{}]interface{})
+	for i, v := range t.items {
+		if i%2 == 0 {
+			key = v
+		} else {
+			m[key] = v
+		}
+	}
+	return t.deco.Apply(m), nil
+}
+
+
+type Decorator struct {
+	stack []Symbol
+}
+
+func NewDecorator() *Decorator {
+	return &Decorator{stack:make([]Symbol, 0)}
+}
+
+func (d *Decorator) Push(s Symbol) {
+	d.stack = append(d.stack, s)
+}
+
+func (d *Decorator) HasSomething() bool {
+	return len(d.stack) > 0
+}
+
+func (d *Decorator) Pop() Symbol {
+	idx := len(d.stack) - 1
+	last := d.stack[idx]
+	d.stack = d.stack[0:idx]
+	return last
+}
+
+func (d *Decorator) Apply(expr interface{}) interface{} {
+	for ; d.HasSomething() ; {
+		s := d.Pop()
+		expr = List(s, expr)
+	}
+	return expr
+}
+
+
 type SExprBuilder struct {
 	stack         []*tokenSeq
-	quoteNextExpr bool
-	qqNextExpr bool
-	uqNextExpr bool
+	deco *Decorator
 }
 
 func NewSExprBuilder() *SExprBuilder {
-	b := &SExprBuilder{stack: make([]*tokenSeq, 0),
-	quoteNextExpr: false,
-	qqNextExpr: false,
-	uqNextExpr: false}
+	b := &SExprBuilder{stack: make([]*tokenSeq, 0)}
+	b.ResetDeco()
 	return b
+}
+
+func (b *SExprBuilder)ResetDeco() {
+	b.deco = NewDecorator()
 }
 
 func (b *SExprBuilder) Len() int {
 	return len(b.stack)
 }
 
-func (b *SExprBuilder) push(expr interface{}) {
-	if b.quoteNextExpr {
-		expr = List(sym("quote"), expr)
-		b.quoteNextExpr = false
-	}
+func (b *SExprBuilder) Top() *tokenSeq {
+	return b.stack[b.Len() - 1]
+}
 
-	if b.qqNextExpr {
-		expr = List(sym("qq"), expr)
-		b.qqNextExpr = false
-	}
+func (b *SExprBuilder) Pop() *tokenSeq {
+	last := b.Len() - 1
+	seq := b.stack[last]
+	b.stack = b.stack[0:last]
+	return  seq
+}
 
-	if b.uqNextExpr{
-		expr = List(sym("uq"), expr)
-		b.uqNextExpr = false
-	}
 
-	top := b.Len() - 1
-	seq := b.stack[top]
-	seq.items = append(seq.items, expr)
-	b.stack[top] = seq
+func (b *SExprBuilder) Add(expr interface{}) {
+	b.Top().Append(b.deco.Apply(expr))
 }
 
 func (b *SExprBuilder) startSeq(typ int) {
-	seq := new(tokenSeq)
-	seq.typ = typ
-
-	seq.quoted = b.quoteNextExpr
-	seq.quasiquoted = b.qqNextExpr
-	seq.unquoted = b.uqNextExpr
-
-	b.quoteNextExpr = false
-	b.qqNextExpr = false
-	b.uqNextExpr = false
-
-	seq.items = make([]interface{}, 0)
+	seq := NewTokenSeq(typ, b.deco)
+	b.ResetDeco()
 	b.stack = append(b.stack, seq)
 }
 
 func (b *SExprBuilder) endSeq() *tokenSeq {
-	last := b.Len() - 1
-	seq := b.stack[last]
-	b.stack = b.stack[0:last]
-	return seq
-}
-
-func (b *SExprBuilder) quote() {
-	b.quoteNextExpr = true
-}
-
-func (b *SExprBuilder) quasiquote() {
-	b.qqNextExpr = true
-}
-
-func (b *SExprBuilder) unquote() {
-	b.uqNextExpr = true
+	return b.Pop()
 }
 
 type BuilderError struct {
@@ -580,85 +638,24 @@ func (b *SExprBuilder) Error(msg string) *BuilderError {
 }
 
 func (b *SExprBuilder) MakeParenObject(seq *tokenSeq) (interface{}, error) {
-	switch {
-	case b.quoteNextExpr:
-		return nil, b.Error("found quote in front of ')'")
-	case b.qqNextExpr:
-		return nil, b.Error("found quasiquote in front of ')'")
-	case b.uqNextExpr:
-		return nil, b.Error("found unquote in front of ')'")
+	if b.deco.HasSomething() {
+		return nil, b.Error("can't decorate ')'.")
 	}
-	if seq.typ != TOKEN_LEFT_PAREN {
-		return nil, b.Error("PAREN does not match")
-	}
-
-	switch {
-	case seq.quoted:
-		return List(sym("quote"), List(seq.items...)), nil
-	case seq.quasiquoted:
-		return List(sym("qq"), List(seq.items...)), nil
-	case seq.unquoted:
-		panic("tried to unqoute seqence!")
-	default:
-		return List(seq.items...), nil
-	}
+	return seq.CloseParen()
 }
 
 func (b *SExprBuilder) MakeBracketObject(seq *tokenSeq) (interface{}, error) {
-	switch {
-	case b.quoteNextExpr:
-		return nil, b.Error("found quote in front of ']'")
-	case b.qqNextExpr:
-		return nil, b.Error("found quasiquote in front of ']'")
-	case b.uqNextExpr:
-		return nil, b.Error("found unquote in front of ']'")
+	if b.deco.HasSomething() {
+		return nil, b.Error("can't decorate ']'.")
 	}
-	if seq.typ != TOKEN_LEFT_BRACKET {
-		return nil, b.Error("PAREN does not match")
-	}
-	switch {
-	case seq.quoted:
-		return List(sym("quote"), seq.items), nil
-	case seq.quasiquoted:
-		return List(sym("qq"), seq.items), nil
-	case seq.unquoted:
-		panic("tried to unqoute []!")
-	default:
-		return seq.items, nil
-	}
+	return seq.CloseBracket()
 }
 
 func (b *SExprBuilder) MakeBraceObject(seq *tokenSeq) (interface{}, error) {
-	switch {
-	case b.quoteNextExpr:
-		return nil, b.Error("found quote in front of '}'")
-	case b.qqNextExpr:
-		return nil, b.Error("found quasiquote in front of '}'")
-	case b.uqNextExpr:
-		return nil, b.Error("found unquote in front of '}'")
+	if b.deco.HasSomething() {
+		return nil, b.Error("can't decorate '}'.")
 	}
-	if seq.typ != TOKEN_LEFT_BRACE {
-		return nil, b.Error("PAREN does not match")
-	}
-	var key interface{}
-	m := make(map[interface{}]interface{})
-	for i, v := range seq.items {
-		if i%2 == 0 {
-			key = v
-		} else {
-			m[key] = v
-		}
-	}
-	switch {
-	case seq.quoted:
-		return List(sym("quote"), m), nil
-	case seq.quasiquoted: //wtf
-		return List(sym("qq"), m), nil
-	case seq.unquoted:
-		panic("tried to unqoute {}!")
-	default:
-		return m, nil
-	}
+	return seq.CloseBrace()
 }
 
 func (builder *SExprBuilder) Run(reader *Reader) (*tokenSeq, error) {
@@ -666,11 +663,13 @@ func (builder *SExprBuilder) Run(reader *Reader) (*tokenSeq, error) {
 	for tk := reader.Read(); tk.id != TOKEN_ENDOFINPUT; tk = reader.Read() {
 		switch tk.id {
 		case TOKEN_QUOTE:
-			builder.quote()
+			builder.deco.Push(sym("quote"))
 		case TOKEN_QUASIQUOTE:
-			builder.quasiquote()
+			builder.deco.Push(sym("qq"))
 		case TOKEN_UNQUOTE:
-			builder.unquote()
+			builder.deco.Push(sym("uq"))
+		case TOKEN_SPLICINGQUOTE:
+			builder.deco.Push(sym("sq"))
 		case TOKEN_LEFT_PAREN:
 			builder.startSeq(tk.id)
 		case TOKEN_RIGHT_PAREN:
@@ -678,7 +677,7 @@ func (builder *SExprBuilder) Run(reader *Reader) (*tokenSeq, error) {
 			if err != nil {
 				return nil, err
 			}
-			builder.push(obj)
+			builder.Add(obj)
 		case TOKEN_LEFT_BRACKET:
 			builder.startSeq(tk.id)
 		case TOKEN_RIGHT_BRACKET:
@@ -686,7 +685,7 @@ func (builder *SExprBuilder) Run(reader *Reader) (*tokenSeq, error) {
 			if err != nil {
 				return nil, err
 			}
-			builder.push(obj)
+			builder.Add(obj)
 		case TOKEN_LEFT_BRACE:
 			builder.startSeq(tk.id)
 		case TOKEN_RIGHT_BRACE:
@@ -694,23 +693,23 @@ func (builder *SExprBuilder) Run(reader *Reader) (*tokenSeq, error) {
 			if err != nil {
 				return nil, err
 			}
-			builder.push(obj)
+			builder.Add(obj)
 		case TOKEN_INT:
 			var n int
 			fmt.Sscanf(tk.v, "%d", &n)
-			builder.push(n)
+			builder.Add(n)
 		case TOKEN_FLOAT:
 			var f float64
 			fmt.Sscanf(tk.v, "%f", &f)
-			builder.push(f)
+			builder.Add(f)
 		case TOKEN_TRUE:
-			builder.push(true)
+			builder.Add(true)
 		case TOKEN_FALSE:
-			builder.push(false)
+			builder.Add(false)
 		case TOKEN_SYMBOL:
-			builder.push(sym(tk.v))
+			builder.Add(sym(tk.v))
 		case TOKEN_STRING:
-			builder.push(tk.v)
+			builder.Add(tk.v)
 		}
 	}
 	seq := builder.endSeq()
