@@ -6,21 +6,42 @@ import (
 	"time"
 )
 
-func qq(env Environment, cdr Pair) Pair {
-	if isNull(cdr) {
-		return nil
-	}
-	x := Car(cdr)
-	if p, ok := x.(Pair); ok {
-		if s, ok := Car(p).(Symbol); ok {
+
+type Injector func(target Pair) Pair
+
+func qq(env Environment, x interface{}) interface{} {
+	if p, ok := x.(Pair) ; ok {
+		if s, ok := Car(p).(Symbol) ; ok {
 			if s.GetValue() == "uq" {
-				v, _ := env.Resolve(Car(Cdr(p)).(Symbol).GetValue())
-				return Cons(v, qq(env, Cdr(cdr)))
+				return uq(env, Car(Cdr(p)))
 			}
 		}
-		return Cons(qq(env, p), qq(env, Cdr(cdr)))
+		var xs Pair
+		xs = nil
+		for _, v := range List2Arr(p) {
+			q := qq(env, v)
+			if i, ok := q.(Injector) ; ok {
+				xs = i(xs)
+			} else {
+				xs = Append(xs, Cons(q, nil))
+			}
+		}
+		return xs
+	} else {
+		return x
 	}
-	return Cons(x, qq(env, Cdr(cdr)))
+}
+
+func uq(env Environment, x interface{}) Injector {
+	return func(target Pair) Pair {
+		fmt.Println("uq:", x)
+		v := Eval(env, x)
+		if i, ok := v.(Injector) ; ok {
+			return i(target)
+		} else {
+			return Append(target, Cons(v, nil))
+		}
+	}
 }
 
 func setupBuiltins(env Environment) Environment {
@@ -37,8 +58,29 @@ func setupBuiltins(env Environment) Environment {
 		return Eval(given_env, v)
 	}))
 	env.Bind("qq", Closure(func(env Environment, cdr Pair) interface{} {
-		return qq(env, Car(cdr).(Pair))
+		// (qq x)
+		return qq(env, Car(cdr))
 	}))
+	env.Bind("uq", Closure(func(env Environment, cdr Pair) interface{} {
+		// (uq x)
+		return uq(env, Car(cdr).(Pair))
+	}))
+
+	env.Bind("splicing", Closure(func(env Environment, cdr Pair) interface {} {
+		// (splicing xs)
+		return Injector(func(target Pair) Pair {
+			v := Eval(env, Car(cdr))
+			switch xs := v.(type){
+			case Pair:
+				return Append(target, xs)
+			case []interface{}:
+				return Append(target, List(xs...))
+			default:
+				panic(fmt.Sprintf("expected sequence, but got %v", v))
+			}
+		})
+	}))
+
 	env.Bind("cons", Closure(func(env Environment, body Pair) interface{} {
 		car := Eval(env, Car(body))
 		cdr, ok := Eval(env, Car(Cdr(body))).(Pair)

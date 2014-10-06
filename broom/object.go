@@ -420,3 +420,31 @@ func BinaryGreaterThan(x, y interface{}) interface{} {
 		panic("Greater than is not supported by this type.")
 	}
 }
+
+func Visit(env Environment,
+	pred func(Environment, interface{}) bool,
+	gen func(Environment, interface{}) interface{},
+	x interface{}) interface{} {
+
+	switch v := x.(type) {
+	case Pair:
+		if pred(env, v) {
+			return gen(env, v)
+		} else {
+			cdr, ok := Visit(env, pred, gen, Cdr(v)).(Pair)
+			if !ok {
+				cdr = nil
+			}
+			return Cons(Visit(env, pred, gen, Car(v)), cdr)
+		}
+	case []interface{}:
+		return nil
+	default:
+		if pred(env, v) {
+			return gen(env, v)
+		} else {
+			return x
+		}
+	}
+	return nil
+}

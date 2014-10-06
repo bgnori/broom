@@ -364,7 +364,9 @@ type Token struct {
 }
 
 const (
-	TOKEN_ENDOFINPUT = iota
+	TOKEN_INVALID = iota
+	TOKEN_TOPLEVEL
+	TOKEN_ENDOFINPUT
 	TOKEN_ENDOFLINE
 	TOKEN_SYMBOL
 	TOKEN_INT
@@ -383,7 +385,7 @@ const (
 	TOKEN_QUOTE
 	TOKEN_QUASIQUOTE
 	TOKEN_UNQUOTE
-	TOKEN_SPLICINGQUOTE
+	TOKEN_SPLICING
 	TOKEN_GENSYMQUOTE
 	TOKEN_DOT
 	TOKEN_TRUE
@@ -470,7 +472,7 @@ func (r *Reader) MakeUnquote() Token {
 }
 
 func (r *Reader) MakeSplicingQuote() Token {
-	t := Token{pos: r.buffer.pos, id: TOKEN_SPLICINGQUOTE}
+	t := Token{pos: r.buffer.pos, id: TOKEN_SPLICING}
 	r.buffer.Consume(1)
 	return t
 }
@@ -579,9 +581,8 @@ func (d *Decorator) Apply(expr interface{}) interface{} {
 	return expr
 }
 
-
 type SExprBuilder struct {
-	stack         []*tokenSeq
+	stack []*tokenSeq
 	deco *Decorator
 }
 
@@ -607,9 +608,8 @@ func (b *SExprBuilder) Pop() *tokenSeq {
 	last := b.Len() - 1
 	seq := b.stack[last]
 	b.stack = b.stack[0:last]
-	return  seq
+	return seq
 }
-
 
 func (b *SExprBuilder) Add(expr interface{}) {
 	b.Top().Append(b.deco.Apply(expr))
@@ -659,7 +659,7 @@ func (b *SExprBuilder) MakeBraceObject(seq *tokenSeq) (interface{}, error) {
 }
 
 func (builder *SExprBuilder) Run(reader *Reader) (*tokenSeq, error) {
-	builder.startSeq(-1)
+	builder.startSeq(TOKEN_TOPLEVEL)
 	for tk := reader.Read(); tk.id != TOKEN_ENDOFINPUT; tk = reader.Read() {
 		switch tk.id {
 		case TOKEN_QUOTE:
@@ -668,8 +668,8 @@ func (builder *SExprBuilder) Run(reader *Reader) (*tokenSeq, error) {
 			builder.deco.Push(sym("qq"))
 		case TOKEN_UNQUOTE:
 			builder.deco.Push(sym("uq"))
-		case TOKEN_SPLICINGQUOTE:
-			builder.deco.Push(sym("sq"))
+		case TOKEN_SPLICING:
+			builder.deco.Push(sym("splicing"))
 		case TOKEN_LEFT_PAREN:
 			builder.startSeq(tk.id)
 		case TOKEN_RIGHT_PAREN:
@@ -713,7 +713,7 @@ func (builder *SExprBuilder) Run(reader *Reader) (*tokenSeq, error) {
 		}
 	}
 	seq := builder.endSeq()
-	if seq.typ != -1 {
+	if seq.typ != TOKEN_TOPLEVEL {
 		return nil, builder.Error("expected TopLevel")
 	}
 	return seq, nil
