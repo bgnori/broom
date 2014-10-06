@@ -81,8 +81,8 @@ func List(xs ...interface{}) Pair {
 }
 
 func Append(xs Pair, cdr Pair) Pair {
-	if Cdr(xs) == nil {
-		return Cons(Car(xs), cdr)
+	if xs == nil {
+		return cdr
 	} else {
 		return Cons(Car(xs), Append(Cdr(xs), cdr))
 	}
