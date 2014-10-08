@@ -1,0 +1,8 @@
+
+(defmacro is [expect-true & rest]
+    `(if ,expect-true
+         true
+         (begin
+             (println (quote ,expect-true))
+             (println ,@rest)
+             false)))

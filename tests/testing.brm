@@ -1,0 +1,25 @@
+
+(defn foo[x]
+    x)
+
+(is (= (foo 1) 1))
+(is (= (foo 1) 2))
+
+
+
+(defn make-deposit [x]
+    (list x))
+
+(defn get-deposit [depo]
+    (car depo))
+
+(defn withdraw [depo x]
+    (begin
+        (set-car! depo (- (get-deposit depo) x))
+        (get-deposit depo)))
+
+(define acc (make-deposit 100))
+(is (= (withdraw acc 10) 90))
+(is (= (withdraw acc 15) 75))
+(is (= (withdraw acc 3) 70) "should fail")
+
