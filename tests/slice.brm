@@ -1,5 +1,3 @@
-
-
 (define my-slice-type (. reflect SliceOf
                        (. reflect TypeByKind (. reflect Int))))
 
@@ -28,4 +26,14 @@
 
 ; Slice3
 
+(def string-type (. reflect TypeByKind (. reflect String)))
+
+(def xxs (make-slice-of string-type 0 0))
+
+xxs ; []
+(slice-append xxs "hello") ; ["hello"]
+(slice-append (slice-append xxs "hello") "world") ; ["hello", "world"]
+(define mine (slice-append (slice-append (slice-append xxs "hello") "world") "broom"))
+
+(nth mine 1) ; "world"
 
