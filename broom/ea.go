@@ -26,8 +26,7 @@ func Eval(env Environment, expr interface{}) interface{} {
 	case isBoolean(expr) ||
 		isNumber(expr) ||
 		isString(expr) ||
-		isProcedure(expr) ||
-		isSyntax(expr): // self-evaluating?
+		isProcedure(expr):
 		return expr
 	case isRecur(expr):
 		return expr
@@ -50,7 +49,7 @@ func Eval(env Environment, expr interface{}) interface{} {
 			return xs[idx]
 		}
 
-		op, ok := car.(Closure)
+		op, ok := car.(func(Environment, Pair)interface{})
 		if !ok {
 			panic("application error, expected SExprOperator, but got " + fmt.Sprintf("%v", car))
 		}
@@ -103,11 +102,11 @@ func NewGlobalRootFrame() *enviroment {
 	e := NewEnvFrame(nil)
 	setupSpecialForms(e)
 	setupBuiltins(e)
-	e.Bind("eval", Closure(func(env Environment, cdr Pair) interface{} {
+	e.Bind("eval", func(env Environment, cdr Pair) interface{} {
 		given := Eval(env, Car(cdr)).(Environment)
 		given.Dump()
 		return Eval(given, Car(Cdr(cdr)))
-	}))
+	})
 	return e
 }
 

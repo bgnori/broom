@@ -107,19 +107,9 @@ func isRecur(v interface{}) bool {
 	return ok
 }
 
-type Closure func(env Environment, cdr Pair) interface{}
-
 func isProcedure(v interface{}) bool {
 	//procedure?
-	_, ok := v.(Closure)
-	return ok
-}
-
-type Syntax Closure
-
-func isSyntax(v interface{}) bool {
-	//syntax?
-	_, ok := v.(Syntax)
+	_, ok := v.(func(Environment, Pair)interface{})
 	return ok
 }
 

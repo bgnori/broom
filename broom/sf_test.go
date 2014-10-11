@@ -40,7 +40,7 @@ func TestEvalIF(t *testing.T) {
 func TestEvalLambda(t *testing.T) {
 	e := NewGlobalRootFrame()
 	f := Eval(e, List(sym("fn"), []interface{}{sym("x")}, sym("x")))
-	if _, ok := f.(Closure); !ok {
+	if _, ok := f.(func(Environment, Pair)interface{}); !ok {
 		t.Error("expected Procedure")
 	}
 	v := Eval(e, List(f, 123))
@@ -52,7 +52,7 @@ func TestEvalLambda(t *testing.T) {
 func TestEvalfn(t *testing.T) {
 	e := NewGlobalRootFrame()
 	f := Eval(e, List(sym("fn"), []interface{}{sym("x")}, sym("x")))
-	if _, ok := f.(Closure); !ok {
+	if _, ok := f.(func(Environment, Pair)interface{}); !ok {
 		t.Error("expected Procedure")
 	}
 	v := Eval(e, List(f, 123))
@@ -66,7 +66,7 @@ func xTestEvaldefn(t *testing.T) {
 	e := NewGlobalRootFrame()
 	Eval(e, List(sym("defn"), sym("foo"), []interface{}{sym("x")}, sym("x")))
 	f := Eval(e, sym("foo"))
-	if _, ok := f.(Closure); !ok {
+	if _, ok := f.(func(Environment, Pair)interface{}); !ok {
 		t.Error("expected Procedure")
 	}
 	v := Eval(e, List(f, 123))

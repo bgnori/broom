@@ -28,10 +28,10 @@ func Load(file io.Reader, env Environment, verbose bool) error {
 }
 
 func Repl(in io.Reader, env Environment) {
-	env.Bind("dump", Closure(func(dynamic Environment, cdr Pair) interface{} {
+	env.Bind("dump", func(dynamic Environment, cdr Pair) interface{} {
 		dynamic.Dump()
 		return nil
-	}))
+	})
 
 	reader := bufio.NewReader(in)
 

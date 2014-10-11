@@ -47,26 +47,26 @@ func uq(env Environment, x interface{}) Injector {
 func setupBuiltins(env Environment) Environment {
 	env.Bind("true", true)
 	env.Bind("false", false)
-	env.Bind("not", Closure(func(env Environment, cdr Pair) interface{} {
+	env.Bind("not", func(env Environment, cdr Pair) interface{} {
 		x := Eval(env, Car(cdr)).(bool)
 		return !x
-	}))
-	env.Bind("eval", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("eval", func(env Environment, cdr Pair) interface{} {
 		given_env := Car(cdr).(Environment)
 		v := Car(Cdr(cdr)).(interface{})
 		fmt.Println(given_env, v)
 		return Eval(given_env, v)
-	}))
-	env.Bind("qq", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("qq", func(env Environment, cdr Pair) interface{} {
 		// (qq x)
 		return qq(env, Car(cdr))
-	}))
-	env.Bind("uq", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("uq", func(env Environment, cdr Pair) interface{} {
 		// (uq x)
 		return uq(env, Car(cdr).(Pair))
-	}))
+	})
 
-	env.Bind("splicing", Closure(func(env Environment, cdr Pair) interface {} {
+	env.Bind("splicing", func(env Environment, cdr Pair) interface {} {
 		// (splicing xs)
 		return Injector(func(target Pair) Pair {
 			v := Eval(env, Car(cdr))
@@ -79,28 +79,28 @@ func setupBuiltins(env Environment) Environment {
 				panic(fmt.Sprintf("expected sequence, but got %v", v))
 			}
 		})
-	}))
+	})
 
-	env.Bind("cons", Closure(func(env Environment, body Pair) interface{} {
+	env.Bind("cons", func(env Environment, body Pair) interface{} {
 		car := Eval(env, Car(body))
 		cdr, ok := Eval(env, Car(Cdr(body))).(Pair)
 		if !ok {
 			cdr = nil
 		}
 		return Cons(car, cdr)
-	}))
-	env.Bind("gensym", Closure(func(env Environment, cdr Pair) interface {} {
+	})
+	env.Bind("gensym", func(env Environment, cdr Pair) interface {} {
 		return GenSym()
-	}))
-	env.Bind("Arr2List", Closure(func(env Environment, args Pair) interface{} {
+	})
+	env.Bind("Arr2List", func(env Environment, args Pair) interface{} {
 		xs := Eval(env, Car(args)).([]interface{})
 		return List(xs...)
-	}))
-	env.Bind("List2Arr", Closure(func(env Environment, args Pair) interface{} {
+	})
+	env.Bind("List2Arr", func(env Environment, args Pair) interface{} {
 		list := Eval(env, Car(args))
 		return List2Arr(list)
-	}))
-	env.Bind("list", Closure(func(env Environment, args Pair) interface{} {
+	})
+	env.Bind("list", func(env Environment, args Pair) interface{} {
 		var head, tail Pair
 
 		for _, v := range List2Arr(args) {
@@ -114,8 +114,8 @@ func setupBuiltins(env Environment) Environment {
 			}
 		}
 		return head
-	}))
-	env.Bind("abs", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("abs", func(env Environment, cdr Pair) interface{} {
 		v := reflect.ValueOf(Eval(env, Car(cdr)))
 		t := v.Type()
 		switch t.Kind() {
@@ -139,64 +139,64 @@ func setupBuiltins(env Environment) Environment {
 			}
 		}
 		return v.Interface()
-	}))
+	})
 
 	env.Bind("reflect", MakeReflectPackage())
 	env.Bind("os", MakeOSPackage())
 	env.Bind("runtime", MakeRuntimePackage())
 	env.Bind(".", GolangInterop())
-	env.Bind("=", Closure(func(env Environment, cdr Pair) interface{} {
+	env.Bind("=", func(env Environment, cdr Pair) interface{} {
 		fmt.Println(cdr)
 		x := Eval(env, Car(cdr))
 		y := Eval(env, Car(Cdr(cdr)))
 		return Eq(x, y)
-	}))
-	env.Bind("mod", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("mod", func(env Environment, cdr Pair) interface{} {
 		x := Eval(env, Car(cdr)).(int)
 		y := Eval(env, Car(Cdr(cdr))).(int)
 		return x % y
-	}))
-	env.Bind("add", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("add", func(env Environment, cdr Pair) interface{} {
 		x := Eval(env, Car(cdr))
 		y := Eval(env, Car(Cdr(cdr)))
 		return BinaryAdd(x, y)
-	}))
-	env.Bind("sub", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("sub", func(env Environment, cdr Pair) interface{} {
 		x := Eval(env, Car(cdr))
 		y := Eval(env, Car(Cdr(cdr)))
 		return BinarySub(x, y)
-	}))
-	env.Bind("mul", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("mul", func(env Environment, cdr Pair) interface{} {
 		x := Eval(env, Car(cdr))
 		y := Eval(env, Car(Cdr(cdr)))
 		return BinaryMul(x, y)
-	}))
-	env.Bind("div", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("div", func(env Environment, cdr Pair) interface{} {
 		x := Eval(env, Car(cdr))
 		y := Eval(env, Car(Cdr(cdr)))
 		return BinaryDiv(x, y)
-	}))
-	env.Bind("+", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("+", func(env Environment, cdr Pair) interface{} {
 		xs := List2Arr(Cdr(cdr))
 		acc := Eval(env, Car(cdr)).(int)
 		for _, x := range xs {
 			acc += Eval(env, x).(int)
 		}
 		return acc
-	}))
-	env.Bind("*", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("*", func(env Environment, cdr Pair) interface{} {
 		xs := List2Arr(Cdr(cdr))
 		acc := Eval(env, Car(cdr)).(int)
 		for _, x := range xs {
 			acc *= Eval(env, x).(int)
 		}
 		return acc
-	}))
-	env.Bind("panic", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("panic", func(env Environment, cdr Pair) interface{} {
 		panic(Car(cdr))
 		return nil
-	}))
-	env.Bind("-", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("-", func(env Environment, cdr Pair) interface{} {
 		xs := List2Arr(Cdr(cdr))
 		acc, ok := Eval(env, Car(cdr)).(int)
 		if !ok {
@@ -206,16 +206,16 @@ func setupBuiltins(env Environment) Environment {
 			acc -= Eval(env, x).(int)
 		}
 		return acc
-	}))
-	env.Bind("/", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("/", func(env Environment, cdr Pair) interface{} {
 		xs := List2Arr(Cdr(cdr))
 		acc := Eval(env, Car(cdr)).(int)
 		for _, x := range xs {
 			acc /= Eval(env, x).(int)
 		}
 		return acc
-	}))
-	env.Bind("sprintf", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("sprintf", func(env Environment, cdr Pair) interface{} {
 		format := Eval(env, Car(cdr)).(string)
 		xs := List2Arr(Cdr(cdr))
 		ys := make([]interface{}, 0)
@@ -223,8 +223,8 @@ func setupBuiltins(env Environment) Environment {
 			ys = append(ys, Eval(env, x))
 		}
 		return fmt.Sprintf(format, ys...)
-	}))
-	env.Bind("println", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("println", func(env Environment, cdr Pair) interface{} {
 		xs := List2Arr(cdr)
 		ys := make([]interface{}, 0)
 		for _, x := range xs {
@@ -232,80 +232,77 @@ func setupBuiltins(env Environment) Environment {
 		}
 		fmt.Println(ys)
 		return nil
-	}))
-	env.Bind("<", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("<", func(env Environment, cdr Pair) interface{} {
 		first := Eval(env, Car(cdr))
 		second := Eval(env, (Car(Cdr(cdr))))
 		return BinaryLessThan(first, second)
-	}))
-	env.Bind(">", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind(">", func(env Environment, cdr Pair) interface{} {
 		first := Eval(env, Car(cdr))
 		second := Eval(env, (Car(Cdr(cdr))))
 		return BinaryGreaterThan(first, second)
-	}))
-	env.Bind("null?", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("null?", func(env Environment, cdr Pair) interface{} {
 		return isNull(Eval(env, Car(cdr)))
-	}))
-	env.Bind("boolean?", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("boolean?", func(env Environment, cdr Pair) interface{} {
 		return isBoolean(Eval(env, Car(cdr)))
-	}))
-	env.Bind("char?", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("char?", func(env Environment, cdr Pair) interface{} {
 		return isChar(Eval(env, Car(cdr)))
-	}))
-	env.Bind("symbol?", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("symbol?", func(env Environment, cdr Pair) interface{} {
 		return isSymbol(Eval(env, Car(cdr)))
-	}))
-	env.Bind("number?", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("number?", func(env Environment, cdr Pair) interface{} {
 		return isNumber(Eval(env, Car(cdr)))
-	}))
-	env.Bind("pair?", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("pair?", func(env Environment, cdr Pair) interface{} {
 		return isPair(Eval(env, Car(cdr)))
-	}))
-	env.Bind("procedure?", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("procedure?", func(env Environment, cdr Pair) interface{} {
 		return isProcedure(Eval(env, Car(cdr)))
-	}))
-	env.Bind("syntax?", Closure(func(env Environment, cdr Pair) interface{} {
-		return isSyntax(Eval(env, Car(cdr)))
-	}))
+	})
 
-	env.Bind("string?", Closure(func(env Environment, cdr Pair) interface{} {
+	env.Bind("string?", func(env Environment, cdr Pair) interface{} {
 		return isString(Eval(env, Car(cdr)))
-	}))
+	})
 
-	env.Bind("array?", Closure(func(env Environment, cdr Pair) interface{} {
+	env.Bind("array?", func(env Environment, cdr Pair) interface{} {
 		return isArray(Eval(env, Car(cdr)))
-	}))
+	})
 
-	env.Bind("map?", Closure(func(env Environment, cdr Pair) interface{} {
+	env.Bind("map?", func(env Environment, cdr Pair) interface{} {
 		return isMap(Eval(env, Car(cdr)))
-	}))
+	})
 
-	env.Bind("go", Closure(func(env Environment, cdr Pair) interface{} {
-		proc := Eval(env, Car(cdr)).(Closure)
+	env.Bind("go", func(env Environment, cdr Pair) interface{} {
+		proc := Eval(env, Car(cdr)).(func(Environment, Pair)interface{})
 		go proc(env, Cdr(cdr))
 		return nil
-	}))
+	})
 
-	env.Bind("defer", Closure(func(env Environment, cdr Pair) interface{} {
-		handler := Eval(env, Car(cdr)).(Closure)
-		target := Eval(env, Car(Cdr(cdr))).(Closure)
-		return Closure(func(dynamic Environment, arg Pair) interface{} {
+	env.Bind("defer", func(env Environment, cdr Pair) interface{} {
+		handler := Eval(env, Car(cdr)).(func(Environment, Pair)interface{})
+		target := Eval(env, Car(Cdr(cdr))).(func(Environment, Pair)interface{})
+		return func(dynamic Environment, arg Pair) interface{} {
 			defer func() {
 				//fmt.Println("evoking defered", handler)
 				handler(dynamic, Cons(1, nil))
 				//Eval(dynamic, Cons(handler, nil))
 			}()
 			return Eval(dynamic, Cons(target, arg))
-		})
-	}))
-	env.Bind("bound?", Closure(func(env Environment, cdr Pair) interface{} {
+		}
+	})
+	env.Bind("bound?", func(env Environment, cdr Pair) interface{} {
 		if s, ok := Car(cdr).(Symbol) ; ok {
 			_, err := env.Resolve(s.GetValue())
 			return err == nil
 		}
 		return false
-	}))
-	env.Bind("select", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("select", func(env Environment, cdr Pair) interface{} {
 		cases := make([]reflect.SelectCase, 0)
 		headers := make([][]interface{}, 0)
 		bodies := make([]interface{}, 0)
@@ -354,37 +351,37 @@ func setupBuiltins(env Environment) Environment {
 			benv.Bind(h[0].(Symbol).GetValue(), recv)
 		}
 		return Eval(benv, b)
-	}))
-	env.Bind("make-chan-bool", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("make-chan-bool", func(env Environment, cdr Pair) interface{} {
 		return make(chan bool)
-	}))
-	env.Bind("make-chan-string", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("make-chan-string", func(env Environment, cdr Pair) interface{} {
 		return make(chan string)
-	}))
-	env.Bind("recv", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("recv", func(env Environment, cdr Pair) interface{} {
 		ch := reflect.ValueOf(Eval(env, Car(cdr)))
 		if v, ok := ch.Recv(); ok {
 			return v
 		}
 		return nil
-	}))
-	env.Bind("send", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("send", func(env Environment, cdr Pair) interface{} {
 		ch := reflect.ValueOf(Eval(env, Car(cdr)))
 		to_send := reflect.ValueOf(Eval(env, Car(Cdr(cdr))))
 		ch.Send(to_send)
 		return nil
-	}))
-	env.Bind("time/Sleep", Closure(func(env Environment, cdr Pair) interface{} {
+	})
+	env.Bind("time/Sleep", func(env Environment, cdr Pair) interface{} {
 		//d := Eval(env, Car(cdr)).(time.Duration)
 		time.Sleep(1 * time.Second)
 		return nil
-	}))
+	})
 	env.Bind("time/Second", time.Second)
 
 	return env
 }
 
-func GolangInterop() Closure {
+func GolangInterop() (func(Environment, Pair)interface{}){
 	return func(env Environment, cdr Pair) interface{} {
 		//see  http://stackoverflow.com/questions/14116840/dynamically-call-method-on-interface-regardless-of-receiver-type
 

@@ -6,31 +6,31 @@ import (
 
 func setupSpecialForms(env Environment) Environment {
 	//case sym("quote").Eq(car): //quoted?
-	env.Bind("quote", Closure(func(env Environment, cdr Pair) interface{} {
+	env.Bind("quote", func(env Environment, cdr Pair) interface{} {
 		if cdr == nil {
 			println("got nil")
 			return nil
 		}
 		return Car(cdr)
-	}))
+	})
 
 	//case sym("set!").Eq(car): //assignment?
-	env.Bind("set!", Closure(func(env Environment, cdr Pair) interface{} {
+	env.Bind("set!", func(env Environment, cdr Pair) interface{} {
 		panic("not implemented: set!")
 		return nil
-	}))
+	})
 
 	//case sym("def").Eq(car): //definition?
-	env.Bind("def", Closure(func(env Environment, cdr Pair) interface{} {
+	env.Bind("def", func(env Environment, cdr Pair) interface{} {
 		s, _ := Car(cdr).(Symbol)
 		v := Car(Cdr(cdr))
 		u := Eval(env, v)
 		env.Bind(s.GetValue(), u)
 		return s
-	}))
+	})
 
 	//case sym("if").Eq(car): //if?
-	env.Bind("if", Closure(func(env Environment, cdr Pair) interface{} {
+	env.Bind("if", func(env Environment, cdr Pair) interface{} {
 		cond := Car(cdr)
 		if Eval(env, cond) == true {
 			clauseThen := Car(Cdr(cdr))
@@ -40,19 +40,19 @@ func setupSpecialForms(env Environment) Environment {
 			return Eval(env, clauseElse)
 		}
 		return nil
-	}))
+	})
 
 	//idea from http://clojuredocs.org/clojure_core/clojure.core/fn
-	env.Bind("fn", Closure(func(lexical Environment, cdr Pair) interface{} {
-		r := Closure(func(dynamic Environment, args Pair) interface{} {
+	env.Bind("fn", func(lexical Environment, cdr Pair) interface{} {
+		r := func(dynamic Environment, args Pair) interface{} {
 			eb := NewEnvBuilder(Car(cdr).([]interface{}))
 			e := eb.EvalAndBindAll(List2Arr(args), NewEnvFrame(lexical), dynamic)
 			return EvalExprs(e, List2Arr(Body(cdr)))
-		})
+		}
 		return r
-	}))
+	})
 
-	env.Bind("let", Closure(func(env Environment, cdr Pair) interface{} {
+	env.Bind("let", func(env Environment, cdr Pair) interface{} {
 		//(let [x 1] ,body)
 		xs := Car(cdr).([]interface{})
 
@@ -60,10 +60,10 @@ func setupSpecialForms(env Environment) Environment {
 		eb := NewEnvBuilder(Evens(xs))
 		x := eb.EvalAndBindAll(Odds(xs), e, e)
 		return EvalExprs(x, List2Arr(Body(cdr)))
-	}))
+	})
 
 	// (loop [i 1] (recur (+ i 1))) ... never stops
-	env.Bind("loop", Closure(func(dynamic Environment, cdr Pair) interface{} {
+	env.Bind("loop", func(dynamic Environment, cdr Pair) interface{} {
 		r := NewRecur(dynamic, Car(cdr).([]interface{}))
 		for {
 			x := EvalExprs(r.Env(), List2Arr(Body(cdr)))
@@ -73,17 +73,17 @@ func setupSpecialForms(env Environment) Environment {
 			}
 		}
 		panic("never reach")
-	}))
+	})
 
 	//case sym("begin").Eq(car): //begin?
-	env.Bind("begin", Closure(func(env Environment, cdr Pair) interface{} {
+	env.Bind("begin", func(env Environment, cdr Pair) interface{} {
 		e := NewEnvFrame(env)
 		return EvalExprs(e, List2Arr(cdr))
-	}))
+	})
 
 	//macro
-	env.Bind("macro", Closure(func(lexical Environment, cdr Pair) interface{} {
-		m := Closure(func(dynamic Environment, args Pair) interface{} {
+	env.Bind("macro", func(lexical Environment, cdr Pair) interface{} {
+		m := func(dynamic Environment, args Pair) interface{} {
 			env = NewEnvFrame(lexical)
 			env.Bind("_dynamic", dynamic)
 			eb := NewEnvBuilder(Car(cdr).([]interface{}))
@@ -96,20 +96,20 @@ func setupSpecialForms(env Environment) Environment {
 			fmt.Println(transformed)
 			//Our macro is macor object. it won't expand until see it.
 			return Eval(dynamic, transformed)
-		})
+		}
 		return m
-	}))
+	})
 
 	// to be implemented
-	env.Bind("macroexpand", Closure(func(env Environment, cdr Pair) interface{} {
+	env.Bind("macroexpand", func(env Environment, cdr Pair) interface{} {
 		conv := List(sym("if"), Car(cdr),
 			Cons(sym("begin"), Cdr(cdr)))
 		return Eval(env, conv)
-	}))
+	})
 
 	//
-	env.Bind("and", Closure(and))
-	env.Bind("or", Closure(or))
+	env.Bind("and", and)
+	env.Bind("or", or)
 	return env
 }
 
