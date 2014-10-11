@@ -146,10 +146,19 @@ func setupBuiltins(env Environment) Environment {
 	env.Bind("runtime", MakeRuntimePackage())
 	env.Bind(".", GolangInterop())
 	env.Bind("=", func(env Environment, cdr Pair) interface{} {
-		fmt.Println(cdr)
 		x := Eval(env, Car(cdr))
 		y := Eval(env, Car(Cdr(cdr)))
-		return Eq(x, y)
+		return x == y
+	})
+	env.Bind("eq?", func(env Environment, cdr Pair) interface{} {
+		x := Eval(env, Car(cdr))
+		y := Eval(env, Car(Cdr(cdr)))
+		return x == y
+	})
+	env.Bind("equal?", func(env Environment, cdr Pair) interface{} {
+		x := Eval(env, Car(cdr))
+		y := Eval(env, Car(Cdr(cdr)))
+		return reflect.DeepEqual(x, y)
 	})
 	env.Bind("mod", func(env Environment, cdr Pair) interface{} {
 		x := Eval(env, Car(cdr)).(int)
