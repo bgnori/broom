@@ -49,7 +49,7 @@ func Eval(env Environment, expr interface{}) interface{} {
 			return xs[idx]
 		}
 
-		op, ok := car.(func(Environment, Pair)interface{})
+		op, ok := car.(func(Environment, Pair) interface{})
 		if !ok {
 			panic("application error, expected SExprOperator, but got " + fmt.Sprintf("%v", car))
 		}

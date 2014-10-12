@@ -109,7 +109,7 @@ func isRecur(v interface{}) bool {
 
 func isProcedure(v interface{}) bool {
 	//procedure?
-	_, ok := v.(func(Environment, Pair)interface{})
+	_, ok := v.(func(Environment, Pair) interface{})
 	return ok
 }
 

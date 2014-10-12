@@ -6,12 +6,11 @@ import (
 	"time"
 )
 
-
 type Injector func(target Pair) Pair
 
 func qq(env Environment, x interface{}) interface{} {
-	if p, ok := x.(Pair) ; ok {
-		if s, ok := Car(p).(Symbol) ; ok {
+	if p, ok := x.(Pair); ok {
+		if s, ok := Car(p).(Symbol); ok {
 			if s.GetValue() == "uq" {
 				return uq(env, Car(Cdr(p)))
 			}
@@ -20,7 +19,7 @@ func qq(env Environment, x interface{}) interface{} {
 		xs = nil
 		for _, v := range List2Arr(p) {
 			q := qq(env, v)
-			if i, ok := q.(Injector) ; ok {
+			if i, ok := q.(Injector); ok {
 				xs = i(xs)
 			} else {
 				xs = Append(xs, Cons(q, nil))
@@ -36,7 +35,7 @@ func uq(env Environment, x interface{}) Injector {
 	return func(target Pair) Pair {
 		fmt.Println("uq:", x)
 		v := Eval(env, x)
-		if i, ok := v.(Injector) ; ok {
+		if i, ok := v.(Injector); ok {
 			return i(target)
 		} else {
 			return Append(target, Cons(v, nil))
@@ -66,11 +65,11 @@ func setupBuiltins(env Environment) Environment {
 		return uq(env, Car(cdr).(Pair))
 	})
 
-	env.Bind("splicing", func(env Environment, cdr Pair) interface {} {
+	env.Bind("splicing", func(env Environment, cdr Pair) interface{} {
 		// (splicing xs)
 		return Injector(func(target Pair) Pair {
 			v := Eval(env, Car(cdr))
-			switch xs := v.(type){
+			switch xs := v.(type) {
 			case Pair:
 				return Append(target, xs)
 			case []interface{}:
@@ -89,7 +88,7 @@ func setupBuiltins(env Environment) Environment {
 		}
 		return Cons(car, cdr)
 	})
-	env.Bind("gensym", func(env Environment, cdr Pair) interface {} {
+	env.Bind("gensym", func(env Environment, cdr Pair) interface{} {
 		return GenSym()
 	})
 	env.Bind("Arr2List", func(env Environment, args Pair) interface{} {
@@ -287,14 +286,14 @@ func setupBuiltins(env Environment) Environment {
 	})
 
 	env.Bind("go", func(env Environment, cdr Pair) interface{} {
-		proc := Eval(env, Car(cdr)).(func(Environment, Pair)interface{})
+		proc := Eval(env, Car(cdr)).(func(Environment, Pair) interface{})
 		go proc(env, Cdr(cdr))
 		return nil
 	})
 
 	env.Bind("defer", func(env Environment, cdr Pair) interface{} {
-		handler := Eval(env, Car(cdr)).(func(Environment, Pair)interface{})
-		target := Eval(env, Car(Cdr(cdr))).(func(Environment, Pair)interface{})
+		handler := Eval(env, Car(cdr)).(func(Environment, Pair) interface{})
+		target := Eval(env, Car(Cdr(cdr))).(func(Environment, Pair) interface{})
 		return func(dynamic Environment, arg Pair) interface{} {
 			defer func() {
 				//fmt.Println("evoking defered", handler)
@@ -305,7 +304,7 @@ func setupBuiltins(env Environment) Environment {
 		}
 	})
 	env.Bind("bound?", func(env Environment, cdr Pair) interface{} {
-		if s, ok := Car(cdr).(Symbol) ; ok {
+		if s, ok := Car(cdr).(Symbol); ok {
 			_, err := env.Resolve(s.GetValue())
 			return err == nil
 		}
@@ -390,7 +389,7 @@ func setupBuiltins(env Environment) Environment {
 	return env
 }
 
-func GolangInterop() (func(Environment, Pair)interface{}){
+func GolangInterop() func(Environment, Pair) interface{} {
 	return func(env Environment, cdr Pair) interface{} {
 		//see  http://stackoverflow.com/questions/14116840/dynamically-call-method-on-interface-regardless-of-receiver-type
 

@@ -10,41 +10,41 @@ type symbolImpl struct {
 }
 
 type Pool struct {
-	mutex sync.RWMutex
-	lookup map[string] int
-	xs []string
+	mutex  sync.RWMutex
+	lookup map[string]int
+	xs     []string
 }
 
 var pool *Pool
 
 func initPool() {
-	pool = &Pool{lookup:make(map[string]int), xs: make([]string, 0)}
+	pool = &Pool{lookup: make(map[string]int), xs: make([]string, 0)}
 }
 
-func (p* Pool)Lock() { p.mutex.Lock() }
-func (p* Pool)Unlock() { p.mutex.Unlock() }
-func (p* Pool)RLock() { p.mutex.RLock() }
-func (p* Pool)RUnlock() { p.mutex.RUnlock() }
+func (p *Pool) Lock()    { p.mutex.Lock() }
+func (p *Pool) Unlock()  { p.mutex.Unlock() }
+func (p *Pool) RLock()   { p.mutex.RLock() }
+func (p *Pool) RUnlock() { p.mutex.RUnlock() }
 
-func (p* Pool)MakeSymbol(s string) *symbolImpl{
+func (p *Pool) MakeSymbol(s string) *symbolImpl {
 	p.xs = append(p.xs, s)
 	n := len(p.xs) - 1
 	p.lookup[s] = n
-	return &symbolImpl{id:n}
+	return &symbolImpl{id: n}
 }
 
-func (p* Pool)GenSymbol() *symbolImpl{
+func (p *Pool) GenSymbol() *symbolImpl {
 	return pool.MakeSymbol(fmt.Sprintf("_symol-%d", len(p.xs)))
 }
 
-func (p* Pool)LookUp(s string) (*symbolImpl, bool) {
+func (p *Pool) LookUp(s string) (*symbolImpl, bool) {
 	if n, ok := p.lookup[s]; ok {
-		return &symbolImpl{id:n}, true
+		return &symbolImpl{id: n}, true
 	}
 	return nil, false
 }
 
-func (p* Pool)GetValue(n int) string {
+func (p *Pool) GetValue(n int) string {
 	return p.xs[n]
 }
 
@@ -94,4 +94,3 @@ func GenSym() *symbolImpl {
 	defer pool.Unlock()
 	return pool.GenSymbol()
 }
-

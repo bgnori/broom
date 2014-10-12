@@ -483,11 +483,10 @@ func (r *Reader) MakeGenSymQuote() Token {
 	return t
 }
 
-
 type tokenSeq struct {
-	typ    int
-	items  []interface{}
-	deco *Decorator
+	typ   int
+	items []interface{}
+	deco  *Decorator
 }
 
 func NewTokenSeq(typ int, deco *Decorator) *tokenSeq {
@@ -549,13 +548,12 @@ func (t *tokenSeq) CloseBrace() (interface{}, error) {
 	return t.deco.Apply(m), nil
 }
 
-
 type Decorator struct {
 	stack []Symbol
 }
 
 func NewDecorator() *Decorator {
-	return &Decorator{stack:make([]Symbol, 0)}
+	return &Decorator{stack: make([]Symbol, 0)}
 }
 
 func (d *Decorator) Push(s Symbol) {
@@ -574,7 +572,7 @@ func (d *Decorator) Pop() Symbol {
 }
 
 func (d *Decorator) Apply(expr interface{}) interface{} {
-	for ; d.HasSomething() ; {
+	for d.HasSomething() {
 		s := d.Pop()
 		expr = List(s, expr)
 	}
@@ -583,7 +581,7 @@ func (d *Decorator) Apply(expr interface{}) interface{} {
 
 type SExprBuilder struct {
 	stack []*tokenSeq
-	deco *Decorator
+	deco  *Decorator
 }
 
 func NewSExprBuilder() *SExprBuilder {
@@ -592,7 +590,7 @@ func NewSExprBuilder() *SExprBuilder {
 	return b
 }
 
-func (b *SExprBuilder)ResetDeco() {
+func (b *SExprBuilder) ResetDeco() {
 	b.deco = NewDecorator()
 }
 
@@ -601,7 +599,7 @@ func (b *SExprBuilder) Len() int {
 }
 
 func (b *SExprBuilder) Top() *tokenSeq {
-	return b.stack[b.Len() - 1]
+	return b.stack[b.Len()-1]
 }
 
 func (b *SExprBuilder) Pop() *tokenSeq {

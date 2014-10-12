@@ -1,11 +1,8 @@
-
 (defn foo[x]
     x)
 
 (is (= (foo 1) 1))
 (is (= (foo 1) 2))
-
-
 
 (defn make-deposit [x]
     (list x))

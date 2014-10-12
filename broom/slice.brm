@@ -21,4 +21,3 @@
 
 ;(defn slice-zip1 [xs]) ;[1 2 3]) ; ((1) (2) (3)) ???
 ;slice-reverse : no need for it?
-

@@ -189,7 +189,6 @@ func TestBinaryAddComplex(t *testing.T) {
 	}
 }
 
-
 func NoneOf(env Environment, x interface{}) bool {
 	return false
 }
@@ -206,8 +205,6 @@ func IfInt(env Environment, x interface{}) bool {
 func Be42(env Environment, x interface{}) interface{} {
 	return 42
 }
-
-
 
 func TestVisit(t *testing.T) {
 	env := NewGlobalRootFrame()
@@ -232,4 +229,3 @@ func TestVisit(t *testing.T) {
 	}
 
 }
-

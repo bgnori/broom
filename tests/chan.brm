@@ -14,4 +14,3 @@
 
 
 (macro-select-case [my-chan 1] (print "sending"))
-

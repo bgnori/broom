@@ -30,4 +30,3 @@
     false (println 2)
     (= 1 2) (println 3)
     else (println "else"))
-

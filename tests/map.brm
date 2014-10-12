@@ -12,6 +12,3 @@
 
 (. my-map MapIndex (. reflect ValueOf 2)) ; def
 (. my-map MapKeys) ; [1 2 3]
-
-
-

@@ -28,4 +28,3 @@
 ;(defn hoge 1 2 3) ; should panic
 (gensym)
 (gensym)
-

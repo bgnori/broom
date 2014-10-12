@@ -36,4 +36,3 @@ xxs ; []
 (define mine (slice-append (slice-append (slice-append xxs "hello") "world") "broom"))
 
 (nth mine 1) ; "world"
-

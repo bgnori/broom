@@ -21,5 +21,3 @@ interface-type
 (. reflect TypeOf arr)
 ;(def xs (. reflect Append arr (. reflect ValueOf 1)))
 ;(. (. reflect ValueOf xs) Len)
-
-

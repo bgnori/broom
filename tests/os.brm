@@ -21,5 +21,3 @@
 
 (. os FindProcess 0) ; init
 (. os Interrupt)
-
-

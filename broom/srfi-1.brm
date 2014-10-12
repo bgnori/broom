@@ -370,6 +370,3 @@
 ; set-cdr!
 (defn set-cdr! [p v]
   (. p SetCdr v))
-
-
-
