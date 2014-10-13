@@ -1,7 +1,6 @@
 package broom
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -14,20 +13,14 @@ func Eq(x, y interface{}) bool {
 func Test_Symbol(t *testing.T) {
 	var v interface{}
 	v = sym("a")
-	if _, ok := v.(Symbol) ; !ok {
-		t.Error("(symbol? 'a) must be true.")
-		fmt.Println(v)
-		_, ok := v.(symbolImpl)
-		fmt.Println(ok)
-	}
-	if !sym("a").Eq(v) {
+	if sym("a") != sym("a") {
 		t.Error("'a and 'a must match.")
 	}
-	if sym("b").Eq(v) {
-		t.Error("'a and 'b must not match.")
+	if sym("a") != v {
+		t.Error("'a and 'a must match.")
 	}
-	if !sym("quote").Eq(sym("quote")) {
-		t.Error(" must match.")
+	if sym("b") == v {
+		t.Error("'a and 'b must not match.")
 	}
 }
 

@@ -7,18 +7,19 @@ import (
 
 type symbolImpl struct {
 	id int
+	value string
 }
 
 type Pool struct {
 	mutex  sync.RWMutex
 	lookup map[string]int
-	xs     []string
+	xs     []Symbol
 }
 
 var pool *Pool
 
 func initPool() {
-	pool = &Pool{lookup: make(map[string]int), xs: make([]string, 0)}
+	pool = &Pool{lookup: make(map[string]int), xs: make([]Symbol, 0)}
 }
 
 func (p *Pool) Lock()    { p.mutex.Lock() }
@@ -26,29 +27,26 @@ func (p *Pool) Unlock()  { p.mutex.Unlock() }
 func (p *Pool) RLock()   { p.mutex.RLock() }
 func (p *Pool) RUnlock() { p.mutex.RUnlock() }
 
-func (p *Pool) MakeSymbol(s string) *symbolImpl {
-	p.xs = append(p.xs, s)
-	n := len(p.xs) - 1
+func (p *Pool) MakeSymbol(s string) Symbol {
+	n := len(p.xs)
+	x := &symbolImpl{id: n-1, value: s}
+	p.xs = append(p.xs, Symbol(x))
 	p.lookup[s] = n
-	return &symbolImpl{id: n}
+	return x
 }
 
-func (p *Pool) GenSymbol() *symbolImpl {
+func (p *Pool) GenSymbol() Symbol {
 	return pool.MakeSymbol(fmt.Sprintf("_symol-%d", len(p.xs)))
 }
 
-func (p *Pool) LookUp(s string) (*symbolImpl, bool) {
+func (p *Pool) LookUp(s string) (Symbol, bool) {
 	if n, ok := p.lookup[s]; ok {
-		return &symbolImpl{id: n}, true
+		return p.xs[n], true
 	}
 	return nil, false
 }
 
-func (p *Pool) GetValue(n int) string {
-	return p.xs[n]
-}
-
-func sym(t string) *symbolImpl {
+func sym(t string) Symbol {
 	if pool == nil {
 		initPool()
 	}
@@ -68,17 +66,12 @@ func sym(t string) *symbolImpl {
 }
 
 func (s *symbolImpl) GetValue() string {
-	pool.RLock()
-	defer pool.RUnlock()
-	return pool.GetValue(s.id)
+	return s.value
 }
 
-func (s *symbolImpl) Eq(other interface{}) bool {
-	if t, ok := other.(*symbolImpl); ok {
-		return s.id == t.id
-	} else {
-		return false
-	}
+func (s *symbolImpl) Eq(other interface{}) bool{
+	oth, ok := other.(*symbolImpl)
+	return ok && s == oth
 }
 
 func (s *symbolImpl) String() string {
@@ -89,7 +82,7 @@ func (s *symbolImpl) DetailedPrint() string {
 	return fmt.Sprintf("#symbol-%d-:%s", s.id, s.GetValue())
 }
 
-func GenSym() *symbolImpl {
+func GenSym() Symbol {
 	pool.Lock()
 	defer pool.Unlock()
 	return pool.GenSymbol()
