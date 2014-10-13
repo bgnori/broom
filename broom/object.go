@@ -113,12 +113,6 @@ func isProcedure(v interface{}) bool {
 	return ok
 }
 
-func isString(v interface{}) bool {
-	//string?
-	_, ok := v.(string)
-	return ok
-}
-
 // vector?
 func isArray(v interface{}) bool {
 	_, ok := v.([]interface{})

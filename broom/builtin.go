@@ -274,7 +274,8 @@ func setupBuiltins(env Environment) Environment {
 	})
 
 	env.Bind("string?", func(env Environment, cdr Pair) interface{} {
-		return isString(Eval(env, Car(cdr)))
+		_, ok := Eval(env, Car(cdr)).(string)
+		return ok
 	})
 
 	env.Bind("array?", func(env Environment, cdr Pair) interface{} {

@@ -94,18 +94,6 @@ func Test_isPair(t *testing.T) {
 	}
 }
 
-func Test_isString(t *testing.T) {
-	var v interface{}
-	v = "abcd"
-	if !isString(v) {
-		t.Error("string must be string? true")
-	}
-	v = 1
-	if isString(v) {
-		t.Error("int must be string? false")
-	}
-}
-
 func TestBinaryAddIntXInt(t *testing.T) {
 	var v_int8, v_int16, v_int32, v_int64 interface{}
 	v_int8 = int8(1)
