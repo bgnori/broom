@@ -20,32 +20,40 @@ func (e EvalError) Error() string {
 }
 
 func Eval(env Environment, expr interface{}) interface{} {
-	switch {
-	case expr == nil:
-		return nil
-	case isBoolean(expr) ||
-		isNumber(expr) ||
-		isString(expr) ||
-		isProcedure(expr):
-		return expr
-	case isRecur(expr):
-		return expr
-	case isSymbol(expr): // variables?
-		sym, _ := expr.(Symbol)
-		if v, err := env.Resolve(sym.GetValue()); err != nil {
+	switch x := expr.(type) {
+	case bool: return expr
+	case int: return expr
+	case int8: return expr
+	case int16: return expr
+	case int32: return expr
+	case int64: return expr
+	case uint: return expr
+	case uint8: return expr
+	case uint16: return expr
+	case uint32: return expr
+	case uint64: return expr
+	case float32: return expr
+	case float64: return expr
+	case complex64: return expr
+	case complex128: return expr
+	case string: return expr
+	case func(Environment, Pair) interface{}: return expr
+	case *Recur: return expr
+	case Symbol: // variables?
+		if v, err := env.Resolve(x.GetValue()); err != nil {
 			panic(err)
 		} else {
 			return v
 		}
-	case isPair(expr):
-		car := Eval(env, Car(expr))
+	case Pair:
+		car := Eval(env, Car(x))
 		r, ok := car.(*Recur)
 		if ok {
-			r.Update(List2Arr(Cdr(expr)), env)
+			r.Update(List2Arr(Cdr(x)), env)
 			return r
 		}
 		if xs, ok := car.([]interface{}); ok {
-			idx := Car(Cdr(expr)).(int)
+			idx := Car(Cdr(x)).(int)
 			return xs[idx]
 		}
 
@@ -53,8 +61,7 @@ func Eval(env Environment, expr interface{}) interface{} {
 		if !ok {
 			panic("application error, expected SExprOperator, but got " + fmt.Sprintf("%v", car))
 		}
-		v := Cdr(expr)
-		return op(env, v)
+		return op(env, Cdr(x))
 	}
 	return nil
 }
