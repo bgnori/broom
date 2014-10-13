@@ -28,24 +28,6 @@ func Test_Symbol(t *testing.T) {
 	}
 }
 
-func Test_isBoolean(t *testing.T) {
-	var v interface{}
-	v = true
-	if !isBoolean(v) {
-		t.Error("v must be boolean? true.")
-	}
-	if v != true {
-		t.Error("v must be true.")
-	}
-	v = false
-	if !isBoolean(v) {
-		t.Error("v must be boolean? true.")
-	}
-	if v != false {
-		t.Error("v must be false.")
-	}
-}
-
 func Test_isChar(t *testing.T) {
 	var v interface{}
 	v = 'あ'

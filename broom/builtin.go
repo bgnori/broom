@@ -255,7 +255,8 @@ func setupBuiltins(env Environment) Environment {
 		return nil == Eval(env, Car(cdr))
 	})
 	env.Bind("boolean?", func(env Environment, cdr Pair) interface{} {
-		return isBoolean(Eval(env, Car(cdr)))
+		_, ok := Eval(env, Car(cdr)).(bool)
+		return ok
 	})
 	env.Bind("char?", func(env Environment, cdr Pair) interface{} {
 		return isChar(Eval(env, Car(cdr)))

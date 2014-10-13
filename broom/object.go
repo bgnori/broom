@@ -22,12 +22,6 @@ type Pair interface {
 	SetCdr(p Pair) Undef
 }
 
-func isBoolean(v interface{}) bool {
-	//boolean?
-	_, ok := v.(bool)
-	return ok
-}
-
 func isChar(v interface{}) bool {
 	//char?
 	_, ok := v.(rune)
