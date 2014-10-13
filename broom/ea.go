@@ -46,22 +46,18 @@ func Eval(env Environment, expr interface{}) interface{} {
 			return v
 		}
 	case Pair:
-		car := Eval(env, Car(x))
-		r, ok := car.(*Recur)
-		if ok {
-			r.Update(List2Arr(Cdr(x)), env)
-			return r
-		}
-		if xs, ok := car.([]interface{}); ok {
+		switch v := Eval(env, Car(x)).(type) {
+		case *Recur:
+			v.Update(List2Arr(Cdr(x)), env)
+			return v
+		case ([]interface{}):
 			idx := Car(Cdr(x)).(int)
-			return xs[idx]
+			return v[idx]
+		case func(Environment, Pair) interface{}:
+			return v(env, Cdr(x))
+		default:
+			panic("application error, expected SExprOperator, but got " + fmt.Sprintf("%v", v))
 		}
-
-		op, ok := car.(func(Environment, Pair) interface{})
-		if !ok {
-			panic("application error, expected SExprOperator, but got " + fmt.Sprintf("%v", car))
-		}
-		return op(env, Cdr(x))
 	}
 	return nil
 }
