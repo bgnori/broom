@@ -89,7 +89,7 @@ func Append(xs Pair, cdr Pair) Pair {
 }
 
 func isList(xs interface{}) bool {
-	if isNull(xs) {
+	if nil == xs {
 		return true
 	}
 	if isPair(xs) {
@@ -99,7 +99,7 @@ func isList(xs interface{}) bool {
 }
 
 func Length(xs interface{}) int {
-	if isNull(xs) {
+	if xs == nil {
 		return 0
 	}
 	if isPair(xs) {

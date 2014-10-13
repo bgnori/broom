@@ -28,14 +28,6 @@ func Test_Symbol(t *testing.T) {
 	}
 }
 
-func Test_isNull(t *testing.T) {
-	var v interface{}
-	v = nil
-	if !isNull(v) {
-		t.Error("nil must be null? true.")
-	}
-}
-
 func Test_isBoolean(t *testing.T) {
 	var v interface{}
 	v = true

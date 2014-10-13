@@ -252,7 +252,7 @@ func setupBuiltins(env Environment) Environment {
 		return BinaryGreaterThan(first, second)
 	})
 	env.Bind("null?", func(env Environment, cdr Pair) interface{} {
-		return isNull(Eval(env, Car(cdr)))
+		return nil == Eval(env, Car(cdr))
 	})
 	env.Bind("boolean?", func(env Environment, cdr Pair) interface{} {
 		return isBoolean(Eval(env, Car(cdr)))

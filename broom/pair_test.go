@@ -8,7 +8,7 @@ import (
 func Test_ConsCarCdr(t *testing.T) {
 	var v interface{}
 	v = Cons(1, Cons(2, nil))
-	if isNull(v) {
+	if v == nil {
 		t.Error("(null? v) must be null? false.")
 	}
 	if !isPair(v) {
@@ -39,7 +39,7 @@ func Test_ConsNilNil(t *testing.T) {
 
 func Test_ListNil(t *testing.T) {
 	xs := List()
-	if !isNull(xs) {
+	if nil != xs {
 		t.Error("xs must be null, i.e. '()")
 	}
 	if isPair(xs) {
