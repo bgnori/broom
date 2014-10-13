@@ -2,9 +2,14 @@ package broom
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 	"time"
 )
+
+func Eq(x, y interface{}) bool {
+	return reflect.DeepEqual(x, y)
+}
 
 func Test_Symbol(t *testing.T) {
 	var v interface{}
@@ -151,43 +156,3 @@ func TestBinaryAddComplex(t *testing.T) {
 	}
 }
 
-func NoneOf(env Environment, x interface{}) bool {
-	return false
-}
-
-func AnyOf(env Environment, x interface{}) bool {
-	return true
-}
-
-func IfInt(env Environment, x interface{}) bool {
-	_, ok := x.(int)
-	return ok
-}
-
-func Be42(env Environment, x interface{}) interface{} {
-	return 42
-}
-
-func TestVisit(t *testing.T) {
-	env := NewGlobalRootFrame()
-	x := Visit(env, NoneOf, nil, 1)
-	if x.(int) != 1 {
-		t.Errorf("Expected 1 but got %v", x)
-	}
-	v := Cons(1, nil)
-	w := Visit(env, NoneOf, nil, v)
-	if !Eq(w, v) {
-		t.Errorf("Expected (1) but got %v", w)
-	}
-	v = Cons(Cons(1, nil), nil)
-	w = Visit(env, NoneOf, nil, v)
-	if !Eq(w, v) {
-		t.Errorf("Expected ((1)) but got %v", w)
-	}
-	v = Cons(1, nil)
-	w = Visit(env, IfInt, Be42, v)
-	if !Eq(w, Cons(42, nil)) {
-		t.Errorf("Expected (42) but got %v", w)
-	}
-
-}

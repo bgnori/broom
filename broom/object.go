@@ -124,47 +124,6 @@ func DumpMap(x interface{}) {
 	}
 }
 
-func EqMap(x, y interface{}) bool {
-	mx, _ := x.(map[interface{}]interface{})
-	my, _ := y.(map[interface{}]interface{})
-	for k, vx := range mx {
-		vy, in := my[k]
-		if in && vx == vy {
-			continue
-		} else {
-			return false
-		}
-	}
-	for k, vy := range my {
-		vx, in := mx[k]
-		if in && vx == vy {
-			continue
-		} else {
-			return false
-		}
-	}
-	return true
-}
-
-func EqArray(x, y interface{}) bool {
-	println("EqArray")
-	xs, _ := x.([]interface{})
-	ys, _ := y.([]interface{})
-	if len(xs) != len(ys) {
-		return false
-	}
-	for i, v := range xs {
-		if !Eq(ys[i], v) {
-			return false
-		}
-	}
-	return true
-}
-
-func Eq(x, y interface{}) bool {
-	return reflect.DeepEqual(x, y)
-}
-
 func Wider(t1, t2 reflect.Type) int {
 	k1 := t1.Kind()
 	k2 := t2.Kind()
@@ -380,30 +339,3 @@ func BinaryGreaterThan(x, y interface{}) interface{} {
 	}
 }
 
-func Visit(env Environment,
-	pred func(Environment, interface{}) bool,
-	gen func(Environment, interface{}) interface{},
-	x interface{}) interface{} {
-
-	switch v := x.(type) {
-	case Pair:
-		if pred(env, v) {
-			return gen(env, v)
-		} else {
-			cdr, ok := Visit(env, pred, gen, Cdr(v)).(Pair)
-			if !ok {
-				cdr = nil
-			}
-			return Cons(Visit(env, pred, gen, Car(v)), cdr)
-		}
-	case []interface{}:
-		return nil
-	default:
-		if pred(env, v) {
-			return gen(env, v)
-		} else {
-			return x
-		}
-	}
-	return nil
-}
