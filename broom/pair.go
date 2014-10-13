@@ -14,20 +14,12 @@ func Cons(car interface{}, cdr Pair) Pair {
 	return &pairImpl{car: car, cdr: cdr}
 }
 
-func Car(v interface{}) interface{} {
-	u, ok := v.(Pair)
-	if !ok {
-		panic("non pair object for Car()")
-	}
-	return u.Car()
+func Car(v Pair) interface{} {
+	return v.Car()
 }
 
-func Cdr(v interface{}) Pair {
-	u, ok := v.(Pair)
-	if !ok {
-		panic("non pair object for Cdr()")
-	}
-	return u.Cdr()
+func Cdr(v Pair)Pair {
+	return v.Cdr()
 }
 
 func (p *pairImpl) Car() interface{} {
@@ -58,7 +50,7 @@ func (p *pairImpl) String() string {
 	return "(" + strings.Join(ss, " ") + ")"
 }
 
-func sub(v interface{}, xs []interface{}) [](interface{}) {
+func sub(v Pair, xs []interface{}) [](interface{}) {
 	if v == nil {
 		return xs
 	} else {
@@ -67,7 +59,7 @@ func sub(v interface{}, xs []interface{}) [](interface{}) {
 	}
 }
 
-func List2Arr(v interface{}) []interface{} {
+func List2Arr(v Pair) []interface{} {
 	return sub(v, make([]interface{}, 0))
 }
 

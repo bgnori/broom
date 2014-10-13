@@ -11,20 +11,21 @@ func Test_ConsCarCdr(t *testing.T) {
 	if v == nil {
 		t.Error("(null? v) must be null? false.")
 	}
-	if _, ok := v.(Pair) ; !ok  {
+	p, ok := v.(Pair)
+	if!ok  {
 		t.Error("(pair? v) must be true.")
 	}
-	if !isNumber(Car(v)) {
+	if !isNumber(Car(p)) {
 		t.Error("(car v) must be number.")
 	}
-	if u, ok := Car(v).(int); ok && u == 1 {
+	if u, ok := Car(p).(int); ok && u == 1 {
 	} else {
 		t.Error("(car v) must be 1.")
 	}
-	if !isNumber(Car(Cdr(v))) {
+	if !isNumber(Car(Cdr(p))) {
 		t.Error("(cdr v) must be number.")
 	}
-	if u, ok := Car(Cdr(v)).(int); ok && u == 2 {
+	if u, ok := Car(Cdr(p)).(int); ok && u == 2 {
 	} else {
 		t.Error("(cdr v) must be 2.")
 	}

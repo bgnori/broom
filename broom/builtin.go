@@ -96,8 +96,11 @@ func setupBuiltins(env Environment) Environment {
 		return List(xs...)
 	})
 	env.Bind("List2Arr", func(env Environment, args Pair) interface{} {
-		list := Eval(env, Car(args))
-		return List2Arr(list)
+		x := Eval(env, Car(args))
+		if xs, ok := x.(Pair) ; ok {
+			return List2Arr(xs)
+		}
+		panic("Non Pair Value")
 	})
 	env.Bind("list", func(env Environment, args Pair) interface{} {
 		var head, tail Pair
