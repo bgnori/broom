@@ -8,7 +8,7 @@ import (
 func TestEvalQuotedSymbol(t *testing.T) {
 	e := NewGlobalRootFrame()
 	v := Eval(e, List(sym("quote"), sym("A")))
-	if !sym("A").Eq(v) {
+	if sym("A") != v {
 		t.Error("expected sym A")
 		fmt.Println(v)
 	}
@@ -20,7 +20,7 @@ func TestEvalDefine(t *testing.T) {
 	if found, err := e.Resolve("A"); err != nil || found != 42 {
 		t.Error("expected 42")
 	}
-	if !sym("A").Eq(v) {
+	if sym("A") != v {
 		t.Error("expected sym A")
 	}
 }

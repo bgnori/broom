@@ -69,11 +69,6 @@ func (s *symbolImpl) GetValue() string {
 	return s.value
 }
 
-func (s *symbolImpl) Eq(other interface{}) bool{
-	oth, ok := other.(*symbolImpl)
-	return ok && s == oth
-}
-
 func (s *symbolImpl) String() string {
 	return s.GetValue()
 }

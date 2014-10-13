@@ -12,7 +12,6 @@ type Undef interface{} // T.B.D.
 type Symbol interface {
 	//T.B.D.
 	GetValue() string
-	Eq(other interface{}) bool
 }
 
 type Pair interface {

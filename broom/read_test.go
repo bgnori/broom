@@ -421,7 +421,7 @@ func TestMakeFloat(t *testing.T) {
 func TestMakeSymbol(t *testing.T) {
 	buf := NewBuffered(strings.NewReader("a"))
 	expr := BuildSExpr(buf)
-	if !sym("a").Eq(expr) {
+	if sym("a") != expr {
 		t.Error("a is expected")
 	}
 }
