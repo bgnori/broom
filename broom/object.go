@@ -96,12 +96,6 @@ func isRecur(v interface{}) bool {
 	return ok
 }
 
-func isProcedure(v interface{}) bool {
-	//procedure?
-	_, ok := v.(func(Environment, Pair) interface{})
-	return ok
-}
-
 // vector?
 func isArray(v interface{}) bool {
 	_, ok := v.([]interface{})
