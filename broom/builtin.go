@@ -258,8 +258,10 @@ func setupBuiltins(env Environment) Environment {
 		_, ok := Eval(env, Car(cdr)).(bool)
 		return ok
 	})
-	env.Bind("char?", func(env Environment, cdr Pair) interface{} {
-		return isChar(Eval(env, Car(cdr)))
+	env.Bind("rune?", func(env Environment, cdr Pair) interface{} {
+		v := Eval(env, Car(cdr))
+		_, ok := v.(rune)
+		return ok
 	})
 	env.Bind("symbol?", func(env Environment, cdr Pair) interface{} {
 		return isSymbol(Eval(env, Car(cdr)))

@@ -33,22 +33,6 @@ func Test_Symbol(t *testing.T) {
 	}
 }
 
-func Test_isChar(t *testing.T) {
-	var v interface{}
-	v = 'あ'
-	if !isChar(v) {
-		t.Error("v must be char? true.")
-	}
-}
-
-func xTest_isSymbol(t *testing.T) {
-	var v interface{}
-	v = 'あ'
-	if !isChar(v) {
-		t.Error("v must be char? true.")
-	}
-}
-
 func Test_isNumber(t *testing.T) {
 	var v interface{}
 	v = 123

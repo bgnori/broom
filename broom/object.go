@@ -22,12 +22,6 @@ type Pair interface {
 	SetCdr(p Pair) Undef
 }
 
-func isChar(v interface{}) bool {
-	//char?
-	_, ok := v.(rune)
-	return ok
-}
-
 func isSymbol(v interface{}) bool {
 	//symbol?
 	_, ok := v.(Symbol) //FIXME

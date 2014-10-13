@@ -24,6 +24,8 @@
 (fizzbuzz 20)
 (fizzbuzz 7)
 
+(rune? 1) ; false
+;(rune? (. reflect Uint32 1)) ; false
 
 ;(defn hoge 1 2 3) ; should panic
 (gensym)
