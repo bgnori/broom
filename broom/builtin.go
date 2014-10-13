@@ -272,7 +272,8 @@ func setupBuiltins(env Environment) Environment {
 		return isNumber(Eval(env, Car(cdr)))
 	})
 	env.Bind("pair?", func(env Environment, cdr Pair) interface{} {
-		return isPair(Eval(env, Car(cdr)))
+		_, ok := Eval(env, Car(cdr)).(Pair)
+		return ok
 	})
 	env.Bind("procedure?", func(env Environment, cdr Pair) interface{} {
 		v := Eval(env, Car(cdr))

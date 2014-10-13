@@ -47,12 +47,6 @@ func isNumber(v interface{}) bool {
 	return true
 }
 
-func isPair(v interface{}) bool {
-	//pair?
-	_, ok := v.(Pair)
-	return ok
-}
-
 //port?
 
 type Recur struct {

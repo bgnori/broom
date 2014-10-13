@@ -11,7 +11,7 @@ func Test_ConsCarCdr(t *testing.T) {
 	if v == nil {
 		t.Error("(null? v) must be null? false.")
 	}
-	if !isPair(v) {
+	if _, ok := v.(Pair) ; !ok  {
 		t.Error("(pair? v) must be true.")
 	}
 	if !isNumber(Car(v)) {
@@ -32,7 +32,7 @@ func Test_ConsCarCdr(t *testing.T) {
 
 func Test_ConsNilNil(t *testing.T) {
 	p := Cons(nil, nil)
-	if !isPair(p) {
+	if _, ok := p.(Pair) ; !ok  {
 		t.Error("(pair? xs) must be true.")
 	}
 }
@@ -42,7 +42,7 @@ func Test_ListNil(t *testing.T) {
 	if nil != xs {
 		t.Error("xs must be null, i.e. '()")
 	}
-	if isPair(xs) {
+	if _, ok := xs.(Pair) ; ok  {
 		t.Error("(pair? '()) must be false")
 	}
 }

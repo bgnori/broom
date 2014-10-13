@@ -88,21 +88,21 @@ func Append(xs Pair, cdr Pair) Pair {
 	}
 }
 
-func isList(xs interface{}) bool {
-	if nil == xs {
+func isList(v interface{}) bool {
+	if nil == v {
 		return true
 	}
-	if isPair(xs) {
+	if xs, ok := v.(Pair) ; ok {
 		return isList(Cdr(xs))
 	}
 	return false
 }
 
-func Length(xs interface{}) int {
-	if xs == nil {
+func Length(v Pair) int {
+	if v == nil {
 		return 0
 	}
-	if isPair(xs) {
+	if xs, ok := v.(Pair) ; ok {
 		return Length(Cdr(xs)) + 1
 	}
 	panic("proper list required")

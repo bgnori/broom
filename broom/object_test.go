@@ -40,14 +40,6 @@ func Test_isNumber(t *testing.T) {
 	}
 }
 
-func Test_isPair(t *testing.T) {
-	var v interface{}
-	v = nil
-	if isPair(v) {
-		t.Error("nil must not be pair")
-	}
-}
-
 func TestBinaryAddIntXInt(t *testing.T) {
 	var v_int8, v_int16, v_int32, v_int64 interface{}
 	v_int8 = int8(1)
