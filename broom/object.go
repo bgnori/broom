@@ -91,11 +91,6 @@ func (r *Recur) Env() Environment {
 	return r.env
 }
 
-func isRecur(v interface{}) bool {
-	_, ok := v.(*Recur)
-	return ok
-}
-
 // vector?
 func isArray(v interface{}) bool {
 	_, ok := v.([]interface{})
