@@ -162,21 +162,7 @@ func EqArray(x, y interface{}) bool {
 }
 
 func Eq(x, y interface{}) bool {
-	switch {
-	case isMap(x) && isMap(y):
-		return EqMap(x, y)
-	case isSymbol(x) && isSymbol(y):
-		sx, _ := x.(Symbol)
-		sy, _ := y.(Symbol)
-		return sx.Eq(sy)
-	case isPair(x) && isPair(y):
-		return Eq(Car(x), Car(y)) && Eq(Cdr(x), Cdr(y))
-	case isArray(x) && isArray(y):
-		return EqArray(x, y)
-	default:
-		return x == y
-	}
-	return false
+	return reflect.DeepEqual(x, y)
 }
 
 func Wider(t1, t2 reflect.Type) int {
