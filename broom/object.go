@@ -22,12 +22,6 @@ type Pair interface {
 	SetCdr(p Pair) Undef
 }
 
-func isSymbol(v interface{}) bool {
-	//symbol?
-	_, ok := v.(Symbol) //FIXME
-	return ok
-}
-
 //eof-object?
 
 func isNumber(v interface{}) bool {

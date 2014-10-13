@@ -14,12 +14,10 @@ func Eq(x, y interface{}) bool {
 func Test_Symbol(t *testing.T) {
 	var v interface{}
 	v = sym("a")
-	if !isSymbol(v) {
-		t.Error("(Symbol? 'a) must be true.")
+	if _, ok := v.(Symbol) ; !ok {
+		t.Error("(symbol? 'a) must be true.")
 		fmt.Println(v)
 		_, ok := v.(symbolImpl)
-		fmt.Println(ok)
-		_, ok = v.(Symbol)
 		fmt.Println(ok)
 	}
 	if !sym("a").Eq(v) {

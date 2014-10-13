@@ -264,7 +264,9 @@ func setupBuiltins(env Environment) Environment {
 		return ok
 	})
 	env.Bind("symbol?", func(env Environment, cdr Pair) interface{} {
-		return isSymbol(Eval(env, Car(cdr)))
+		v := Eval(env, Car(cdr))
+		_, ok := v.(Symbol)
+		return ok
 	})
 	env.Bind("number?", func(env Environment, cdr Pair) interface{} {
 		return isNumber(Eval(env, Car(cdr)))
