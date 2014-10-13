@@ -7,7 +7,7 @@ import (
 
 func TestEvalQuotedSymbol(t *testing.T) {
 	e := NewGlobalRootFrame()
-	v := Eval(e, List(sym("quote"), sym("A")))
+	v := Eval(e, Slice2List(sym("quote"), sym("A")))
 	if sym("A") != v {
 		t.Error("expected sym A")
 		fmt.Println(v)
@@ -16,7 +16,7 @@ func TestEvalQuotedSymbol(t *testing.T) {
 
 func TestEvalDefine(t *testing.T) {
 	e := NewGlobalRootFrame()
-	v := Eval(e, List(sym("def"), sym("A"), 42))
+	v := Eval(e, Slice2List(sym("def"), sym("A"), 42))
 	if found, err := e.Resolve("A"); err != nil || found != 42 {
 		t.Error("expected 42")
 	}
@@ -27,11 +27,11 @@ func TestEvalDefine(t *testing.T) {
 
 func TestEvalIF(t *testing.T) {
 	e := NewGlobalRootFrame()
-	v := Eval(e, List(sym("if"), true, 42, 123))
+	v := Eval(e, Slice2List(sym("if"), true, 42, 123))
 	if v != 42 {
 		t.Error("expected 42")
 	}
-	v = Eval(e, List(sym("if"), false, 42, 123))
+	v = Eval(e, Slice2List(sym("if"), false, 42, 123))
 	if v != 123 {
 		t.Error("expected 123")
 	}
@@ -39,11 +39,11 @@ func TestEvalIF(t *testing.T) {
 
 func TestEvalLambda(t *testing.T) {
 	e := NewGlobalRootFrame()
-	f := Eval(e, List(sym("fn"), []interface{}{sym("x")}, sym("x")))
-	if _, ok := f.(func(Environment, Pair) interface{}); !ok {
+	f := Eval(e, Slice2List(sym("fn"), []interface{}{sym("x")}, sym("x")))
+	if _, ok := f.(func(Environment, List) interface{}); !ok {
 		t.Error("expected Procedure")
 	}
-	v := Eval(e, List(f, 123))
+	v := Eval(e, Slice2List(f, 123))
 	if v != 123 {
 		t.Error("expected 123")
 	}
@@ -51,11 +51,11 @@ func TestEvalLambda(t *testing.T) {
 
 func TestEvalfn(t *testing.T) {
 	e := NewGlobalRootFrame()
-	f := Eval(e, List(sym("fn"), []interface{}{sym("x")}, sym("x")))
-	if _, ok := f.(func(Environment, Pair) interface{}); !ok {
+	f := Eval(e, Slice2List(sym("fn"), []interface{}{sym("x")}, sym("x")))
+	if _, ok := f.(func(Environment, List) interface{}); !ok {
 		t.Error("expected Procedure")
 	}
-	v := Eval(e, List(f, 123))
+	v := Eval(e, Slice2List(f, 123))
 	if v != 123 {
 		t.Error("expected 123")
 	}
@@ -64,12 +64,12 @@ func TestEvalfn(t *testing.T) {
 func xTestEvaldefn(t *testing.T) {
 	//defn is macro now
 	e := NewGlobalRootFrame()
-	Eval(e, List(sym("defn"), sym("foo"), []interface{}{sym("x")}, sym("x")))
+	Eval(e, Slice2List(sym("defn"), sym("foo"), []interface{}{sym("x")}, sym("x")))
 	f := Eval(e, sym("foo"))
-	if _, ok := f.(func(Environment, Pair) interface{}); !ok {
+	if _, ok := f.(func(Environment, List) interface{}); !ok {
 		t.Error("expected Procedure")
 	}
-	v := Eval(e, List(f, 123))
+	v := Eval(e, Slice2List(f, 123))
 	if v != 123 {
 		t.Error("expected 123")
 	}
@@ -78,7 +78,7 @@ func xTestEvaldefn(t *testing.T) {
 func xTestEvalWhen(t *testing.T) {
 	// when is macro
 	e := NewGlobalRootFrame()
-	v := Eval(e, List(sym("when"), true, 1, 2, 3))
+	v := Eval(e, Slice2List(sym("when"), true, 1, 2, 3))
 	if v != 3 {
 		t.Error("expected 3")
 		fmt.Println(v)
@@ -95,7 +95,7 @@ func TestEvalEnvSymbol(t *testing.T) {
 
 func TestEvalAnd1(t *testing.T) {
 	e := NewGlobalRootFrame()
-	v := Eval(e, List(sym("and"), true, true, false))
+	v := Eval(e, Slice2List(sym("and"), true, true, false))
 	if v != false {
 		t.Error("expected false")
 		fmt.Println(v)
@@ -104,7 +104,7 @@ func TestEvalAnd1(t *testing.T) {
 
 func TestEvalAnd2(t *testing.T) {
 	e := NewGlobalRootFrame()
-	v := Eval(e, List(sym("and"), true, true, true))
+	v := Eval(e, Slice2List(sym("and"), true, true, true))
 	if v != true {
 		t.Error("expected true")
 		fmt.Println(v)
@@ -113,7 +113,7 @@ func TestEvalAnd2(t *testing.T) {
 
 func TestEvalOr1(t *testing.T) {
 	e := NewGlobalRootFrame()
-	v := Eval(e, List(sym("or"), false, false, true))
+	v := Eval(e, Slice2List(sym("or"), false, false, true))
 	if v != true {
 		t.Error("expected true")
 		fmt.Println(v)
@@ -122,7 +122,7 @@ func TestEvalOr1(t *testing.T) {
 
 func TestEvalOr2(t *testing.T) {
 	e := NewGlobalRootFrame()
-	v := Eval(e, List(sym("or"), false, false, false))
+	v := Eval(e, Slice2List(sym("or"), false, false, false))
 	if v != false {
 		t.Error("expected false")
 		fmt.Println(v)
@@ -132,9 +132,9 @@ func TestEvalOr2(t *testing.T) {
 // cond is defined by macro.
 func xTestEvalCond(t *testing.T) {
 	e := NewGlobalRootFrame()
-	v := Eval(e, List(sym("cond"),
-		List(sym(">"), 0, 1), 1,
-		List(sym(">"), 3, 2), 2,
+	v := Eval(e, Slice2List(sym("cond"),
+		Slice2List(sym(">"), 0, 1), 1,
+		Slice2List(sym(">"), 3, 2), 2,
 		sym("else"), 3))
 	if v != 2 {
 		t.Error("expected 2")
@@ -145,9 +145,9 @@ func xTestEvalCond(t *testing.T) {
 // cond is defined by macro.
 func xTestEvalCondElse(t *testing.T) {
 	e := NewGlobalRootFrame()
-	v := Eval(e, List(sym("cond"),
-		List(sym(">"), 0, 1), 1,
-		List(sym(">"), 0, 2), 2,
+	v := Eval(e, Slice2List(sym("cond"),
+		Slice2List(sym(">"), 0, 1), 1,
+		Slice2List(sym(">"), 0, 2), 2,
 		sym("else"), 3))
 	if v != 3 {
 		t.Error("expected 2")

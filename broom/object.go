@@ -14,11 +14,11 @@ type Symbol interface {
 	GetValue() string
 }
 
-type Pair interface {
+type List interface {
 	Car() interface{}
-	Cdr() Pair
+	Cdr() List
 	SetCar(v interface{}) Undef
-	SetCdr(p Pair) Undef
+	SetCdr(p List) Undef
 }
 
 //eof-object?

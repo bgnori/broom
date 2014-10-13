@@ -28,7 +28,7 @@ func Load(file io.Reader, env Environment, verbose bool) error {
 }
 
 func Repl(in io.Reader, env Environment) {
-	env.Bind("dump", func(dynamic Environment, cdr Pair) interface{} {
+	env.Bind("dump", func(dynamic Environment, cdr List) interface{} {
 		dynamic.Dump()
 		return nil
 	})

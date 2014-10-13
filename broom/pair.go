@@ -7,18 +7,18 @@ import (
 
 type pairImpl struct {
 	car interface{}
-	cdr Pair
+	cdr List
 }
 
-func Cons(car interface{}, cdr Pair) Pair {
+func Cons(car interface{}, cdr List) List {
 	return &pairImpl{car: car, cdr: cdr}
 }
 
-func Car(v Pair) interface{} {
+func Car(v List) interface{} {
 	return v.Car()
 }
 
-func Cdr(v Pair)Pair {
+func Cdr(v List)List {
 	return v.Cdr()
 }
 
@@ -26,7 +26,7 @@ func (p *pairImpl) Car() interface{} {
 	return p.car
 }
 
-func (p *pairImpl) Cdr() Pair {
+func (p *pairImpl) Cdr() List {
 	return p.cdr
 }
 
@@ -35,14 +35,14 @@ func (p *pairImpl) SetCar(v interface{}) Undef {
 	return nil
 }
 
-func (p *pairImpl) SetCdr(cdr Pair) Undef {
+func (p *pairImpl) SetCdr(cdr List) Undef {
 	p.cdr = cdr
 	return nil
 }
 
 func (p *pairImpl) String() string {
 	//assume that proper list
-	xs := List2Arr(p)
+	xs := List2Slice(p)
 	ss := make([]string, 0)
 	for _, x := range xs {
 		ss = append(ss, fmt.Sprint(x))
@@ -50,7 +50,7 @@ func (p *pairImpl) String() string {
 	return "(" + strings.Join(ss, " ") + ")"
 }
 
-func sub(v Pair, xs []interface{}) [](interface{}) {
+func sub(v List, xs []interface{}) [](interface{}) {
 	if v == nil {
 		return xs
 	} else {
@@ -59,20 +59,20 @@ func sub(v Pair, xs []interface{}) [](interface{}) {
 	}
 }
 
-func List2Arr(v Pair) []interface{} {
+func List2Slice(v List) []interface{} {
 	return sub(v, make([]interface{}, 0))
 }
 
-func List(xs ...interface{}) Pair {
+func Slice2List(xs ...interface{}) List {
 	//(list obj... )
 	// this function supports . cdr, for none proper list
 	if len(xs) == 0 {
 		return nil
 	}
-	return Cons(xs[0], List(xs[1:]...))
+	return Cons(xs[0], Slice2List(xs[1:]...))
 }
 
-func Append(xs Pair, cdr Pair) Pair {
+func Append(xs List, cdr List) List {
 	if xs == nil {
 		return cdr
 	} else {
@@ -84,23 +84,23 @@ func isList(v interface{}) bool {
 	if nil == v {
 		return true
 	}
-	if xs, ok := v.(Pair) ; ok {
+	if xs, ok := v.(List) ; ok {
 		return isList(Cdr(xs))
 	}
 	return false
 }
 
-func Length(v Pair) int {
+func Length(v List) int {
 	if v == nil {
 		return 0
 	}
-	if xs, ok := v.(Pair) ; ok {
+	if xs, ok := v.(List) ; ok {
 		return Length(Cdr(xs)) + 1
 	}
 	panic("proper list required")
 }
 
-func Chop2(xs Pair) []struct{ header, body interface{} } {
+func Chop2(xs List) []struct{ header, body interface{} } {
 
 	ys := make([]struct{ header, body interface{} }, 0)
 	for xs != nil {

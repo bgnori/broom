@@ -11,7 +11,7 @@ func Test_ConsCarCdr(t *testing.T) {
 	if v == nil {
 		t.Error("(null? v) must be null? false.")
 	}
-	p, ok := v.(Pair)
+	p, ok := v.(List)
 	if!ok  {
 		t.Error("(pair? v) must be true.")
 	}
@@ -33,17 +33,17 @@ func Test_ConsCarCdr(t *testing.T) {
 
 func Test_ConsNilNil(t *testing.T) {
 	p := Cons(nil, nil)
-	if _, ok := p.(Pair) ; !ok  {
+	if _, ok := p.(List) ; !ok  {
 		t.Error("(pair? xs) must be true.")
 	}
 }
 
 func Test_ListNil(t *testing.T) {
-	xs := List()
+	xs := Slice2List()
 	if nil != xs {
 		t.Error("xs must be null, i.e. '()")
 	}
-	if _, ok := xs.(Pair) ; ok  {
+	if _, ok := xs.(List) ; ok  {
 		t.Error("(pair? '()) must be false")
 	}
 }
@@ -84,7 +84,7 @@ func Test_Length_01(t *testing.T) {
 
 func Test_Length_02(t *testing.T) {
 	//(length '(a (b) (c d e))) =) 3
-	xs := List(sym("a"), List(sym("b")), List(sym("c"), sym("d"), sym("e")))
+	xs := Slice2List(sym("a"), Slice2List(sym("b")), Slice2List(sym("c"), sym("d"), sym("e")))
 	if Length(xs) != 3 {
 		t.Error("expected 3 for (length '(a (b) (c d e))) ")
 	}
@@ -99,7 +99,7 @@ func Test_Length_03(t *testing.T) {
 }
 
 func Test_String(t *testing.T) {
-	xs := List(sym("a"), List(sym("b")), List(sym("c"), sym("d"), sym("e")))
+	xs := Slice2List(sym("a"), Slice2List(sym("b")), Slice2List(sym("c"), sym("d"), sym("e")))
 	if fmt.Sprint(xs) != "(a (b) (c d e))" {
 		t.Error("expected: (a (b) (c d e))")
 		t.Error("actually:", fmt.Sprint(xs))
@@ -107,10 +107,10 @@ func Test_String(t *testing.T) {
 }
 
 func Test_Append(t *testing.T) {
-	xs := List(sym("a"), sym("b"), sym("c"))
-	ys := List(sym("d"), sym("e"), sym("f"))
+	xs := Slice2List(sym("a"), sym("b"), sym("c"))
+	ys := Slice2List(sym("d"), sym("e"), sym("f"))
 	got := Append(xs, ys)
-	if !Eq(got, List(sym("a"), sym("b"), sym("c"), sym("d"), sym("e"), sym("f"))) {
+	if !Eq(got, Slice2List(sym("a"), sym("b"), sym("c"), sym("d"), sym("e"), sym("f"))) {
 		t.Error("Append not working right")
 		println(got)
 	}

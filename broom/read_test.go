@@ -59,7 +59,7 @@ func TestReaderQuotedSymbol(t *testing.T) {
 	}
 }
 
-func TestReaderEmptyList(t *testing.T) {
+func TestReaderEmptySlice2List(t *testing.T) {
 	buf := NewBuffered(strings.NewReader("()"))
 	reader := NewReader(buf)
 
@@ -225,7 +225,7 @@ func TestReaderSemicolonEOS(t *testing.T) {
 	}
 }
 
-func TestReaderSomeList(t *testing.T) {
+func TestReaderSomeSlice2List(t *testing.T) {
 	buf := NewBuffered(strings.NewReader("(a b (c d) e)"))
 	reader := NewReader(buf)
 
@@ -429,12 +429,12 @@ func TestMakeSymbol(t *testing.T) {
 func TestMakeQuotedSymbol(t *testing.T) {
 	buf := NewBuffered(strings.NewReader("'a"))
 	expr := BuildSExpr(buf)
-	if !Eq(List(sym("quote"), sym("a")), expr) {
+	if !Eq(Slice2List(sym("quote"), sym("a")), expr) {
 		t.Error("'a is expected")
 	}
 }
 
-func TestMakeEmptyList(t *testing.T) {
+func TestMakeEmptySlice2List(t *testing.T) {
 	buf := NewBuffered(strings.NewReader("()"))
 	expr := BuildSExpr(buf)
 
@@ -443,16 +443,16 @@ func TestMakeEmptyList(t *testing.T) {
 	}
 }
 
-func TestMakeQuotedEmptyList(t *testing.T) {
+func TestMakeQuotedEmptySlice2List(t *testing.T) {
 	buf := NewBuffered(strings.NewReader("'()"))
 	expr := BuildSExpr(buf)
 
-	if !Eq(List(sym("quote"), List()), expr) {
+	if !Eq(Slice2List(sym("quote"), Slice2List()), expr) {
 		t.Errorf("'() is expected %v", expr)
 	}
 }
 
-func TestMakeBadQuoteList(t *testing.T) {
+func TestMakeBadQuoteSlice2List(t *testing.T) {
 	defer func() {
 		recover()
 	}()
@@ -474,25 +474,25 @@ func TestMakeQuotedEmptyArray(t *testing.T) {
 	buf := NewBuffered(strings.NewReader("'[]"))
 	expr := BuildSExpr(buf)
 
-	if !Eq(List(sym("quote"), []interface{}{}), expr) {
+	if !Eq(Slice2List(sym("quote"), []interface{}{}), expr) {
 		t.Error("[] is expected")
 	}
 }
 
-func TestMakeSomeList(t *testing.T) {
+func TestMakeSomeSlice2List(t *testing.T) {
 	buf := NewBuffered(strings.NewReader("(1 2 3)"))
 	expr := BuildSExpr(buf)
 
-	if !Eq(List(1, 2, 3), expr) {
+	if !Eq(Slice2List(1, 2, 3), expr) {
 		t.Error("(1 2 3) is expected")
 	}
 }
 
-func TestMakeNestedList(t *testing.T) {
+func TestMakeNestedSlice2List(t *testing.T) {
 	buf := NewBuffered(strings.NewReader("(a b (c d) e)"))
 	expr := BuildSExpr(buf)
 
-	if !Eq(List(sym("a"), sym("b"), List(sym("c"), sym("d")), sym("e")), expr) {
+	if !Eq(Slice2List(sym("a"), sym("b"), Slice2List(sym("c"), sym("d")), sym("e")), expr) {
 		t.Error("(a b (c d) e) is expected")
 	}
 }
@@ -520,7 +520,7 @@ func TestMakeSomeMap(t *testing.T) {
 func TestMakeSemicolonCRLF(t *testing.T) {
 	buf := NewBuffered(strings.NewReader("(a ;\r\n)"))
 	expr := BuildSExpr(buf)
-	if !Eq(List(sym("a")), expr) {
+	if !Eq(Slice2List(sym("a")), expr) {
 		t.Error("(a) is expected")
 	}
 }
@@ -533,10 +533,10 @@ func TestMakeSemicolonCRLFwithSomething(t *testing.T) {
 	if err != nil {
 		t.Error("got error")
 	}
-	if !Eq(List(sym("a")), seq.items[0]) {
+	if !Eq(Slice2List(sym("a")), seq.items[0]) {
 		t.Error("(a) is expected")
 	}
-	if !Eq(List(sym("b"), sym("c")), seq.items[1]) {
+	if !Eq(Slice2List(sym("b"), sym("c")), seq.items[1]) {
 		t.Error("(b c) is expected")
 	}
 }

@@ -1,16 +1,16 @@
 
 (def defmacro
         (macro [name xs & body]
-               (list 'def name (cons 'macro (cons xs (Arr2List body))))))
+               (list 'def name (cons 'macro (cons xs (Slice2List body))))))
 
 (defmacro identity [expr]
     expr)
 
 (defmacro when [expr & form]
-    (list 'if expr (cons 'begin (Arr2List form)) '()))
+    (list 'if expr (cons 'begin (Slice2List form)) '()))
 
 (defmacro lambda [xs body]
-    (list 'fn (List2Arr xs) body))
+    (list 'fn (List2Slice xs) body))
 
 (defmacro defn [name args body]
     (let [_defn_arg args]
@@ -31,4 +31,4 @@
 
 (def else true) ; for cond
 (defmacro cond [test action & rest]
-    (list 'if test action (cons 'cond (Arr2List rest))))
+    (list 'if test action (cons 'cond (Slice2List rest))))

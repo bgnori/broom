@@ -522,7 +522,7 @@ func (t *tokenSeq) CloseParen() (interface{}, error) {
 	if t.typ != TOKEN_LEFT_PAREN {
 		return nil, t.Error("PAREN does not match")
 	}
-	return t.deco.Apply(List(t.Items()...)), nil
+	return t.deco.Apply(Slice2List(t.Items()...)), nil
 }
 
 func (t *tokenSeq) CloseBracket() (interface{}, error) {
@@ -574,7 +574,7 @@ func (d *Decorator) Pop() Symbol {
 func (d *Decorator) Apply(expr interface{}) interface{} {
 	for d.HasSomething() {
 		s := d.Pop()
-		expr = List(s, expr)
+		expr = Slice2List(s, expr)
 	}
 	return expr
 }
