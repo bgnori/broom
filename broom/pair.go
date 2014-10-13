@@ -5,42 +5,62 @@ import (
 	"strings"
 )
 
-type pairImpl struct {
+type Pair struct {
 	car interface{}
 	cdr List
 }
 
 func Cons(car interface{}, cdr List) List {
-	return &pairImpl{car: car, cdr: cdr}
+	return &Pair{car:car, cdr:cdr}
 }
 
 func Car(v List) interface{} {
 	return v.Car()
 }
 
-func Cdr(v List)List {
+func Cdr(v List) List {
 	return v.Cdr()
 }
 
-func (p *pairImpl) Car() interface{} {
+/* As Sequence */
+func (p *Pair) First() interface{} {
 	return p.car
 }
 
-func (p *pairImpl) Cdr() List {
+func (p *Pair) Rest() Sequence {
+	return p.cdr.(Sequence)
+}
+
+func (p *Pair) Cons(item interface{}) Sequence {
+	return &Pair{car: item, cdr: p}
+}
+
+func (p *Pair) IsEmpty() bool {
+	return p == nil
+}
+
+
+/* As List */
+
+func (p *Pair) Car () interface{} {
+	return p.car
+}
+
+func (p *Pair) Cdr() List {
 	return p.cdr
 }
 
-func (p *pairImpl) SetCar(v interface{}) Undef {
+func (p *Pair) SetCar(v interface{}) Undef {
 	p.car = v
 	return nil
 }
 
-func (p *pairImpl) SetCdr(cdr List) Undef {
+func (p *Pair) SetCdr(cdr List) Undef {
 	p.cdr = cdr
 	return nil
 }
 
-func (p *pairImpl) String() string {
+func (p *Pair) String() string {
 	//assume that proper list
 	xs := List2Slice(p)
 	ss := make([]string, 0)
