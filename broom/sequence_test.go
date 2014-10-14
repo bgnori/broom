@@ -75,5 +75,30 @@ func Test_Take20(t *testing.T) {
 }
 
 
+func Test_Seq2Slice(t *testing.T) {
+	xs := make([]interface{}, 10)
+	for i := 0 ; i< 10 ; i++ {
+		xs[i] = 'a'+i
+	}
+	ys := MakeFromSlice(xs...)
+	zs := Seq2Slice(ys)
+	if len(zs) != 10 {
+		t.Errorf("expected 10 items but there is %d", len(zs))
+	}
+}
 
+func Test_SeqAppend(t *testing.T) {
+	xs := make([]interface{}, 5)
+	for i := 0 ; i< 5 ; i++ {
+		xs[i] = 'a'+i
+	}
+	ys := make([]interface{}, 5)
+	for i := 0 ; i< 5 ; i++ {
+		ys[i] = 'A'+i
+	}
+	zs := SeqAppend(MakeFromSlice(xs...), MakeFromSlice(ys...))
+	if Length(zs) != 10 {
+		t.Errorf("expected 10 items but there is %d", Length(zs))
+	}
+}
 

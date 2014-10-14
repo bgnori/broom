@@ -65,7 +65,7 @@ func (fs *FromSlice) Cons(item interface{}) Sequence {
 	return &Base{first: item, rest: fs}
 }
 
-func MakeFromSlice(xs ...interface{}) Sequence {
+func MakeFromSlice(xs... interface{}) Sequence {
 	return &FromSlice{wrapped: xs}
 }
 
@@ -139,4 +139,18 @@ func Take(n int, s Sequence) Sequence {
 	return v.Cons(s.First())
 }
 
+func Seq2Slice(s Sequence)[]interface{} {
+	xs := make([]interface{}, 0)
+	for ; s != nil && !s.IsEmpty() ; s = s.Rest() {
+		xs = append(xs, s.First())
+	}
+	return xs
+}
 
+func SeqAppend(xs, ys Sequence) Sequence {
+	if xs == nil {
+		return ys
+	} else {
+		return SeqAppend(xs.Rest(), ys).Cons(xs.First())
+	}
+}
