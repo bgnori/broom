@@ -2,6 +2,7 @@ package broom
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 )
 
@@ -24,11 +25,15 @@ func Cdr(v List) List {
 
 /* As Sequence */
 func (p *Pair) First() interface{} {
-	return p.car
+	return p.Car()
 }
 
 func (p *Pair) Rest() Sequence {
-	return p.cdr.(Sequence)
+	v := p.Cdr()
+	if v != nil {
+		return v.(Sequence)
+	}
+	return nil
 }
 
 func (p *Pair) Cons(item interface{}) Sequence {
@@ -36,6 +41,7 @@ func (p *Pair) Cons(item interface{}) Sequence {
 }
 
 func (p *Pair) IsEmpty() bool {
+	fmt.Println("Pair.IsEmpty", p, reflect.TypeOf(p))
 	return p == nil
 }
 
@@ -108,16 +114,6 @@ func isList(v interface{}) bool {
 		return isList(Cdr(xs))
 	}
 	return false
-}
-
-func Length(v List) int {
-	if v == nil {
-		return 0
-	}
-	if xs, ok := v.(List) ; ok {
-		return Length(Cdr(xs)) + 1
-	}
-	panic("proper list required")
 }
 
 func Chop2(xs List) []struct{ header, body interface{} } {

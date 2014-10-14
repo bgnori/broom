@@ -15,6 +15,7 @@ type Symbol interface {
 }
 
 type List interface {
+	Sequence
 	Car() interface{}
 	Cdr() List
 	SetCar(v interface{}) Undef

@@ -74,6 +74,12 @@ func Test_isList_04(t *testing.T) {
 	//  (list? x))
 }
 
+func Test_Length_00(t *testing.T) {
+	if Length(nil) != 0 {
+		t.Errorf("expected 0 but got %d", Length(nil))
+	}
+}
+
 func Test_Length_01(t *testing.T) {
 	//(length '(a b c)) =) 3
 	xs := Cons(sym("a"), Cons(sym("b"), Cons(sym("c"), nil)))
