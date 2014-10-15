@@ -62,10 +62,10 @@ func Eval(env Environment, expr interface{}) interface{} {
 	return nil
 }
 
-func EvalExprs(env Environment, xs []interface{}) interface{} {
+func EvalExprs(env Environment, seq Sequence) interface{} {
 	var x interface{}
-	for _, b := range xs {
-		x = Eval(env, b)
+	for ; seq !=nil && !seq.IsEmpty() ; seq = seq.Rest() {
+		x = Eval(env, seq.First())
 	}
 	return x
 }

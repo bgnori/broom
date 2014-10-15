@@ -47,7 +47,7 @@ func setupSpecialForms(env Environment) Environment {
 		r := func(dynamic Environment, args List) interface{} {
 			eb := NewEnvBuilder(Car(cdr).([]interface{}))
 			e := eb.EvalAndBindAll(List2Slice(args), NewEnvFrame(lexical), dynamic)
-			return EvalExprs(e, List2Slice(Body(cdr)))
+			return EvalExprs(e, Body(cdr))
 		}
 		return r
 	})
@@ -59,14 +59,14 @@ func setupSpecialForms(env Environment) Environment {
 		e := NewEnvFrame(env)
 		eb := NewEnvBuilder(Evens(xs))
 		x := eb.EvalAndBindAll(Odds(xs), e, e)
-		return EvalExprs(x, List2Slice(Body(cdr)))
+		return EvalExprs(x, Body(cdr))
 	})
 
 	// (loop [i 1] (recur (+ i 1))) ... never stops
 	env.Bind("loop", func(dynamic Environment, cdr List) interface{} {
 		r := NewRecur(dynamic, Car(cdr).([]interface{}))
 		for {
-			x := EvalExprs(r.Env(), List2Slice(Body(cdr)))
+			x := EvalExprs(r.Env(), Body(cdr))
 			_, recuring := x.(*Recur)
 			if !recuring {
 				return x
@@ -78,7 +78,7 @@ func setupSpecialForms(env Environment) Environment {
 	//case sym("begin").Eq(car): //begin?
 	env.Bind("begin", func(env Environment, cdr List) interface{} {
 		e := NewEnvFrame(env)
-		return EvalExprs(e, List2Slice(cdr))
+		return EvalExprs(e, cdr)
 	})
 
 	//macro
@@ -90,7 +90,7 @@ func setupSpecialForms(env Environment) Environment {
 			env = eb.BindAll(List2Slice(args), env)
 			env.Bind("exprs", args)
 
-			transformed := EvalExprs(env, List2Slice(Body(cdr)))
+			transformed := EvalExprs(env, Body(cdr))
 			//fmt.Println(cdr)
 			//fmt.Println("--(macro)-->")
 			//fmt.Println(transformed)
