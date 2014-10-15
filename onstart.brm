@@ -1,18 +1,23 @@
 (def car 
     (fn [x] (. x Car)))
 
-;(println (. _env Outer)) ; must be nil, _env is outer most
+(def cdr 
+    (fn [x] (. x Cdr)))
 
-(let [x (. os Open "broom/core.brm")]
-    (begin
-        (println x)
-        (. broom Load (car x) _env false)))
+(def load-from-file 
+    (fn [fname env verbose]
+        (let [x (. os Open fname)]
+            (begin
+                (println x)
+                (if (null? (car (cdr x)))
+                    (. broom Load (car x) env verbose)
+                    (panic (car (cdr x))))))))
 
 
-;(let [x (. os Open "broom/srfi-1.brm")]
-;    (begin
-;        (println x)
-;        (. broom Load (car x) _env true)))
+(load-from-file "broom/core.brm" _env false)
+(load-from-file "broom/srfi-1.brm" _env false)
+(load-from-file "null" _env false)
+
 
 (println (. os Args))
 (. broom Repl (. os Stdin) _env)
