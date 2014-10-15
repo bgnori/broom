@@ -57,9 +57,10 @@ type Recur struct {
 
 func NewRecur(outer Environment, xs []interface{}) *Recur {
 	r := new(Recur)
-	r.eb = NewEnvBuilder(Evens(xs))
+	seq := MakeFromSlice(xs...)
+	r.eb = NewEnvBuilder(SeqEvens(seq))
 	e := NewEnvFrame(outer)
-	r.env = r.eb.EvalAndBindAll(Odds(xs), e, e)
+	r.env = r.eb.EvalAndBindAll(Seq2Slice(SeqOdds(seq)), e, e)
 	r.Env().Bind("recur", r)
 	return r
 }

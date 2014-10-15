@@ -3,6 +3,7 @@ package broom
 import (
 	"fmt"
 	"reflect"
+	"strings"
 //	"fmt"
 )
 
@@ -25,7 +26,6 @@ type Base struct {
 }
 
 func (bs *Base) IsEmpty() bool {
-	fmt.Println("*Base.IsEmpty", bs, reflect.TypeOf(bs))
 	return bs == nil
 }
 
@@ -40,6 +40,7 @@ func (bs *Base) Rest() Sequence {
 func (bs *Base) Cons(item interface{}) Sequence {
 	return &Base{first: item, rest: bs}
 }
+
 
 type FromSlice struct {
 	wrapped []interface{}
@@ -128,6 +129,14 @@ func Length(s Sequence) int {
 	return Length(s.Rest()) + 1
 }
 
+func SeqString(xs Sequence) string {
+	ss := make([]string, 0)
+	for ; xs != nil && !xs.IsEmpty() ; xs = xs.Rest() {
+		ss = append(ss, fmt.Sprintf("%v", xs.First()))
+	}
+	return "(" + strings.Join(ss, " ") + ")"
+}
+
 func Take(n int, s Sequence) Sequence {
 	if n == 0 || s == nil || s.IsEmpty() {
 		return nil
@@ -137,6 +146,15 @@ func Take(n int, s Sequence) Sequence {
 		return Kons(s.First(), nil)
 	}
 	return v.Cons(s.First())
+}
+
+func SeqDrop(n int, s Sequence) Sequence {
+	i := 0
+	for i < n && s != nil && !s.IsEmpty() {
+		s = s.Rest()
+		i += 1
+	}
+	return s
 }
 
 func Seq2Slice(s Sequence)[]interface{} {
@@ -154,3 +172,52 @@ func SeqAppend(xs, ys Sequence) Sequence {
 		return SeqAppend(xs.Rest(), ys).Cons(xs.First())
 	}
 }
+
+
+func SeqFilter(pred (func(interface{}) bool), seq Sequence) Sequence {
+	if seq == nil || seq.IsEmpty() {
+		return nil
+	}
+	result := SeqFilter(pred, seq.Rest())
+	v := seq.First()
+	if pred(v) {
+		if result == nil {
+			return Kons(v, nil)
+		}
+		return result.Cons(v)
+	}
+	return result
+}
+
+func SeqEvens(seq Sequence) Sequence {
+	n := 0
+	return SeqFilter(func(x interface{}) (v bool) {
+		v = (n % 2 == 1)
+		n += 1
+		return
+	}, seq)
+}
+
+func SeqOdds(seq Sequence) Sequence {
+	n := 0
+	return SeqFilter(func(x interface{}) (v bool) {
+		v = (n % 2 == 0)
+		n += 1
+		return
+	}, seq)
+}
+
+
+func SeqZip2(xs, ys Sequence) Sequence {
+	tmp := make([]interface{},0) //FIXME
+	for xs != nil && !xs.IsEmpty() && ys != nil && !ys.IsEmpty() {
+		v := make([]interface{}, 2)
+		v[0] = xs.First()
+		v[1] = ys.First()
+		tmp = append(tmp, v)
+		xs = xs.Rest()
+		ys = ys.Rest()
+	}
+	return MakeFromSlice(tmp...)
+}
+

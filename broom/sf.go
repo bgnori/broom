@@ -1,6 +1,7 @@
 package broom
 
 import (
+	"fmt"
 //	"fmt"
 )
 
@@ -44,9 +45,11 @@ func setupSpecialForms(env Environment) Environment {
 
 	//idea from http://clojuredocs.org/clojure_core/clojure.core/fn
 	env.Bind("fn", func(lexical Environment, cdr List) interface{} {
+		fmt.Println("fn")//, cdr)
 		r := func(dynamic Environment, args List) interface{} {
-			eb := NewEnvBuilder(Car(cdr).([]interface{}))
-			e := eb.EvalAndBindAll(List2Slice(args), NewEnvFrame(lexical), dynamic)
+			car := Car(cdr).([]interface{})
+			eb := NewEnvBuilder(MakeFromSlice(car...))
+			e := eb.EvalAndBindAll(Seq2Slice(args), NewEnvFrame(lexical), dynamic)
 			return EvalExprs(e, Body(cdr))
 		}
 		return r
@@ -55,10 +58,13 @@ func setupSpecialForms(env Environment) Environment {
 	env.Bind("let", func(env Environment, cdr List) interface{} {
 		//(let [x 1] ,body)
 		xs := Car(cdr).([]interface{})
+		fmt.Println("let", xs)
+		seq := MakeFromSlice(xs...)
+		fmt.Println("made seq from xs", SeqString(seq))
 
 		e := NewEnvFrame(env)
-		eb := NewEnvBuilder(Evens(xs))
-		x := eb.EvalAndBindAll(Odds(xs), e, e)
+		eb := NewEnvBuilder(SeqEvens(seq))
+		x := eb.EvalAndBindAll(Seq2Slice(SeqOdds(seq)), e, e)
 		return EvalExprs(x, Body(cdr))
 	})
 
@@ -86,8 +92,8 @@ func setupSpecialForms(env Environment) Environment {
 		m := func(dynamic Environment, args List) interface{} {
 			env = NewEnvFrame(lexical)
 			env.Bind("_dynamic", dynamic)
-			eb := NewEnvBuilder(Car(cdr).([]interface{}))
-			env = eb.BindAll(List2Slice(args), env)
+			eb := NewEnvBuilder(MakeFromSlice(Car(cdr).([]interface{})...))
+			env = eb.BindAll(Seq2Slice(args), env)
 			env.Bind("exprs", args)
 
 			transformed := EvalExprs(env, Body(cdr))

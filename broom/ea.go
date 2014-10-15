@@ -160,11 +160,14 @@ type EnvBuilder struct {
 	variadic bool
 }
 
-func NewEnvBuilder(xs []interface{}) *EnvBuilder {
+func NewEnvBuilder(seq Sequence) *EnvBuilder {
+	fmt.Println("NewEnvBuilder", seq)
 	eb := &EnvBuilder{}
 
 	eb.params = make([]Symbol, 0)
-	for _, x := range xs {
+	for ; seq != nil && !seq.IsEmpty() ; seq = seq.Rest(){
+		x := seq.First()
+		fmt.Println(x)
 		if s, ok := x.(Symbol); !ok {
 			panic("Parameter must be symbol")
 		} else {
@@ -184,6 +187,7 @@ func (eb *EnvBuilder) Len() int {
 }
 
 func (eb *EnvBuilder) EvalAndBindAll(as []interface{}, to_bind, to_eval Environment) Environment {
+	fmt.Println("EvalAndBindAll", as)
 	if eb.variadic {
 		last := eb.Len() - 1
 		for i, s := range eb.params[:last] {

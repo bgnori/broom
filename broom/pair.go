@@ -2,7 +2,6 @@ package broom
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 )
 
@@ -41,7 +40,6 @@ func (p *Pair) Cons(item interface{}) Sequence {
 }
 
 func (p *Pair) IsEmpty() bool {
-	fmt.Println("Pair.IsEmpty", p, reflect.TypeOf(p))
 	return p == nil
 }
 
@@ -68,10 +66,10 @@ func (p *Pair) SetCdr(cdr List) Undef {
 
 func (p *Pair) String() string {
 	//assume that proper list
-	xs := List2Slice(p)
+	var xs Sequence
 	ss := make([]string, 0)
-	for _, x := range xs {
-		ss = append(ss, fmt.Sprint(x))
+	for xs = p ; xs != nil && !xs.IsEmpty() ; xs = xs.Rest() {
+		ss = append(ss, fmt.Sprint(xs.First()))
 	}
 	return "(" + strings.Join(ss, " ") + ")"
 }
@@ -128,22 +126,3 @@ func Chop2(xs List) []struct{ header, body interface{} } {
 	return ys
 }
 
-func Odds(xs []interface{}) []interface{} {
-	ys := make([]interface{}, 0)
-	for i, v := range xs {
-		if i%2 == 1 {
-			ys = append(ys, v)
-		}
-	}
-	return ys
-}
-
-func Evens(xs []interface{}) []interface{} {
-	ys := make([]interface{}, 0)
-	for i, v := range xs {
-		if i%2 == 0 {
-			ys = append(ys, v)
-		}
-	}
-	return ys
-}
