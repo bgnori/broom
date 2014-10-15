@@ -431,3 +431,12 @@ func MakeRuntimePackage() *PackageProxy {
 
 	return p
 }
+
+func MakeBroomPackage() *PackageProxy {
+	p := NewPackageProxy("broom")
+	p.register("Load", Load)
+	p.register("Repl", Repl)
+	return p
+}
+
+
