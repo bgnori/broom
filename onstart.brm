@@ -1,0 +1,18 @@
+(def car 
+    (fn [x] (. x Car)))
+
+;(println (. _env Outer)) ; must be nil, _env is outer most
+
+(let [x (. os Open "broom/core.brm")]
+    (begin
+        (println x)
+        (. broom Load (car x) _env false)))
+
+
+;(let [x (. os Open "broom/srfi-1.brm")]
+;    (begin
+;        (println x)
+;        (. broom Load (car x) _env true)))
+
+(println (. os Args))
+(. broom Repl (. os Stdin) _env)
