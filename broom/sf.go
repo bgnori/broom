@@ -1,7 +1,7 @@
 package broom
 
 import (
-	"fmt"
+//	"fmt"
 )
 
 func setupSpecialForms(env Environment) Environment {
@@ -91,9 +91,9 @@ func setupSpecialForms(env Environment) Environment {
 			env.Bind("exprs", args)
 
 			transformed := EvalExprs(env, List2Slice(Body(cdr)))
-			fmt.Println(cdr)
-			fmt.Println("--(macro)-->")
-			fmt.Println(transformed)
+			//fmt.Println(cdr)
+			//fmt.Println("--(macro)-->")
+			//fmt.Println(transformed)
 			//Our macro is macor object. it won't expand until see it.
 			return Eval(dynamic, transformed)
 		}

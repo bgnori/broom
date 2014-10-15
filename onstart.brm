@@ -8,15 +8,19 @@
     (fn [fname env verbose]
         (let [x (. os Open fname)]
             (begin
-                (println x)
                 (if (null? (car (cdr x)))
                     (. broom Load (car x) env verbose)
                     (panic (car (cdr x))))))))
+; (load-from-file "null" _env false) ; to test load-from-file
 
 
 (load-from-file "broom/core.brm" _env false)
 (load-from-file "broom/srfi-1.brm" _env false)
-(load-from-file "null" _env false)
+(load-from-file "broom/slice.brm" _env false)
+(load-from-file "broom/chan.brm" _env false)
+(load-from-file "broom/reflect.brm" _env false)
+(load-from-file "broom/testing.brm" _env false)
+
 
 
 (println (. os Args))
