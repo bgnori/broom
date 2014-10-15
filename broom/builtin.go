@@ -242,7 +242,7 @@ func setupBuiltins(env Environment) Environment {
 		for _, x := range xs {
 			ys = append(ys, Eval(env, x))
 		}
-		fmt.Println(ys)
+		fmt.Println(ys...)
 		return nil
 	})
 	env.Bind("<", func(env Environment, cdr List) interface{} {
