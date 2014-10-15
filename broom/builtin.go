@@ -205,7 +205,7 @@ func setupBuiltins(env Environment) Environment {
 		return acc
 	})
 	env.Bind("panic", func(env Environment, cdr List) interface{} {
-		panic(Car(cdr))
+		panic(Eval(env, Car(cdr)))
 		return nil
 	})
 	env.Bind("-", func(env Environment, cdr List) interface{} {
