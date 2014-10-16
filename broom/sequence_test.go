@@ -28,13 +28,12 @@ func Test_Kons(t *testing.T) {
 	}
 }
 
-
 func Test_MakeFromSlice(t *testing.T) {
 	xs := make([]interface{}, 10)
-	for i := 0 ; i< 10 ; i++ {
-		xs[i] = 'a'+i
+	for i := 0; i < 10; i++ {
+		xs[i] = 'a' + i
 	}
-	ys :=  MakeFromSlice(xs...)
+	ys := MakeFromSlice(xs...)
 	zs := make([]int, 0)
 	for ; ys != nil; ys = ys.Rest() {
 		zs = append(zs, ys.First().(int))
@@ -46,11 +45,11 @@ func Test_MakeFromSlice(t *testing.T) {
 
 func Test_Take5(t *testing.T) {
 	xs := make([]interface{}, 10)
-	for i := 0 ; i< 10 ; i++ {
-		xs[i] = 'a'+i
+	for i := 0; i < 10; i++ {
+		xs[i] = 'a' + i
 	}
 	zs := make([]int, 0)
-	for ys := Take(5, MakeFromSlice(xs...)) ; !ys.IsEmpty() ; ys = ys.Rest() {
+	for ys := Take(5, MakeFromSlice(xs...)); !ys.IsEmpty(); ys = ys.Rest() {
 		fmt.Println(ys, reflect.TypeOf(ys))
 		zs = append(zs, ys.First().(int))
 	}
@@ -61,11 +60,11 @@ func Test_Take5(t *testing.T) {
 
 func Test_Take20(t *testing.T) {
 	xs := make([]interface{}, 10)
-	for i := 0 ; i< 10 ; i++ {
-		xs[i] = 'a'+i
+	for i := 0; i < 10; i++ {
+		xs[i] = 'a' + i
 	}
 	zs := make([]int, 0)
-	for ys := Take(20, MakeFromSlice(xs...)) ; !ys.IsEmpty() ; ys = ys.Rest() {
+	for ys := Take(20, MakeFromSlice(xs...)); !ys.IsEmpty(); ys = ys.Rest() {
 		fmt.Println(ys, reflect.TypeOf(ys))
 		zs = append(zs, ys.First().(int))
 	}
@@ -74,11 +73,10 @@ func Test_Take20(t *testing.T) {
 	}
 }
 
-
 func Test_Seq2Slice(t *testing.T) {
 	xs := make([]interface{}, 10)
-	for i := 0 ; i< 10 ; i++ {
-		xs[i] = 'a'+i
+	for i := 0; i < 10; i++ {
+		xs[i] = 'a' + i
 	}
 	ys := MakeFromSlice(xs...)
 	zs := Seq2Slice(ys)
@@ -89,12 +87,12 @@ func Test_Seq2Slice(t *testing.T) {
 
 func Test_SeqAppend_0(t *testing.T) {
 	xs := make([]interface{}, 5)
-	for i := 0 ; i< 5 ; i++ {
-		xs[i] = 'a'+i
+	for i := 0; i < 5; i++ {
+		xs[i] = 'a' + i
 	}
 	ys := make([]interface{}, 5)
-	for i := 0 ; i< 5 ; i++ {
-		ys[i] = 'A'+i
+	for i := 0; i < 5; i++ {
+		ys[i] = 'A' + i
 	}
 	zs := SeqAppend(MakeFromSlice(xs...), MakeFromSlice(ys...))
 	if Length(zs) != 10 {
@@ -113,7 +111,7 @@ func Test_SeqAppend_1(t *testing.T) {
 
 func Test_SetRange(t *testing.T) {
 	sum := 0
-	for r := SeqRange(0, 101, 1) ; r!=nil && !r.IsEmpty() ; r = r.Rest() {
+	for r := SeqRange(0, 101, 1); r != nil && !r.IsEmpty(); r = r.Rest() {
 		v := r.First().(int)
 		sum += v
 	}
@@ -121,4 +119,3 @@ func Test_SetRange(t *testing.T) {
 		t.Errorf("Expected 5050, but got %v", sum)
 	}
 }
-

@@ -6,7 +6,7 @@ import (
 )
 
 type symbolImpl struct {
-	id int
+	id    int
 	value string
 }
 
@@ -29,7 +29,7 @@ func (p *Pool) RUnlock() { p.mutex.RUnlock() }
 
 func (p *Pool) MakeSymbol(s string) Symbol {
 	n := len(p.xs)
-	x := &symbolImpl{id: n-1, value: s}
+	x := &symbolImpl{id: n - 1, value: s}
 	p.xs = append(p.xs, Symbol(x))
 	p.lookup[s] = n
 	return x

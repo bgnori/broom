@@ -21,24 +21,42 @@ func (e EvalError) Error() string {
 
 func Eval(env Environment, expr interface{}) interface{} {
 	switch x := expr.(type) {
-	case bool: return expr
-	case int: return expr
-	case int8: return expr
-	case int16: return expr
-	case int32: return expr
-	case int64: return expr
-	case uint: return expr
-	case uint8: return expr
-	case uint16: return expr
-	case uint32: return expr
-	case uint64: return expr
-	case float32: return expr
-	case float64: return expr
-	case complex64: return expr
-	case complex128: return expr
-	case string: return expr
-	case func(Environment, List) interface{}: return expr
-	case *Recur: return expr
+	case bool:
+		return expr
+	case int:
+		return expr
+	case int8:
+		return expr
+	case int16:
+		return expr
+	case int32:
+		return expr
+	case int64:
+		return expr
+	case uint:
+		return expr
+	case uint8:
+		return expr
+	case uint16:
+		return expr
+	case uint32:
+		return expr
+	case uint64:
+		return expr
+	case float32:
+		return expr
+	case float64:
+		return expr
+	case complex64:
+		return expr
+	case complex128:
+		return expr
+	case string:
+		return expr
+	case func(Environment, List) interface{}:
+		return expr
+	case *Recur:
+		return expr
 	case Symbol: // variables?
 		if v, err := env.Resolve(x.GetValue()); err != nil {
 			panic(err)
@@ -64,7 +82,7 @@ func Eval(env Environment, expr interface{}) interface{} {
 
 func EvalExprs(env Environment, seq Sequence) interface{} {
 	var x interface{}
-	for ; seq !=nil && !seq.IsEmpty() ; seq = seq.Rest() {
+	for ; seq != nil && !seq.IsEmpty(); seq = seq.Rest() {
 		x = Eval(env, seq.First())
 	}
 	return x
@@ -165,7 +183,7 @@ func NewEnvBuilder(seq Sequence) *EnvBuilder {
 	eb := &EnvBuilder{}
 
 	eb.params = make([]Symbol, 0)
-	for ; seq != nil && !seq.IsEmpty() ; seq = seq.Rest(){
+	for ; seq != nil && !seq.IsEmpty(); seq = seq.Rest() {
 		x := seq.First()
 		fmt.Println(x)
 		if s, ok := x.(Symbol); !ok {

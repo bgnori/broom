@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-//	"fmt"
+	//	"fmt"
 )
 
 /*
@@ -41,7 +41,6 @@ func (bs *Base) Cons(item interface{}) Sequence {
 	return &Base{first: item, rest: bs}
 }
 
-
 type FromSlice struct {
 	wrapped []interface{}
 }
@@ -66,12 +65,12 @@ func (fs *FromSlice) Cons(item interface{}) Sequence {
 	return &Base{first: item, rest: fs}
 }
 
-func MakeFromSlice(xs... interface{}) Sequence {
+func MakeFromSlice(xs ...interface{}) Sequence {
 	return &FromSlice{wrapped: xs}
 }
 
 type FromChan struct { /* Kind a lazy, might block */
-	wrapped chan interface{}
+	wrapped  chan interface{}
 	realized Sequence /* cannnot be lazy */
 }
 
@@ -82,9 +81,9 @@ func (fc *FromChan) IsEmpty() bool {
 func (fc *FromChan) realize() {
 	v, more := <-fc.wrapped
 	if more {
-		fc.realized = &Base{first:v, rest: MakeFromChan(fc.wrapped)}
+		fc.realized = &Base{first: v, rest: MakeFromChan(fc.wrapped)}
 	} else {
-		fc.realized = &Base{first:v, rest: nil}
+		fc.realized = &Base{first: v, rest: nil}
 	}
 }
 
@@ -112,7 +111,6 @@ func MakeFromChan(ch chan interface{}) Sequence {
 	return &FromChan{wrapped: ch}
 }
 
-
 func Kons(item interface{}, s Sequence) Sequence {
 	if s == nil {
 		var b *Base
@@ -131,7 +129,7 @@ func Length(s Sequence) int {
 
 func SeqString(xs Sequence) string {
 	ss := make([]string, 0)
-	for ; xs != nil && !xs.IsEmpty() ; xs = xs.Rest() {
+	for ; xs != nil && !xs.IsEmpty(); xs = xs.Rest() {
 		ss = append(ss, fmt.Sprintf("%v", xs.First()))
 	}
 	return "(" + strings.Join(ss, " ") + ")"
@@ -157,9 +155,9 @@ func SeqDrop(n int, s Sequence) Sequence {
 	return s
 }
 
-func Seq2Slice(s Sequence)[]interface{} {
+func Seq2Slice(s Sequence) []interface{} {
 	xs := make([]interface{}, 0)
-	for ; s != nil && !s.IsEmpty() ; s = s.Rest() {
+	for ; s != nil && !s.IsEmpty(); s = s.Rest() {
 		xs = append(xs, s.First())
 	}
 	return xs
@@ -173,8 +171,7 @@ func SeqAppend(xs, ys Sequence) Sequence {
 	}
 }
 
-
-func SeqFilter(pred (func(interface{}) bool), seq Sequence) Sequence {
+func SeqFilter(pred func(interface{}) bool, seq Sequence) Sequence {
 	if seq == nil || seq.IsEmpty() {
 		return nil
 	}
@@ -192,7 +189,7 @@ func SeqFilter(pred (func(interface{}) bool), seq Sequence) Sequence {
 func SeqEvens(seq Sequence) Sequence {
 	n := 0
 	return SeqFilter(func(x interface{}) (v bool) {
-		v = (n % 2 == 1)
+		v = (n%2 == 1)
 		n += 1
 		return
 	}, seq)
@@ -201,15 +198,14 @@ func SeqEvens(seq Sequence) Sequence {
 func SeqOdds(seq Sequence) Sequence {
 	n := 0
 	return SeqFilter(func(x interface{}) (v bool) {
-		v = (n % 2 == 0)
+		v = (n%2 == 0)
 		n += 1
 		return
 	}, seq)
 }
 
-
 func SeqZip2(xs, ys Sequence) Sequence {
-	tmp := make([]interface{},0) //FIXME
+	tmp := make([]interface{}, 0) //FIXME
 	for xs != nil && !xs.IsEmpty() && ys != nil && !ys.IsEmpty() {
 		v := make([]interface{}, 2)
 		v[0] = xs.First()
@@ -223,7 +219,7 @@ func SeqZip2(xs, ys Sequence) Sequence {
 
 func SeqEq(xs, ys Sequence) bool {
 	//Both Empty
-	if (xs == nil || xs.IsEmpty()) && (ys == nil || ys.IsEmpty()){
+	if (xs == nil || xs.IsEmpty()) && (ys == nil || ys.IsEmpty()) {
 		return true
 	}
 	// Both has something
@@ -237,34 +233,33 @@ func SeqEq(xs, ys Sequence) bool {
 
 type Range struct {
 	start int
-	stop int
-	step int
+	stop  int
+	step  int
 }
 
-func (r * Range) First() interface{} {
+func (r *Range) First() interface{} {
 	return r.start
 }
 
 func (r *Range) Rest() Sequence {
-	return &Range{start:r.start+r.step, stop:r.stop, step:r.step}
+	return &Range{start: r.start + r.step, stop: r.stop, step: r.step}
 }
 
 func (r *Range) Cons(item interface{}) Sequence {
 	return &Base{first: item, rest: r}
 }
 
-func (r * Range) IsEmpty() bool {
+func (r *Range) IsEmpty() bool {
 	return r.start >= r.stop
 }
 
 func SeqRange(start, stop, step int) Sequence {
-	return &Range{start:start, stop:stop, step:step}
+	return &Range{start: start, stop: stop, step: step}
 }
 
-func SeqReduce(init interface{},f func(interface{}, interface{}) interface{}, xs Sequence) interface{} {
-	for ; xs != nil && !xs.IsEmpty() ; xs = xs.Rest() {
+func SeqReduce(init interface{}, f func(interface{}, interface{}) interface{}, xs Sequence) interface{} {
+	for ; xs != nil && !xs.IsEmpty(); xs = xs.Rest() {
 		init = f(init, xs.First())
 	}
 	return init
 }
-

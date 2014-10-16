@@ -11,7 +11,7 @@ type Pair struct {
 }
 
 func Cons(car interface{}, cdr List) List {
-	return &Pair{car:car, cdr:cdr}
+	return &Pair{car: car, cdr: cdr}
 }
 
 func Car(v List) interface{} {
@@ -43,10 +43,9 @@ func (p *Pair) IsEmpty() bool {
 	return p == nil
 }
 
-
 /* As List */
 
-func (p *Pair) Car () interface{} {
+func (p *Pair) Car() interface{} {
 	return p.car
 }
 
@@ -68,7 +67,7 @@ func (p *Pair) String() string {
 	//assume that proper list
 	var xs Sequence
 	ss := make([]string, 0)
-	for xs = p ; xs != nil && !xs.IsEmpty() ; xs = xs.Rest() {
+	for xs = p; xs != nil && !xs.IsEmpty(); xs = xs.Rest() {
 		ss = append(ss, fmt.Sprint(xs.First()))
 	}
 	return "(" + strings.Join(ss, " ") + ")"
@@ -87,7 +86,7 @@ func isList(v interface{}) bool {
 	if nil == v {
 		return true
 	}
-	if xs, ok := v.(List) ; ok {
+	if xs, ok := v.(List); ok {
 		return isList(Cdr(xs))
 	}
 	return false
@@ -104,4 +103,3 @@ func Chop2(xs List) []struct{ header, body interface{} } {
 	}
 	return ys
 }
-

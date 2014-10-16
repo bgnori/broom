@@ -122,4 +122,3 @@ func TestBinaryAddComplex(t *testing.T) {
 		t.Errorf("Expected complex128 value 7.0i but got %v", v)
 	}
 }
-
