@@ -111,3 +111,14 @@ func Test_SeqAppend_1(t *testing.T) {
 	}
 }
 
+func Test_SetRange(t *testing.T) {
+	sum := 0
+	for r := SeqRange(0, 101, 1) ; r!=nil && !r.IsEmpty() ; r = r.Rest() {
+		v := r.First().(int)
+		sum += v
+	}
+	if sum != 5050 {
+		t.Errorf("Expected 5050, but got %v", sum)
+	}
+}
+

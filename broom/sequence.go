@@ -235,4 +235,29 @@ func SeqEq(xs, ys Sequence) bool {
 	return false
 }
 
+type Range struct {
+	start int
+	stop int
+	step int
+}
+
+func (r * Range) First() interface{} {
+	return r.start
+}
+
+func (r *Range) Rest() Sequence {
+	return &Range{start:r.start+r.step, stop:r.stop, step:r.step}
+}
+
+func (r *Range) Cons(item interface{}) Sequence {
+	return &Base{first: item, rest: r}
+}
+
+func (r * Range) IsEmpty() bool {
+	return r.start >= r.stop
+}
+
+func SeqRange(start, stop, step int) Sequence {
+	return &Range{start:start, stop:stop, step:step}
+}
 
