@@ -45,28 +45,28 @@ func uq(env Environment, x interface{}) Injector {
 }
 
 func setupBuiltins(env Environment) Environment {
-	env.Bind("true", true)
-	env.Bind("false", false)
-	env.Bind("not", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("true"), true)
+	env.Bind(sym("false"), false)
+	env.Bind(sym("not"), func(env Environment, cdr List) interface{} {
 		x := Eval(env, Car(cdr)).(bool)
 		return !x
 	})
-	env.Bind("eval", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("eval"), func(env Environment, cdr List) interface{} {
 		given_env := Car(cdr).(Environment)
 		v := Car(Cdr(cdr)).(interface{})
 		fmt.Println(given_env, v)
 		return Eval(given_env, v)
 	})
-	env.Bind("qq", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("qq"), func(env Environment, cdr List) interface{} {
 		// (qq x)
 		return qq(env, Car(cdr))
 	})
-	env.Bind("uq", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("uq"), func(env Environment, cdr List) interface{} {
 		// (uq x)
 		return uq(env, Car(cdr).(List))
 	})
 
-	env.Bind("splicing", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("splicing"), func(env Environment, cdr List) interface{} {
 		// (splicing xs)
 		return Injector(func(target Sequence) Sequence {
 			v := Eval(env, Car(cdr))
@@ -81,7 +81,7 @@ func setupBuiltins(env Environment) Environment {
 		})
 	})
 
-	env.Bind("cons", func(env Environment, body List) interface{} {
+	env.Bind(sym("cons"), func(env Environment, body List) interface{} {
 		car := Eval(env, Car(body))
 		cdr, ok := Eval(env, Car(Cdr(body))).(List)
 		if !ok {
@@ -89,21 +89,21 @@ func setupBuiltins(env Environment) Environment {
 		}
 		return Cons(car, cdr)
 	})
-	env.Bind("gensym", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("gensym"), func(env Environment, cdr List) interface{} {
 		return GenSym()
 	})
-	env.Bind("Slice2List", func(env Environment, args List) interface{} {
+	env.Bind(sym("Slice2List"), func(env Environment, args List) interface{} {
 		xs := Eval(env, Car(args)).([]interface{})
 		return Slice2List(xs...)
 	})
-	env.Bind("Seq2Slice", func(env Environment, args List) interface{} {
+	env.Bind(sym("Seq2Slice"), func(env Environment, args List) interface{} {
 		x := Eval(env, Car(args))
 		if xs, ok := x.(List); ok {
 			return Seq2Slice(xs)
 		}
 		panic("Non List Value")
 	})
-	env.Bind("list", func(env Environment, args List) interface{} {
+	env.Bind(sym("list"), func(env Environment, args List) interface{} {
 		var head, tail List
 		var xs Sequence
 		for xs = args.(Sequence); xs != nil && !xs.IsEmpty(); xs = xs.Rest() {
@@ -119,7 +119,7 @@ func setupBuiltins(env Environment) Environment {
 		}
 		return head
 	})
-	env.Bind("abs", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("abs"), func(env Environment, cdr List) interface{} {
 		v := reflect.ValueOf(Eval(env, Car(cdr)))
 		t := v.Type()
 		switch t.Kind() {
@@ -145,76 +145,76 @@ func setupBuiltins(env Environment) Environment {
 		return v.Interface()
 	})
 
-	env.Bind("reflect", MakeReflectPackage())
-	env.Bind("os", MakeOSPackage())
-	env.Bind("runtime", MakeRuntimePackage())
-	env.Bind("broom", MakeBroomPackage())
-	env.Bind(".", GolangInterop())
-	env.Bind("=", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("reflect"), MakeReflectPackage())
+	env.Bind(sym("os"), MakeOSPackage())
+	env.Bind(sym("runtime"), MakeRuntimePackage())
+	env.Bind(sym("broom"), MakeBroomPackage())
+	env.Bind(sym("."), GolangInterop())
+	env.Bind(sym("="), func(env Environment, cdr List) interface{} {
 		x := Eval(env, Car(cdr))
 		y := Eval(env, Car(Cdr(cdr)))
 		return x == y
 	})
-	env.Bind("eq?", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("eq?"), func(env Environment, cdr List) interface{} {
 		x := Eval(env, Car(cdr))
 		y := Eval(env, Car(Cdr(cdr)))
 		return x == y
 	})
-	env.Bind("equal?", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("equal?"), func(env Environment, cdr List) interface{} {
 		x := Eval(env, Car(cdr))
 		y := Eval(env, Car(Cdr(cdr)))
 		return reflect.DeepEqual(x, y)
 	})
-	env.Bind("mod", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("mod"), func(env Environment, cdr List) interface{} {
 		x := Eval(env, Car(cdr)).(int)
 		y := Eval(env, Car(Cdr(cdr))).(int)
 		return x % y
 	})
-	env.Bind("add", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("add"), func(env Environment, cdr List) interface{} {
 		x := Eval(env, Car(cdr))
 		y := Eval(env, Car(Cdr(cdr)))
 		return BinaryAdd(x, y)
 	})
-	env.Bind("sub", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("sub"), func(env Environment, cdr List) interface{} {
 		x := Eval(env, Car(cdr))
 		y := Eval(env, Car(Cdr(cdr)))
 		return BinarySub(x, y)
 	})
-	env.Bind("mul", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("mul"), func(env Environment, cdr List) interface{} {
 		x := Eval(env, Car(cdr))
 		y := Eval(env, Car(Cdr(cdr)))
 		return BinaryMul(x, y)
 	})
-	env.Bind("div", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("div"), func(env Environment, cdr List) interface{} {
 		x := Eval(env, Car(cdr))
 		y := Eval(env, Car(Cdr(cdr)))
 		return BinaryDiv(x, y)
 	})
-	env.Bind("+", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("+"), func(env Environment, cdr List) interface{} {
 		return SeqReduce(Car(cdr), func(x, y interface{}) interface{} {
 			return BinaryAdd(Eval(env, x), Eval(env, y))
 		}, Cdr(cdr))
 	})
-	env.Bind("*", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("*"), func(env Environment, cdr List) interface{} {
 		return SeqReduce(Car(cdr), func(x, y interface{}) interface{} {
 			return BinaryMul(Eval(env, x), Eval(env, y))
 		}, Cdr(cdr))
 	})
-	env.Bind("panic", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("panic"), func(env Environment, cdr List) interface{} {
 		panic(Eval(env, Car(cdr)))
 		return nil
 	})
-	env.Bind("-", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("-"), func(env Environment, cdr List) interface{} {
 		return SeqReduce(Car(cdr), func(x, y interface{}) interface{} {
 			return BinarySub(Eval(env, x), Eval(env, y))
 		}, Cdr(cdr))
 	})
-	env.Bind("/", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("/"), func(env Environment, cdr List) interface{} {
 		return SeqReduce(Car(cdr), func(x, y interface{}) interface{} {
 			return BinaryDiv(Eval(env, x), Eval(env, y))
 		}, Cdr(cdr))
 	})
-	env.Bind("sprintf", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("sprintf"), func(env Environment, cdr List) interface{} {
 		format := Eval(env, Car(cdr)).(string)
 		xs := Seq2Slice(Cdr(cdr))
 		ys := make([]interface{}, 0)
@@ -223,7 +223,7 @@ func setupBuiltins(env Environment) Environment {
 		}
 		return fmt.Sprintf(format, ys...)
 	})
-	env.Bind("println", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("println"), func(env Environment, cdr List) interface{} {
 		xs := Seq2Slice(cdr)
 		ys := make([]interface{}, 0)
 		for _, x := range xs {
@@ -232,66 +232,66 @@ func setupBuiltins(env Environment) Environment {
 		fmt.Println(ys...)
 		return nil
 	})
-	env.Bind("<", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("<"), func(env Environment, cdr List) interface{} {
 		first := Eval(env, Car(cdr))
 		second := Eval(env, (Car(Cdr(cdr))))
 		return BinaryLessThan(first, second)
 	})
-	env.Bind(">", func(env Environment, cdr List) interface{} {
+	env.Bind(sym(">"), func(env Environment, cdr List) interface{} {
 		first := Eval(env, Car(cdr))
 		second := Eval(env, (Car(Cdr(cdr))))
 		return BinaryGreaterThan(first, second)
 	})
-	env.Bind("null?", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("null?"), func(env Environment, cdr List) interface{} {
 		return nil == Eval(env, Car(cdr))
 	})
-	env.Bind("boolean?", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("boolean?"), func(env Environment, cdr List) interface{} {
 		_, ok := Eval(env, Car(cdr)).(bool)
 		return ok
 	})
-	env.Bind("rune?", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("rune?"), func(env Environment, cdr List) interface{} {
 		v := Eval(env, Car(cdr))
 		_, ok := v.(rune)
 		return ok
 	})
-	env.Bind("symbol?", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("symbol?"), func(env Environment, cdr List) interface{} {
 		v := Eval(env, Car(cdr))
 		_, ok := v.(Symbol)
 		return ok
 	})
-	env.Bind("number?", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("number?"), func(env Environment, cdr List) interface{} {
 		return isNumber(Eval(env, Car(cdr)))
 	})
-	env.Bind("pair?", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("pair?"), func(env Environment, cdr List) interface{} {
 		_, ok := Eval(env, Car(cdr)).(List)
 		return ok
 	})
-	env.Bind("procedure?", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("procedure?"), func(env Environment, cdr List) interface{} {
 		v := Eval(env, Car(cdr))
 		_, ok := v.(func(Environment, List) interface{})
 		return ok
 	})
 
-	env.Bind("string?", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("string?"), func(env Environment, cdr List) interface{} {
 		_, ok := Eval(env, Car(cdr)).(string)
 		return ok
 	})
 
-	env.Bind("array?", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("array?"), func(env Environment, cdr List) interface{} {
 		return isArray(Eval(env, Car(cdr)))
 	})
 
-	env.Bind("map?", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("map?"), func(env Environment, cdr List) interface{} {
 		return isMap(Eval(env, Car(cdr)))
 	})
 
-	env.Bind("go", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("go"), func(env Environment, cdr List) interface{} {
 		proc := Eval(env, Car(cdr)).(func(Environment, List) interface{})
 		go proc(env, Cdr(cdr))
 		return nil
 	})
 
-	env.Bind("defer", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("defer"), func(env Environment, cdr List) interface{} {
 		handler := Eval(env, Car(cdr)).(func(Environment, List) interface{})
 		target := Eval(env, Car(Cdr(cdr))).(func(Environment, List) interface{})
 		return func(dynamic Environment, arg List) interface{} {
@@ -303,14 +303,14 @@ func setupBuiltins(env Environment) Environment {
 			return Eval(dynamic, Cons(target, arg))
 		}
 	})
-	env.Bind("bound?", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("bound?"), func(env Environment, cdr List) interface{} {
 		if s, ok := Car(cdr).(Symbol); ok {
-			_, err := env.Resolve(s.GetValue())
+			_, err := env.Resolve(s)
 			return err == nil
 		}
 		return false
 	})
-	env.Bind("select", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("select"), func(env Environment, cdr List) interface{} {
 		cases := make([]reflect.SelectCase, 0)
 		headers := make([][]interface{}, 0)
 		bodies := make([]interface{}, 0)
@@ -326,7 +326,7 @@ func setupBuiltins(env Environment) Environment {
 				dst := (select_case.([]interface{}))[0]
 				src := (select_case.([]interface{}))[1]
 				if s, ok := dst.(Symbol); ok {
-					if v, err := env.Resolve(s.GetValue()); err == nil {
+					if v, err := env.Resolve(s); err == nil {
 						// must be chan. Sending
 						case_obj := reflect.SelectCase{
 							Dir:  reflect.SelectSend,
@@ -356,35 +356,35 @@ func setupBuiltins(env Environment) Environment {
 		b := bodies[chosen]
 		benv := NewEnvFrame(env)
 		if recvOK {
-			benv.Bind(h[0].(Symbol).GetValue(), recv)
+			benv.Bind(h[0].(Symbol), recv)
 		}
 		return Eval(benv, b)
 	})
-	env.Bind("make-chan-bool", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("make-chan-bool"), func(env Environment, cdr List) interface{} {
 		return make(chan bool)
 	})
-	env.Bind("make-chan-string", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("make-chan-string"), func(env Environment, cdr List) interface{} {
 		return make(chan string)
 	})
-	env.Bind("recv", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("recv"), func(env Environment, cdr List) interface{} {
 		ch := reflect.ValueOf(Eval(env, Car(cdr)))
 		if v, ok := ch.Recv(); ok {
 			return v
 		}
 		return nil
 	})
-	env.Bind("send", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("send"), func(env Environment, cdr List) interface{} {
 		ch := reflect.ValueOf(Eval(env, Car(cdr)))
 		to_send := reflect.ValueOf(Eval(env, Car(Cdr(cdr))))
 		ch.Send(to_send)
 		return nil
 	})
-	env.Bind("time/Sleep", func(env Environment, cdr List) interface{} {
+	env.Bind(sym("time/Sleep"), func(env Environment, cdr List) interface{} {
 		//d := Eval(env, Car(cdr)).(time.Duration)
 		time.Sleep(1 * time.Second)
 		return nil
 	})
-	env.Bind("time/Second", time.Second)
+	env.Bind(sym("time/Second"), time.Second)
 
 	return env
 }

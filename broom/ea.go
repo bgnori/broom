@@ -6,8 +6,8 @@ import (
 )
 
 type Environment interface {
-	Bind(name string, v interface{})
-	Resolve(name string) (interface{}, error)
+	Bind(symbol Symbol, v interface{})
+	Resolve(symbol Symbol) (interface{}, error)
 	SetOuter(outer Environment)
 	Outer() Environment
 	Dump()
@@ -33,7 +33,7 @@ func Eval(env Environment, expr interface{}) interface{} {
 	case *Recur:
 		return expr
 	case Symbol: // variables?
-		if v, err := env.Resolve(x.GetValue()); err != nil {
+		if v, err := env.Resolve(x); err != nil {
 			panic(err)
 		} else {
 			return v
@@ -65,7 +65,7 @@ func EvalExprs(env Environment, seq Sequence) interface{} {
 
 type enviroment struct {
 	rwm       sync.RWMutex
-	variables map[string]interface{}
+	variables map[Symbol]interface{}
 	outer     Environment
 }
 
@@ -87,10 +87,10 @@ func (env *enviroment) Unlock() {
 
 func NewEnvFrame(outer Environment) *enviroment {
 	e := new(enviroment)
-	e.variables = make(map[string]interface{})
+	e.variables = make(map[Symbol]interface{})
 	e.SetOuter(outer)
-	e.Bind("_env", e)
-	e.Bind("_outer", outer)
+	e.Bind(sym("_env"), e)
+	e.Bind(sym("_outer"), outer)
 	return e
 }
 
@@ -98,7 +98,7 @@ func NewGlobalRootFrame() *enviroment {
 	e := NewEnvFrame(nil)
 	setupSpecialForms(e)
 	setupBuiltins(e)
-	e.Bind("eval", func(env Environment, cdr List) interface{} {
+	e.Bind(sym("eval"), func(env Environment, cdr List) interface{} {
 		given := Eval(env, Car(cdr)).(Environment)
 		given.Dump()
 		return Eval(given, Car(Cdr(cdr)))
@@ -106,23 +106,23 @@ func NewGlobalRootFrame() *enviroment {
 	return e
 }
 
-func (env *enviroment) Bind(name string, v interface{}) {
+func (env *enviroment) Bind(symbol Symbol, v interface{}) {
 	env.Lock()
 	defer env.Unlock()
-	env.variables[name] = v
+	env.variables[symbol] = v
 }
 
-func (env *enviroment) Resolve(name string) (interface{}, error) {
+func (env *enviroment) Resolve(symbol Symbol) (interface{}, error) {
 	env.RLock()
 	defer env.RUnlock()
-	if v, ok := env.variables[name]; ok {
+	if v, ok := env.variables[symbol]; ok {
 		return v, nil
 	}
 	outer := env.Outer()
 	if outer != nil {
-		return outer.Resolve(name)
+		return outer.Resolve(symbol)
 	}
-	return nil, EvalError(fmt.Sprintf("Unbound variable %s", name))
+	return nil, EvalError(fmt.Sprintf("Unbound variable %s", symbol))
 }
 
 func (env *enviroment) SetOuter(outer Environment) {
@@ -185,17 +185,17 @@ func (eb *EnvBuilder) EvalAndBindAll(as []interface{}, to_bind, to_eval Environm
 		last := eb.Len() - 1
 		for i, s := range eb.params[:last] {
 			v := Eval(to_eval, as[i])
-			to_bind.Bind(s.GetValue(), v)
+			to_bind.Bind(s, v)
 		}
 		vs := make([]interface{}, 0)
 		for _, v := range as[last:] {
 			vs = append(vs, Eval(to_eval, v))
 		}
-		to_bind.Bind(eb.params[last].GetValue(), vs)
+		to_bind.Bind(eb.params[last], vs)
 	} else {
 		for i, s := range eb.params {
 			v := Eval(to_eval, as[i])
-			to_bind.Bind(s.GetValue(), v)
+			to_bind.Bind(s, v)
 		}
 	}
 	return to_bind
@@ -205,15 +205,15 @@ func (eb *EnvBuilder) BindAll(as []interface{}, env Environment) Environment {
 	if eb.variadic {
 		last := eb.Len() - 1
 		for i, s := range eb.params[:last] {
-			env.Bind(s.GetValue(), as[i])
+			env.Bind(s, as[i])
 		}
-		env.Bind(eb.params[last].GetValue(), as[last:])
+		env.Bind(eb.params[last], as[last:])
 	} else {
 		if len(as) < eb.Len() {
 			panic("not enough argument!")
 		}
 		for i, s := range eb.params {
-			env.Bind(s.GetValue(), as[i])
+			env.Bind(s, as[i])
 		}
 	}
 	return env

@@ -21,7 +21,7 @@ func TestEvalString(t *testing.T) {
 
 func TestEvalVariable(t *testing.T) {
 	e := NewGlobalRootFrame()
-	e.Bind("a", 42)
+	e.Bind(sym("a"), 42)
 	v := Eval(e, sym("a"))
 	if v != 42 {
 		t.Error("expected 42")

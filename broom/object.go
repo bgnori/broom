@@ -61,13 +61,13 @@ func NewRecur(outer Environment, xs []interface{}) *Recur {
 	r.eb = NewEnvBuilder(SeqEvens(seq))
 	e := NewEnvFrame(outer)
 	r.env = r.eb.EvalAndBindAll(Seq2Slice(SeqOdds(seq)), e, e)
-	r.Env().Bind("recur", r)
+	r.Env().Bind(sym("recur"), r)
 	return r
 }
 
 func (r *Recur) Update(xs []interface{}, env Environment) {
 	r.env = r.eb.EvalAndBindAll(xs, NewEnvFrame(r.Env().Outer()), env)
-	r.Env().Bind("recur", r)
+	r.Env().Bind(sym("recur"), r)
 }
 
 func (r *Recur) Env() Environment {
