@@ -87,7 +87,7 @@ func Test_Seq2Slice(t *testing.T) {
 	}
 }
 
-func Test_SeqAppend(t *testing.T) {
+func Test_SeqAppend_0(t *testing.T) {
 	xs := make([]interface{}, 5)
 	for i := 0 ; i< 5 ; i++ {
 		xs[i] = 'a'+i
@@ -99,6 +99,15 @@ func Test_SeqAppend(t *testing.T) {
 	zs := SeqAppend(MakeFromSlice(xs...), MakeFromSlice(ys...))
 	if Length(zs) != 10 {
 		t.Errorf("expected 10 items but there is %d", Length(zs))
+	}
+}
+
+func Test_SeqAppend_1(t *testing.T) {
+	xs := MakeFromSlice(sym("a"), sym("b"), sym("c"))
+	ys := MakeFromSlice(sym("d"), sym("e"), sym("f"))
+	got := SeqAppend(xs, ys)
+	if !SeqEq(got, MakeFromSlice(sym("a"), sym("b"), sym("c"), sym("d"), sym("e"), sym("f"))) {
+		t.Errorf("Append not working right, got %v", got)
 	}
 }
 

@@ -96,14 +96,6 @@ func Slice2List(xs ...interface{}) List {
 	return Cons(xs[0], Slice2List(xs[1:]...))
 }
 
-func Append(xs List, cdr List) List {
-	if xs == nil {
-		return cdr
-	} else {
-		return Cons(Car(xs), Append(Cdr(xs), cdr))
-	}
-}
-
 func isList(v interface{}) bool {
 	if nil == v {
 		return true

@@ -221,3 +221,18 @@ func SeqZip2(xs, ys Sequence) Sequence {
 	return MakeFromSlice(tmp...)
 }
 
+func SeqEq(xs, ys Sequence) bool {
+	//Both Empty
+	if (xs == nil || xs.IsEmpty()) && (ys == nil || ys.IsEmpty()){
+		return true
+	}
+	// Both has something
+	if xs != nil && !xs.IsEmpty() && ys != nil && !ys.IsEmpty() {
+		if xs.First() == ys.First() {
+			return SeqEq(xs.Rest(), ys.Rest())
+		}
+	}
+	return false
+}
+
+

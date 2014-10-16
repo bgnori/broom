@@ -112,12 +112,3 @@ func Test_String(t *testing.T) {
 	}
 }
 
-func Test_Append(t *testing.T) {
-	xs := Slice2List(sym("a"), sym("b"), sym("c"))
-	ys := Slice2List(sym("d"), sym("e"), sym("f"))
-	got := Append(xs, ys)
-	if !Eq(got, Slice2List(sym("a"), sym("b"), sym("c"), sym("d"), sym("e"), sym("f"))) {
-		t.Error("Append not working right")
-		println(got)
-	}
-}

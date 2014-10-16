@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type Injector func(target List) List
+type Injector func(target Sequence) Sequence
 
 func qq(env Environment, x interface{}) interface{} {
 	if p, ok := x.(List); ok {
@@ -15,14 +15,14 @@ func qq(env Environment, x interface{}) interface{} {
 				return uq(env, Car(Cdr(p)))
 			}
 		}
-		var xs List
+		var xs Sequence
 		xs = nil
 		for _, v := range List2Slice(p) {
 			q := qq(env, v)
 			if i, ok := q.(Injector); ok {
 				xs = i(xs)
 			} else {
-				xs = Append(xs, Cons(q, nil))
+				xs = SeqAppend(xs, Cons(q, nil))
 			}
 		}
 		return xs
@@ -32,13 +32,13 @@ func qq(env Environment, x interface{}) interface{} {
 }
 
 func uq(env Environment, x interface{}) Injector {
-	return func(target List) List {
+	return func(target Sequence) Sequence{
 		fmt.Println("uq:", x)
 		v := Eval(env, x)
 		if i, ok := v.(Injector); ok {
 			return i(target)
 		} else {
-			return Append(target, Cons(v, nil))
+			return SeqAppend(target, Cons(v, nil))
 		}
 	}
 }
@@ -67,13 +67,13 @@ func setupBuiltins(env Environment) Environment {
 
 	env.Bind("splicing", func(env Environment, cdr List) interface{} {
 		// (splicing xs)
-		return Injector(func(target List) List {
+		return Injector(func(target Sequence) Sequence{
 			v := Eval(env, Car(cdr))
 			switch xs := v.(type) {
 			case List:
-				return Append(target, xs)
+				return SeqAppend(target, xs)
 			case []interface{}:
-				return Append(target, Slice2List(xs...))
+				return SeqAppend(target, Slice2List(xs...))
 			default:
 				panic(fmt.Sprintf("expected sequence, but got %v", v))
 			}
