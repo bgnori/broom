@@ -261,3 +261,10 @@ func SeqRange(start, stop, step int) Sequence {
 	return &Range{start:start, stop:stop, step:step}
 }
 
+func SeqReduce(init interface{},f func(interface{}, interface{}) interface{}, xs Sequence) interface{} {
+	for ; xs != nil && !xs.IsEmpty() ; xs = xs.Rest() {
+		init = f(init, xs.First())
+	}
+	return init
+}
+

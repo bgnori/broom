@@ -15,9 +15,10 @@ func qq(env Environment, x interface{}) interface{} {
 				return uq(env, Car(Cdr(p)))
 			}
 		}
-		var xs Sequence
+		var xs, ys Sequence
 		xs = nil
-		for _, v := range List2Slice(p) {
+		for ys = p.(Sequence) ; ys !=nil && !ys.IsEmpty() ; ys = ys.Rest() {
+			v := ys.First()
 			q := qq(env, v)
 			if i, ok := q.(Injector); ok {
 				xs = i(xs)
@@ -95,17 +96,18 @@ func setupBuiltins(env Environment) Environment {
 		xs := Eval(env, Car(args)).([]interface{})
 		return Slice2List(xs...)
 	})
-	env.Bind("List2Slice", func(env Environment, args List) interface{} {
+	env.Bind("Seq2Slice", func(env Environment, args List) interface{} {
 		x := Eval(env, Car(args))
 		if xs, ok := x.(List) ; ok {
-			return List2Slice(xs)
+			return Seq2Slice(xs)
 		}
 		panic("Non List Value")
 	})
 	env.Bind("list", func(env Environment, args List) interface{} {
 		var head, tail List
-
-		for _, v := range List2Slice(args) {
+		var xs Sequence
+		for xs = args.(Sequence); xs != nil && !xs.IsEmpty() ; xs = xs.Rest() {
+			v := xs.First()
 			x := Eval(env, v)
 			if head == nil && tail == nil {
 				head = Cons(x, nil)
@@ -189,47 +191,32 @@ func setupBuiltins(env Environment) Environment {
 		return BinaryDiv(x, y)
 	})
 	env.Bind("+", func(env Environment, cdr List) interface{} {
-		xs := List2Slice(Cdr(cdr))
-		acc := Eval(env, Car(cdr)).(int)
-		for _, x := range xs {
-			acc += Eval(env, x).(int)
-		}
-		return acc
+		return SeqReduce(Car(cdr), func(x, y interface{}) interface {} {
+			return BinaryAdd(Eval(env, x), Eval(env, y))
+		}, Cdr(cdr))
 	})
 	env.Bind("*", func(env Environment, cdr List) interface{} {
-		xs := List2Slice(Cdr(cdr))
-		acc := Eval(env, Car(cdr)).(int)
-		for _, x := range xs {
-			acc *= Eval(env, x).(int)
-		}
-		return acc
+		return SeqReduce(Car(cdr), func(x, y interface{}) interface {} {
+			return BinaryMul(Eval(env, x), Eval(env, y))
+		}, Cdr(cdr))
 	})
 	env.Bind("panic", func(env Environment, cdr List) interface{} {
 		panic(Eval(env, Car(cdr)))
 		return nil
 	})
 	env.Bind("-", func(env Environment, cdr List) interface{} {
-		xs := List2Slice(Cdr(cdr))
-		acc, ok := Eval(env, Car(cdr)).(int)
-		if !ok {
-			panic("1st arg is not int")
-		}
-		for _, x := range xs {
-			acc -= Eval(env, x).(int)
-		}
-		return acc
+		return SeqReduce(Car(cdr), func(x, y interface{}) interface {} {
+			return BinarySub(Eval(env, x), Eval(env, y))
+		}, Cdr(cdr))
 	})
 	env.Bind("/", func(env Environment, cdr List) interface{} {
-		xs := List2Slice(Cdr(cdr))
-		acc := Eval(env, Car(cdr)).(int)
-		for _, x := range xs {
-			acc /= Eval(env, x).(int)
-		}
-		return acc
+		return SeqReduce(Car(cdr), func(x, y interface{}) interface {} {
+			return BinaryDiv(Eval(env, x), Eval(env, y))
+		}, Cdr(cdr))
 	})
 	env.Bind("sprintf", func(env Environment, cdr List) interface{} {
 		format := Eval(env, Car(cdr)).(string)
-		xs := List2Slice(Cdr(cdr))
+		xs := Seq2Slice(Cdr(cdr))
 		ys := make([]interface{}, 0)
 		for _, x := range xs {
 			ys = append(ys, Eval(env, x))
@@ -237,7 +224,7 @@ func setupBuiltins(env Environment) Environment {
 		return fmt.Sprintf(format, ys...)
 	})
 	env.Bind("println", func(env Environment, cdr List) interface{} {
-		xs := List2Slice(cdr)
+		xs := Seq2Slice(cdr)
 		ys := make([]interface{}, 0)
 		for _, x := range xs {
 			ys = append(ys, Eval(env, x))

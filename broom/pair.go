@@ -74,19 +74,6 @@ func (p *Pair) String() string {
 	return "(" + strings.Join(ss, " ") + ")"
 }
 
-func sub(v List, xs []interface{}) [](interface{}) {
-	if v == nil {
-		return xs
-	} else {
-		xs = append(xs, Car(v))
-		return sub(Cdr(v), xs)
-	}
-}
-
-func List2Slice(v List) []interface{} {
-	return sub(v, make([]interface{}, 0))
-}
-
 func Slice2List(xs ...interface{}) List {
 	//(list obj... )
 	// this function supports . cdr, for none proper list

@@ -48,7 +48,7 @@ func Eval(env Environment, expr interface{}) interface{} {
 	case List:
 		switch v := Eval(env, Car(x)).(type) {
 		case *Recur:
-			v.Update(List2Slice(Cdr(x)), env)
+			v.Update(Seq2Slice(Cdr(x)), env)
 			return v
 		case ([]interface{}):
 			idx := Car(Cdr(x)).(int)
