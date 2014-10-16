@@ -21,37 +21,12 @@ func (e EvalError) Error() string {
 
 func Eval(env Environment, expr interface{}) interface{} {
 	switch x := expr.(type) {
-	case bool:
-		return expr
-	case int:
-		return expr
-	case int8:
-		return expr
-	case int16:
-		return expr
-	case int32:
-		return expr
-	case int64:
-		return expr
-	case uint:
-		return expr
-	case uint8:
-		return expr
-	case uint16:
-		return expr
-	case uint32:
-		return expr
-	case uint64:
-		return expr
-	case float32:
-		return expr
-	case float64:
-		return expr
-	case complex64:
-		return expr
-	case complex128:
-		return expr
-	case string:
+	case bool,
+	int, int8, int16, int32, int64,
+	uint, uint8, uint16, uint32, uint64,
+	float32, float64,
+	complex64, complex128,
+	string:
 		return expr
 	case func(Environment, List) interface{}:
 		return expr
