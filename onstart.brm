@@ -24,5 +24,4 @@
 
 
 (println (. os Args))
-(load-from-file "cal.brm" _env false)
 (. broom Repl (. os Stdin) _env)
