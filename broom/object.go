@@ -18,8 +18,6 @@ type List interface {
 	Sequence
 	Car() interface{}
 	Cdr() List
-	SetCar(v interface{}) Undef
-	SetCdr(p List) Undef
 }
 
 //eof-object?

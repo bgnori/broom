@@ -102,20 +102,14 @@ func setupBuiltins(env Environment) Environment {
 		panic("Non List Value")
 	})
 	env.Bind(sym("list"), func(env Environment, args List) interface{} {
-		var head, tail List
 		var xs Sequence
+		ys := make([]interface{}, 0)
 		for xs = args.(Sequence); xs != nil && !xs.IsEmpty(); xs = xs.Rest() {
 			v := xs.First()
 			x := Eval(env, v)
-			if head == nil && tail == nil {
-				head = Cons(x, nil)
-				tail = head
-			} else {
-				tail.SetCdr(Cons(x, nil))
-				tail = tail.Cdr()
-			}
+			ys = append(ys, x)
 		}
-		return head
+		return Slice2List(ys...)
 	})
 	env.Bind(sym("abs"), func(env Environment, cdr List) interface{} {
 		v := reflect.ValueOf(Eval(env, Car(cdr)))

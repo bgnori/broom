@@ -363,10 +363,6 @@
 ; lset-diff+intersection!
 
 
+; no mutables
 ; set-car!
-(defn set-car! [p v]
-  (. p SetCar v))
-
 ; set-cdr!
-(defn set-cdr! [p v]
-  (. p SetCdr v))

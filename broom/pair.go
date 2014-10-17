@@ -53,16 +53,6 @@ func (p *Pair) Cdr() List {
 	return p.cdr
 }
 
-func (p *Pair) SetCar(v interface{}) Undef {
-	p.car = v
-	return nil
-}
-
-func (p *Pair) SetCdr(cdr List) Undef {
-	p.cdr = cdr
-	return nil
-}
-
 func (p *Pair) String() string {
 	//assume that proper list
 	var xs Sequence
