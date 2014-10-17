@@ -1,0 +1,52 @@
+package broom
+
+import (
+	"time"
+)
+
+func MakeTimePackage() *PackageProxy {
+	p := NewPackageProxy("time")
+	p.register("Sleep", time.Sleep)
+	p.register("Second", time.Second)
+	p.register("Now", time.Now)
+	p.register("After", time.After)
+	p.register("Tick", time.Tick)
+	p.register("Nanosecond", func() time.Duration { return time.Nanosecond })
+	p.register("Microsecond", func() time.Duration { return time.Microsecond })
+	p.register("Millisecond", func() time.Duration { return time.Millisecond })
+	p.register("Second", func() time.Duration { return time.Second })
+	p.register("Minute", func() time.Duration { return time.Minute})
+	p.register("Hour", func() time.Duration { return time.Hour})
+	p.register("ParseDuration", time.ParseDuration)
+	p.register("Since", time.Since)
+	p.register("Local", func()*time.Location { return time.Local })
+	p.register("UTC", func()*time.Location { return time.UTC})
+	p.register("FixedZone", time.FixedZone)
+	p.register("LoadLocation", time.LoadLocation)
+	p.register("January", func() time.Month {return time.January})
+	p.register("February", func() time.Month {return time.February})
+	p.register("March", func() time.Month {return time.March})
+	p.register("April", func() time.Month {return time.April})
+	p.register("May", func() time.Month {return time.May})
+	p.register("June", func() time.Month {return time.June})
+	p.register("July", func() time.Month {return time.July})
+	p.register("August", func() time.Month {return time.August})
+	p.register("September", func() time.Month {return time.September})
+	p.register("October", func() time.Month {return time.October})
+	p.register("November", func() time.Month {return time.November})
+	p.register("December", func() time.Month {return time.December})
+	p.register("NewTicker", time.NewTicker)
+	p.register("Date", time.Date)
+	p.register("Parse", time.Parse)
+	p.register("ParseInLocation", time.ParseInLocation)
+	p.register("Unix", time.Unix)
+	p.register("Sunday", func() time.Weekday {return time.Sunday})
+	p.register("Monday", func() time.Weekday {return time.Monday})
+	p.register("Tuesday", func() time.Weekday {return time.Tuesday})
+	p.register("Wednesday", func() time.Weekday {return time.Wednesday})
+	p.register("Thursday", func() time.Weekday {return time.Thursday})
+	p.register("Friday", func() time.Weekday {return time.Friday})
+	p.register("Saturday", func() time.Weekday {return time.Saturday})
+
+	return p
+}
