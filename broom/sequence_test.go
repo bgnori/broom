@@ -41,13 +41,13 @@ func Test_MakeFromSlice(t *testing.T) {
 	}
 }
 
-func Test_Take5(t *testing.T) {
+func Test_SeqTake5(t *testing.T) {
 	xs := make([]interface{}, 10)
 	for i := 0; i < 10; i++ {
 		xs[i] = 'a' + i
 	}
 	zs := make([]int, 0)
-	for ys := Take(5, MakeFromSlice(xs...)); !ys.IsEmpty(); ys = ys.Rest() {
+	for ys := SeqTake(5, MakeFromSlice(xs...)); !ys.IsEmpty(); ys = ys.Rest() {
 		zs = append(zs, ys.First().(int))
 	}
 	if len(zs) != 5 {
@@ -55,13 +55,13 @@ func Test_Take5(t *testing.T) {
 	}
 }
 
-func Test_Take20(t *testing.T) {
+func Test_SeqTake20(t *testing.T) {
 	xs := make([]interface{}, 10)
 	for i := 0; i < 10; i++ {
 		xs[i] = 'a' + i
 	}
 	zs := make([]int, 0)
-	for ys := Take(20, MakeFromSlice(xs...)); !ys.IsEmpty(); ys = ys.Rest() {
+	for ys := SeqTake(20, MakeFromSlice(xs...)); !ys.IsEmpty(); ys = ys.Rest() {
 		zs = append(zs, ys.First().(int))
 	}
 	if len(zs) != 10 {

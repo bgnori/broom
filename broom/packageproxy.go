@@ -33,5 +33,25 @@ func MakeBroomPackage() *PackageProxy {
 	p := NewPackageProxy("broom")
 	p.register("Load", Load)
 	p.register("Repl", Repl)
+
+	//From sequence.go
+	p.register("MakeFromSlice", MakeFromSlice)
+	p.register("MakeFromChan", MakeFromChan)
+	p.register("SeqString", SeqString)
+	p.register("SeqTake", SeqTake)
+	p.register("SeqDrop", SeqDrop)
+	p.register("Seq2Slice", Seq2Slice)
+	p.register("SeqAppend", SeqAppend)
+	p.register("MakeSeqByAppend", MakeSeqByAppend)
+	p.register("SeqFilter", SeqFilter)
+	p.register("SeqEvens", SeqEvens)
+	p.register("SeqOdds", SeqOdds)
+	p.register("SeqZip2", SeqZip2)
+	p.register("SeqEq", SeqEq)
+	p.register("SeqRange", SeqRange)
+	p.register("SeqReduce", SeqReduce)
+
+
+
 	return p
 }

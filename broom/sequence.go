@@ -131,11 +131,11 @@ func SeqString(xs Sequence) string {
 	return "(" + strings.Join(ss, " ") + ")"
 }
 
-func Take(n int, s Sequence) Sequence {
+func SeqTake(n int, s Sequence) Sequence {
 	if n == 0 || s == nil || s.IsEmpty() {
 		return nil
 	}
-	v := Take(n-1, s.Rest())
+	v := SeqTake(n-1, s.Rest())
 	if v == nil {
 		return Kons(s.First(), nil)
 	}
