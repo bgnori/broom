@@ -167,21 +167,20 @@ func SeqAppend(xs, ys Sequence) Sequence {
 	}
 }
 
-
 type SeqByAppend struct {
 	// doubtful.
-	first Sequence
+	first  Sequence
 	second Sequence
 }
 
 func (seq *SeqByAppend) First() interface{} {
-	 if seq.first != nil && !seq.first.IsEmpty() {
-		 return seq.first.First()
-	 }
-	 if seq.second != nil && !seq.second.IsEmpty() {
-		 return seq.second.First()
-	 }
-	 panic("tried to First() on Empty Sequence")
+	if seq.first != nil && !seq.first.IsEmpty() {
+		return seq.first.First()
+	}
+	if seq.second != nil && !seq.second.IsEmpty() {
+		return seq.second.First()
+	}
+	panic("tried to First() on Empty Sequence")
 }
 
 func (seq *SeqByAppend) Rest() Sequence {
@@ -196,18 +195,18 @@ func (seq *SeqByAppend) Cons(item interface{}) Sequence {
 }
 
 func (seq *SeqByAppend) IsEmpty() bool {
-	 if seq.first != nil && !seq.first.IsEmpty() {
-		 return false
-	 }
-	 if seq.second != nil && !seq.second.IsEmpty() {
-		 return false
-	 }
-	 return true
+	if seq.first != nil && !seq.first.IsEmpty() {
+		return false
+	}
+	if seq.second != nil && !seq.second.IsEmpty() {
+		return false
+	}
+	return true
 }
 
 func MakeSeqByAppend(xs, ys Sequence) Sequence {
-	if xs!= nil && !xs.IsEmpty() {
-		return &SeqByAppend{first:xs, second:ys}
+	if xs != nil && !xs.IsEmpty() {
+		return &SeqByAppend{first: xs, second: ys}
 	}
 	return ys
 }

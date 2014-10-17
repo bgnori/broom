@@ -110,4 +110,3 @@ func MakeOSPackage() *PackageProxy {
 
 	return p
 }
-

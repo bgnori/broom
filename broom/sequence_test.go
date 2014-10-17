@@ -124,4 +124,3 @@ func Test_SeqByAppend(t *testing.T) {
 		t.Errorf("Append not working right, got %v", SeqString(got))
 	}
 }
-

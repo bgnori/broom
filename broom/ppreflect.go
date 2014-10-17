@@ -1,8 +1,8 @@
 package broom
 
 import (
-	"reflect"
 	"fmt"
+	"reflect"
 )
 
 func MakeReflectPackage() *PackageProxy {
