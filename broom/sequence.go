@@ -167,6 +167,51 @@ func SeqAppend(xs, ys Sequence) Sequence {
 	}
 }
 
+
+type SeqByAppend struct {
+	// doubtful.
+	first Sequence
+	second Sequence
+}
+
+func (seq *SeqByAppend) First() interface{} {
+	 if seq.first != nil && !seq.first.IsEmpty() {
+		 return seq.first.First()
+	 }
+	 if seq.second != nil && !seq.second.IsEmpty() {
+		 return seq.second.First()
+	 }
+	 panic("tried to First() on Empty Sequence")
+}
+
+func (seq *SeqByAppend) Rest() Sequence {
+	if seq.first != nil && !seq.first.IsEmpty() {
+		return MakeSeqByAppend(seq.first.Rest(), seq.second)
+	}
+	return seq.second
+}
+
+func (seq *SeqByAppend) Cons(item interface{}) Sequence {
+	return &Base{first: item, rest: seq}
+}
+
+func (seq *SeqByAppend) IsEmpty() bool {
+	 if seq.first != nil && !seq.first.IsEmpty() {
+		 return false
+	 }
+	 if seq.second != nil && !seq.second.IsEmpty() {
+		 return false
+	 }
+	 return true
+}
+
+func MakeSeqByAppend(xs, ys Sequence) Sequence {
+	if xs!= nil && !xs.IsEmpty() {
+		return &SeqByAppend{first:xs, second:ys}
+	}
+	return ys
+}
+
 func SeqFilter(pred func(interface{}) bool, seq Sequence) Sequence {
 	if seq == nil || seq.IsEmpty() {
 		return nil
@@ -224,6 +269,7 @@ func SeqEq(xs, ys Sequence) bool {
 			return SeqEq(xs.Rest(), ys.Rest())
 		}
 	}
+	fmt.Println(xs, ys)
 	return false
 }
 

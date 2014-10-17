@@ -1,8 +1,6 @@
 package broom
 
 import (
-	"fmt"
-	"reflect"
 	"testing"
 )
 
@@ -50,7 +48,6 @@ func Test_Take5(t *testing.T) {
 	}
 	zs := make([]int, 0)
 	for ys := Take(5, MakeFromSlice(xs...)); !ys.IsEmpty(); ys = ys.Rest() {
-		fmt.Println(ys, reflect.TypeOf(ys))
 		zs = append(zs, ys.First().(int))
 	}
 	if len(zs) != 5 {
@@ -65,7 +62,6 @@ func Test_Take20(t *testing.T) {
 	}
 	zs := make([]int, 0)
 	for ys := Take(20, MakeFromSlice(xs...)); !ys.IsEmpty(); ys = ys.Rest() {
-		fmt.Println(ys, reflect.TypeOf(ys))
 		zs = append(zs, ys.First().(int))
 	}
 	if len(zs) != 10 {
@@ -119,3 +115,13 @@ func Test_SetRange(t *testing.T) {
 		t.Errorf("Expected 5050, but got %v", sum)
 	}
 }
+
+func Test_SeqByAppend(t *testing.T) {
+	xs := MakeFromSlice(sym("a"), sym("b"), sym("c"))
+	ys := MakeFromSlice(sym("d"), sym("e"), sym("f"))
+	got := MakeSeqByAppend(xs, ys)
+	if !SeqEq(got, MakeFromSlice(sym("a"), sym("b"), sym("c"), sym("d"), sym("e"), sym("f"))) {
+		t.Errorf("Append not working right, got %v", SeqString(got))
+	}
+}
+
