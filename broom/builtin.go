@@ -34,7 +34,6 @@ func qq(env Environment, x interface{}) interface{} {
 
 func uq(env Environment, x interface{}) Injector {
 	return func(target Sequence) Sequence {
-		fmt.Println("uq:", x)
 		v := Eval(env, x)
 		if i, ok := v.(Injector); ok {
 			return i(target)
@@ -54,7 +53,6 @@ func setupBuiltins(env Environment) Environment {
 	env.Bind(sym("eval"), func(env Environment, cdr List) interface{} {
 		given_env := Car(cdr).(Environment)
 		v := Car(Cdr(cdr)).(interface{})
-		fmt.Println(given_env, v)
 		return Eval(given_env, v)
 	})
 	env.Bind(sym("qq"), func(env Environment, cdr List) interface{} {
@@ -148,6 +146,7 @@ func setupBuiltins(env Environment) Environment {
 	env.Bind(sym("reflect"), MakeReflectPackage())
 	env.Bind(sym("os"), MakeOSPackage())
 	env.Bind(sym("runtime"), MakeRuntimePackage())
+	env.Bind(sym("time"), MakeTimePackage())
 	env.Bind(sym("broom"), MakeBroomPackage())
 	env.Bind(sym("."), GolangInterop())
 	env.Bind(sym("="), func(env Environment, cdr List) interface{} {
@@ -222,6 +221,15 @@ func setupBuiltins(env Environment) Environment {
 			ys = append(ys, Eval(env, x))
 		}
 		return fmt.Sprintf(format, ys...)
+	})
+	env.Bind(sym("print"), func(env Environment, cdr List) interface{} {
+		xs := Seq2Slice(cdr)
+		ys := make([]interface{}, 0)
+		for _, x := range xs {
+			ys = append(ys, Eval(env, x))
+		}
+		fmt.Print(ys...)
+		return nil
 	})
 	env.Bind(sym("println"), func(env Environment, cdr List) interface{} {
 		xs := Seq2Slice(cdr)

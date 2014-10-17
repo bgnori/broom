@@ -2,9 +2,7 @@ package broom
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
-	//	"fmt"
 )
 
 /*
@@ -46,7 +44,6 @@ type FromSlice struct {
 }
 
 func (fs *FromSlice) IsEmpty() bool {
-	fmt.Println("*FromSlice.IsEmpty", fs, reflect.TypeOf(fs))
 	return fs == nil || len(fs.wrapped) == 0
 }
 
@@ -120,7 +117,6 @@ func Kons(item interface{}, s Sequence) Sequence {
 }
 
 func Length(s Sequence) int {
-	fmt.Println("Length", s, reflect.TypeOf(s))
 	if s == nil || s.IsEmpty() {
 		return 0
 	}

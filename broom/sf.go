@@ -1,7 +1,6 @@
 package broom
 
 import (
-	"fmt"
 	//	"fmt"
 )
 
@@ -45,7 +44,6 @@ func setupSpecialForms(env Environment) Environment {
 
 	//idea from http://clojuredocs.org/clojure_core/clojure.core/fn
 	env.Bind(sym("fn"), func(lexical Environment, cdr List) interface{} {
-		fmt.Println("fn") //, cdr)
 		r := func(dynamic Environment, args List) interface{} {
 			car := Car(cdr).([]interface{})
 			eb := NewEnvBuilder(MakeFromSlice(car...))
@@ -58,9 +56,9 @@ func setupSpecialForms(env Environment) Environment {
 	env.Bind(sym("let"), func(env Environment, cdr List) interface{} {
 		//(let [x 1] ,body)
 		xs := Car(cdr).([]interface{})
-		fmt.Println("let", xs)
+		// fmt.Println("let", xs)
 		seq := MakeFromSlice(xs...)
-		fmt.Println("made seq from xs", SeqString(seq))
+		//fmt.Println("made seq from xs", SeqString(seq))
 
 		e := NewEnvFrame(env)
 		eb := NewEnvBuilder(SeqEvens(seq))

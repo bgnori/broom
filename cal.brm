@@ -1,0 +1,28 @@
+(def now (. time Now))
+(def a-day (* 24 (. time Hour)))
+(def delta (* (- 1 (. now Day)) a-day))
+
+(def first-day (. now Add delta))
+(def m (. now Month))
+
+(println (. now Year) m)
+
+(defn enumdays[]
+    (begin 
+    ; shift
+    (loop [n (. time Sunday)]
+        (if (< n (. first-day Weekday))
+            (begin
+                (print "   ")
+                (recur (+ n (. time Monday)))) ; UGH!!!!
+            '()))
+    (loop [t first-day]
+        (if (= (. t Month) (. now Month))
+            (begin
+                (print (sprintf "%3d" (. t Day)))
+                (if (= (. t Weekday) (. time Saturday))
+                    (println "")
+                    (print ""))
+                (recur (. t Add a-day)))
+            (println "")))))
+(enumdays)
