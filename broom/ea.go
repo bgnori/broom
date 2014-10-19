@@ -28,7 +28,7 @@ func Eval(env Environment, expr interface{}) interface{} {
 		complex64, complex128,
 		string:
 		return expr
-	case func(Environment, List) interface{}:
+	case func(Environment, Sequence) interface{}:
 		return expr
 	case *Recur:
 		return expr
@@ -38,16 +38,16 @@ func Eval(env Environment, expr interface{}) interface{} {
 		} else {
 			return v
 		}
-	case List:
-		switch v := Eval(env, Car(x)).(type) {
+	case Sequence:
+		switch v := Eval(env, x.First()).(type) {
 		case *Recur:
-			v.Update(Seq2Slice(Cdr(x)), env)
+			v.Update(Seq2Slice(x.Rest()), env)
 			return v
 		case ([]interface{}):
-			idx := Car(Cdr(x)).(int)
+			idx := Second(x).(int)
 			return v[idx]
-		case func(Environment, List) interface{}:
-			return v(env, Cdr(x))
+		case func(Environment, Sequence) interface{}:
+			return v(env, x.Rest())
 		default:
 			panic("application error, expected SExprOperator, but got " + fmt.Sprintf("%v", v))
 		}
@@ -98,10 +98,10 @@ func NewGlobalRootFrame() *enviroment {
 	e := NewEnvFrame(nil)
 	setupSpecialForms(e)
 	setupBuiltins(e)
-	e.Bind(sym("eval"), func(env Environment, cdr List) interface{} {
-		given := Eval(env, Car(cdr)).(Environment)
+	e.Bind(sym("eval"), func(env Environment, cdr Sequence) interface{} {
+		given := Eval(env, cdr.First()).(Environment)
 		given.Dump()
-		return Eval(given, Car(Cdr(cdr)))
+		return Eval(given, Second(cdr))
 	})
 	return e
 }
@@ -216,6 +216,6 @@ func (eb *EnvBuilder) BindAll(as []interface{}, env Environment) Environment {
 	return env
 }
 
-func Body(p List) List {
-	return Cdr(p).(List)
+func Body(p Sequence) Sequence {
+	return p.Rest().(Sequence)
 }

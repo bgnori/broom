@@ -11,21 +11,21 @@ func Test_ConsCarCdr(t *testing.T) {
 	if v == nil {
 		t.Error("(null? v) must be null? false.")
 	}
-	p, ok := v.(List)
+	p, ok := v.(Sequence)
 	if !ok {
 		t.Error("(pair? v) must be true.")
 	}
-	if !isNumber(Car(p)) {
+	if !isNumber(p.First()) {
 		t.Error("(car v) must be number.")
 	}
-	if u, ok := Car(p).(int); ok && u == 1 {
+	if u, ok := p.First().(int); ok && u == 1 {
 	} else {
 		t.Error("(car v) must be 1.")
 	}
-	if !isNumber(Car(Cdr(p))) {
+	if !isNumber(Second(p)) {
 		t.Error("(cdr v) must be number.")
 	}
-	if u, ok := Car(Cdr(p)).(int); ok && u == 2 {
+	if u, ok := Second(p).(int); ok && u == 2 {
 	} else {
 		t.Error("(cdr v) must be 2.")
 	}
@@ -33,7 +33,7 @@ func Test_ConsCarCdr(t *testing.T) {
 
 func Test_ConsNilNil(t *testing.T) {
 	p := Cons(nil, nil)
-	if _, ok := p.(List); !ok {
+	if _, ok := p.(Sequence); !ok {
 		t.Error("(pair? xs) must be true.")
 	}
 }
@@ -43,7 +43,7 @@ func Test_ListNil(t *testing.T) {
 	if nil != xs {
 		t.Error("xs must be null, i.e. '()")
 	}
-	if _, ok := xs.(List); ok {
+	if _, ok := xs.(Sequence); ok {
 		t.Error("(pair? '()) must be false")
 	}
 }

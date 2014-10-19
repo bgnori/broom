@@ -19,8 +19,8 @@ func Test_IsEmpty(t *testing.T) {
 }
 */
 
-func Test_Kons(t *testing.T) {
-	s := Kons(1, nil)
+func Test_Cons(t *testing.T) {
+	s := Cons(1, nil)
 	if Length(s) != 1 {
 		t.Errorf("expected 1 but got %d", Length(s))
 	}
@@ -47,7 +47,8 @@ func Test_SeqTake5(t *testing.T) {
 		xs[i] = 'a' + i
 	}
 	zs := make([]int, 0)
-	for ys := SeqTake(5, MakeFromSlice(xs...)); !ys.IsEmpty(); ys = ys.Rest() {
+	var ys Sequence
+	for ys = SeqTake(5, MakeFromSlice(xs...)); ys!=nil && !ys.IsEmpty(); ys = ys.Rest() {
 		zs = append(zs, ys.First().(int))
 	}
 	if len(zs) != 5 {
@@ -61,7 +62,8 @@ func Test_SeqTake20(t *testing.T) {
 		xs[i] = 'a' + i
 	}
 	zs := make([]int, 0)
-	for ys := SeqTake(20, MakeFromSlice(xs...)); !ys.IsEmpty(); ys = ys.Rest() {
+	var ys Sequence
+	for ys = SeqTake(20, MakeFromSlice(xs...)); ys!=nil && !ys.IsEmpty(); ys = ys.Rest() {
 		zs = append(zs, ys.First().(int))
 	}
 	if len(zs) != 10 {

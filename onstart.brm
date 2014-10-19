@@ -1,8 +1,8 @@
 (def car 
-    (fn [x] (. x Car)))
+    (fn [x] (. x First)))
 
 (def cdr 
-    (fn [x] (. x Cdr)))
+    (fn [x] (. x Rest)))
 
 (def load-from-file 
     (fn [fname env verbose]

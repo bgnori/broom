@@ -14,12 +14,6 @@ type Symbol interface {
 	GetValue() string
 }
 
-type List interface {
-	Sequence
-	Car() interface{}
-	Cdr() List
-}
-
 //eof-object?
 
 func isNumber(v interface{}) bool {

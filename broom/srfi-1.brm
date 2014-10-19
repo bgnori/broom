@@ -28,8 +28,8 @@
 ; list=  Eq in object.go
 
 ; selectors
-(defn car [x] (. x Car))
-(defn cdr [x] (. x Cdr))
+(defn car [x] (. x First))
+(defn cdr [x] (. x Rest))
 
 (defn caar [x] (car (car x)))
 (defn cadr [x] (car (cdr x)))

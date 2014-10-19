@@ -7,28 +7,24 @@ import (
 
 type Pair struct {
 	car interface{}
-	cdr List
+	cdr Sequence
 }
 
-func Cons(car interface{}, cdr List) List {
+func Cons(car interface{}, cdr Sequence) Sequence {
 	return &Pair{car: car, cdr: cdr}
 }
 
-func Car(v List) interface{} {
-	return v.Car()
-}
-
-func Cdr(v List) List {
-	return v.Cdr()
+func Second(v Sequence) interface{} {
+	return v.Rest().First()
 }
 
 /* As Sequence */
 func (p *Pair) First() interface{} {
-	return p.Car()
+	return p.car
 }
 
 func (p *Pair) Rest() Sequence {
-	v := p.Cdr()
+	v := p.cdr
 	if v != nil {
 		return v.(Sequence)
 	}
@@ -43,16 +39,6 @@ func (p *Pair) IsEmpty() bool {
 	return p == nil
 }
 
-/* As List */
-
-func (p *Pair) Car() interface{} {
-	return p.car
-}
-
-func (p *Pair) Cdr() List {
-	return p.cdr
-}
-
 func (p *Pair) String() string {
 	//assume that proper list
 	var xs Sequence
@@ -63,7 +49,7 @@ func (p *Pair) String() string {
 	return "(" + strings.Join(ss, " ") + ")"
 }
 
-func Slice2List(xs ...interface{}) List {
+func Slice2List(xs ...interface{}) Sequence {
 	//(list obj... )
 	// this function supports . cdr, for none proper list
 	if len(xs) == 0 {
@@ -76,19 +62,19 @@ func isList(v interface{}) bool {
 	if nil == v {
 		return true
 	}
-	if xs, ok := v.(List); ok {
-		return isList(Cdr(xs))
+	if xs, ok := v.(Sequence); ok {
+		return isList(xs.Rest())
 	}
 	return false
 }
 
-func Chop2(xs List) []struct{ header, body interface{} } {
+func Chop2(xs Sequence) []struct{ header, body interface{} } {
 
 	ys := make([]struct{ header, body interface{} }, 0)
 	for xs != nil {
-		header := Car(xs)
-		body := Car(Cdr(xs))
-		xs = Cdr(Cdr(xs))
+		header := xs.First()
+		body := Second(xs)
+		xs = xs.Rest().Rest()
 		ys = append(ys, struct{ header, body interface{} }{header: header, body: body})
 	}
 	return ys

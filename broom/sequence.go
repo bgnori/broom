@@ -18,27 +18,6 @@ type Sequence interface {
 	IsEmpty() bool
 }
 
-type Base struct {
-	first interface{}
-	rest  Sequence
-}
-
-func (bs *Base) IsEmpty() bool {
-	return bs == nil
-}
-
-func (bs *Base) First() interface{} {
-	return bs.first
-}
-
-func (bs *Base) Rest() Sequence {
-	return bs.rest
-}
-
-func (bs *Base) Cons(item interface{}) Sequence {
-	return &Base{first: item, rest: bs}
-}
-
 type FromSlice struct {
 	wrapped []interface{}
 }
@@ -59,7 +38,7 @@ func (fs *FromSlice) Rest() Sequence {
 }
 
 func (fs *FromSlice) Cons(item interface{}) Sequence {
-	return &Base{first: item, rest: fs}
+	return Cons(item, fs)
 }
 
 func MakeFromSlice(xs ...interface{}) Sequence {
@@ -78,9 +57,9 @@ func (fc *FromChan) IsEmpty() bool {
 func (fc *FromChan) realize() {
 	v, more := <-fc.wrapped
 	if more {
-		fc.realized = &Base{first: v, rest: MakeFromChan(fc.wrapped)}
+		fc.realized = Cons(v, MakeFromChan(fc.wrapped))
 	} else {
-		fc.realized = &Base{first: v, rest: nil}
+		fc.realized = Cons(v, nil)
 	}
 }
 
@@ -101,19 +80,11 @@ func (fc *FromChan) Rest() Sequence {
 }
 
 func (fc *FromChan) Cons(item interface{}) Sequence {
-	return &Base{first: item, rest: fc}
+	return Cons(item, fc)
 }
 
 func MakeFromChan(ch chan interface{}) Sequence {
 	return &FromChan{wrapped: ch}
-}
-
-func Kons(item interface{}, s Sequence) Sequence {
-	if s == nil {
-		var b *Base
-		return b.Cons(item)
-	}
-	return s.Cons(item)
 }
 
 func Length(s Sequence) int {
@@ -136,8 +107,8 @@ func SeqTake(n int, s Sequence) Sequence {
 		return nil
 	}
 	v := SeqTake(n-1, s.Rest())
-	if v == nil {
-		return Kons(s.First(), nil)
+	if v == nil || v.IsEmpty() {
+		return Cons(s.First(), nil)
 	}
 	return v.Cons(s.First())
 }
@@ -160,10 +131,11 @@ func Seq2Slice(s Sequence) []interface{} {
 }
 
 func SeqAppend(xs, ys Sequence) Sequence {
-	if xs == nil {
+	if xs == nil || xs.IsEmpty() {
 		return ys
 	} else {
-		return SeqAppend(xs.Rest(), ys).Cons(xs.First())
+		zs := SeqAppend(xs.Rest(), ys)
+		return zs.Cons(xs.First())
 	}
 }
 
@@ -191,7 +163,7 @@ func (seq *SeqByAppend) Rest() Sequence {
 }
 
 func (seq *SeqByAppend) Cons(item interface{}) Sequence {
-	return &Base{first: item, rest: seq}
+	return Cons(item, seq)
 }
 
 func (seq *SeqByAppend) IsEmpty() bool {
@@ -218,8 +190,8 @@ func SeqFilter(pred func(interface{}) bool, seq Sequence) Sequence {
 	result := SeqFilter(pred, seq.Rest())
 	v := seq.First()
 	if pred(v) {
-		if result == nil {
-			return Kons(v, nil)
+		if result == nil || result.IsEmpty() {
+			return Cons(v, nil)
 		}
 		return result.Cons(v)
 	}
@@ -287,7 +259,7 @@ func (r *Range) Rest() Sequence {
 }
 
 func (r *Range) Cons(item interface{}) Sequence {
-	return &Base{first: item, rest: r}
+	return Cons(item, r)
 }
 
 func (r *Range) IsEmpty() bool {

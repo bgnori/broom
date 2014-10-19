@@ -8,7 +8,7 @@ import (
 
 func TestMethodInvocationA(t *testing.T) {
 	e := NewGlobalRootFrame()
-	expr := Slice2List(GolangInterop(), Slice2List(sym("quote"), Slice2List(1, 2)), sym("Car"))
+	expr := Slice2List(GolangInterop(), Slice2List(sym("quote"), Slice2List(1, 2)), sym("First"))
 	r := Eval(e, expr)
 	if v, ok := r.(int); !ok || v != 1 {
 		t.Error("expected 1")
