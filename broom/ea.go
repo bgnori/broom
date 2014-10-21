@@ -2,6 +2,7 @@ package broom
 
 import (
 	"fmt"
+	"reflect"
 	"sync"
 )
 
@@ -28,8 +29,6 @@ func Eval(env Environment, expr interface{}) interface{} {
 		complex64, complex128,
 		string:
 		return expr
-	case func(Environment, Sequence) interface{}:
-		return expr
 	case *Recur:
 		return expr
 	case Symbol: // variables?
@@ -43,13 +42,35 @@ func Eval(env Environment, expr interface{}) interface{} {
 		case *Recur:
 			v.Update(Seq2Slice(x.Rest()), env)
 			return v
-		case ([]interface{}):
-			idx := Second(x).(int)
-			return v[idx]
-		case func(Environment, Sequence) interface{}:
-			return v(env, x.Rest())
 		default:
-			panic("application error, expected SExprOperator, but got " + fmt.Sprintf("%v", v))
+			rt := reflect.TypeOf(v)
+			rv := reflect.ValueOf(v)
+			switch rt.Kind() {
+			case reflect.Slice, reflect.Array, reflect.String:
+				// do indexing (xxx 1)
+				idx := Second(x).(int)
+				return rv.Index(idx).Interface()
+			case reflect.Map:
+				// do access by key, i.e. (xxx "foobar")
+				return rv.MapIndex(reflect.ValueOf(Second(x))).Interface()
+			case reflect.Func:
+				//case func(Environment, Sequence) interface{}:
+				return v.(func(Environment, Sequence) interface{})(env, x.Rest())
+			default:
+				panic("application error, expected SExprOperator, but got " + fmt.Sprintf("%v", v))
+			}
+		}
+	default:
+		rt := reflect.TypeOf(x)
+		switch rt.Kind() {
+		case reflect.Func:
+			return expr
+		case reflect.Slice, reflect.Array, reflect.String:
+			return expr
+		case reflect.Map:
+			return expr
+		default:
+			return nil
 		}
 	}
 	return nil
