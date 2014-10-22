@@ -68,16 +68,16 @@ func (r *Recur) Env() Environment {
 
 // vector?
 func isArray(v interface{}) bool {
-	_, ok := v.([]interface{})
-	return ok
+	k := reflect.TypeOf(v).Kind()
+	return k == reflect.Slice || k == reflect.Array
 }
 
 // bytevector?
 // define-record-type
 
 func isMap(v interface{}) bool {
-	_, ok := v.(map[interface{}]interface{})
-	return ok
+	k := reflect.TypeOf(v).Kind()
+	return k == reflect.Map
 }
 
 func DumpMap(x interface{}) {

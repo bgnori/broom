@@ -80,14 +80,6 @@ func setupBuiltins(env Environment) Environment {
 	})
 
 	env.Bind(sym("cons"), Cons)
-	env.Bind(sym("oldcons"), func(env Environment, body Sequence) interface{} {
-		car := Eval(env, body.First())
-		cdr, ok := Eval(env, Second(body)).(Sequence)
-		if !ok {
-			cdr = nil
-		}
-		return Cons(car, cdr)
-	})
 	env.Bind(sym("gensym"), func(env Environment, cdr Sequence) interface{} {
 		return GenSym()
 	})
@@ -144,9 +136,7 @@ func setupBuiltins(env Environment) Environment {
 	env.Bind(sym("time"), MakeTimePackage())
 	env.Bind(sym("broom"), MakeBroomPackage())
 	env.Bind(sym("."), GolangInterop())
-	env.Bind(sym("="), func(env Environment, cdr Sequence) interface{} {
-		x := Eval(env, cdr.First())
-		y := Eval(env, Second(cdr))
+	env.Bind(sym("="), func(x, y interface{}) bool {
 		return x == y
 	})
 	env.Bind(sym("eq?"), func(env Environment, cdr Sequence) interface{} {
@@ -165,26 +155,9 @@ func setupBuiltins(env Environment) Environment {
 		return x % y
 	})
 	env.Bind(sym("add"), BinaryAdd)
-	env.Bind(sym("oldadd"), func(env Environment, cdr Sequence) interface{} {
-		x := Eval(env, cdr.First())
-		y := Eval(env, Second(cdr))
-		return BinaryAdd(x, y)
-	})
-	env.Bind(sym("sub"), func(env Environment, cdr Sequence) interface{} {
-		x := Eval(env, cdr.First())
-		y := Eval(env, Second(cdr))
-		return BinarySub(x, y)
-	})
-	env.Bind(sym("mul"), func(env Environment, cdr Sequence) interface{} {
-		x := Eval(env, cdr.First())
-		y := Eval(env, Second(cdr))
-		return BinaryMul(x, y)
-	})
-	env.Bind(sym("div"), func(env Environment, cdr Sequence) interface{} {
-		x := Eval(env, cdr.First())
-		y := Eval(env, Second(cdr))
-		return BinaryDiv(x, y)
-	})
+	env.Bind(sym("sub"), BinarySub)
+	env.Bind(sym("mul"), BinaryMul)
+	env.Bind(sym("div"), BinaryDiv)
 	env.Bind(sym("+"), func(env Environment, cdr Sequence) interface{} {
 		return SeqReduce(cdr.First(), func(x, y interface{}) interface{} {
 			return BinaryAdd(Eval(env, x), Eval(env, y))
@@ -209,33 +182,9 @@ func setupBuiltins(env Environment) Environment {
 			return BinaryDiv(Eval(env, x), Eval(env, y))
 		}, cdr.Rest())
 	})
-	env.Bind(sym("sprintf"), func(env Environment, cdr Sequence) interface{} {
-		format := Eval(env, cdr.First()).(string)
-		xs := Seq2Slice(cdr.Rest())
-		ys := make([]interface{}, 0)
-		for _, x := range xs {
-			ys = append(ys, Eval(env, x))
-		}
-		return fmt.Sprintf(format, ys...)
-	})
-	env.Bind(sym("print"), func(env Environment, cdr Sequence) interface{} {
-		xs := Seq2Slice(cdr)
-		ys := make([]interface{}, 0)
-		for _, x := range xs {
-			ys = append(ys, Eval(env, x))
-		}
-		fmt.Print(ys...)
-		return nil
-	})
-	env.Bind(sym("println"), func(env Environment, cdr Sequence) interface{} {
-		xs := Seq2Slice(cdr)
-		ys := make([]interface{}, 0)
-		for _, x := range xs {
-			ys = append(ys, Eval(env, x))
-		}
-		fmt.Println(ys...)
-		return nil
-	})
+	env.Bind(sym("sprintf"), fmt.Sprintf)
+	env.Bind(sym("print"), fmt.Print)
+	env.Bind(sym("println"), fmt.Println)
 	env.Bind(sym("<"), func(env Environment, cdr Sequence) interface{} {
 		first := Eval(env, cdr.First())
 		second := Eval(env, (Second(cdr)))
@@ -247,7 +196,6 @@ func setupBuiltins(env Environment) Environment {
 		return BinaryGreaterThan(first, second)
 	})
 	env.Bind(sym("null?"), func(env Environment, cdr Sequence) interface{} {
-		fmt.Println("null?", cdr.First())
 		v := Eval(env, cdr.First())
 		if v == nil {
 			return true
