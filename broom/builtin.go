@@ -79,7 +79,8 @@ func setupBuiltins(env Environment) Environment {
 		})
 	})
 
-	env.Bind(sym("cons"), func(env Environment, body Sequence) interface{} {
+	env.Bind(sym("cons"), Cons)
+	env.Bind(sym("oldcons"), func(env Environment, body Sequence) interface{} {
 		car := Eval(env, body.First())
 		cdr, ok := Eval(env, Second(body)).(Sequence)
 		if !ok {
@@ -163,7 +164,8 @@ func setupBuiltins(env Environment) Environment {
 		y := Eval(env, Second(cdr)).(int)
 		return x % y
 	})
-	env.Bind(sym("add"), func(env Environment, cdr Sequence) interface{} {
+	env.Bind(sym("add"), BinaryAdd)
+	env.Bind(sym("oldadd"), func(env Environment, cdr Sequence) interface{} {
 		x := Eval(env, cdr.First())
 		y := Eval(env, Second(cdr))
 		return BinaryAdd(x, y)
@@ -245,7 +247,19 @@ func setupBuiltins(env Environment) Environment {
 		return BinaryGreaterThan(first, second)
 	})
 	env.Bind(sym("null?"), func(env Environment, cdr Sequence) interface{} {
-		return nil == Eval(env, cdr.First())
+		fmt.Println("null?", cdr.First())
+		v := Eval(env, cdr.First())
+		if v == nil {
+			return true
+		}
+		rv := reflect.ValueOf(v)
+		if rv.IsNil() {
+			return true
+		}
+		if xs, ok := v.(Sequence) ; ok {
+			return xs.IsEmpty()
+		}
+		return false
 	})
 	env.Bind(sym("boolean?"), func(env Environment, cdr Sequence) interface{} {
 		_, ok := Eval(env, cdr.First()).(bool)
@@ -424,9 +438,9 @@ func GolangInterop() func(Environment, Sequence) interface{} {
 			f = vogus.MethodByName(name)
 			//fmt.Println(name, vogus.Interface(), f.Kind())
 		}
-		xs = helper(env, cdr.Rest().Rest(), nil)
 
 		if f.IsValid() {
+			xs = BuildArgs(env, f, cdr.Rest().Rest())
 			vs := f.Call(xs)
 			i := len(vs)
 			if i == 1 {
@@ -445,18 +459,26 @@ func GolangInterop() func(Environment, Sequence) interface{} {
 	}
 }
 
-func helper(env Environment, args Sequence, result []reflect.Value) []reflect.Value {
-	if len(result) == 0 {
-		result = make([]reflect.Value, 0)
+func BuildAnArg(env Environment, rtp reflect.Type, arg interface{}) reflect.Value {
+	v := reflect.ValueOf(Eval(env, arg))
+	if !v.IsValid() {
+		v = reflect.Zero(rtp)
 	}
-	if args == nil {
+	return v
+}
+
+func BuildArgs(env Environment, f reflect.Value, args Sequence) []reflect.Value {
+	result := make([]reflect.Value, 0)
+	if args == nil || args.IsEmpty() {
 		return result
 	}
-	car := args.First()
-	cdr := args.Rest()
+	ft := f.Type()
+	in := ft.NumIn()
 
-	v := reflect.ValueOf(Eval(env, car))
-	result = append(result, v)
-
-	return helper(env, cdr, result)
+	as := Seq2Slice(args)
+	for i := 0 ; i < in ; i++ {
+		v := BuildAnArg(env, ft.In(i), as[i])
+		result = append(result, v)
+	}
+	return result
 }

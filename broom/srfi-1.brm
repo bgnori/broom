@@ -139,13 +139,13 @@
   (loop [src xs1 result '()]
     (if (null? src)
       (reverse result)
-      (recur (cdr src) (cons (cons (car src) '()) result)))))
+      (recur (cdr src) (list (car src)) result))))
 
 (defn zip2 [xs1 xs2]
   (loop [s1 xs1 s2 xs2 result '()]
     (if (or (null? s1) (null? s2))
       (reverse result)
-      (recur (cdr s1) (cdr s2) (cons (cons (car s1) (cons (car s2) '())) result)))))
+      (recur (cdr s1) (cdr s2) (list (car s1) (car s2)) result))))
 
 (defn unzip1 [xxs]
   (loop [rest xxs result '()]

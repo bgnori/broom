@@ -94,8 +94,9 @@
 (list-index1 even? '(3 1 4 1 5 9)) ; 2
 
 
-(define xs '(1 2 3))
-(set-car! xs 0)
-xs ; (0 2 3)
-(set-cdr! xs '(4 5))
-xs ; (0 4 5)
+; no support for set!
+;(define xs '(1 2 3))
+;(set-car! xs 0)
+;xs ; (0 2 3)
+;(set-cdr! xs '(4 5))
+;xs ; (0 4 5)

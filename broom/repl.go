@@ -110,7 +110,7 @@ func try2Eval(env Environment, expr interface{}) (result interface{}, err error)
 			if ee, ok := e.(EvalError); ok {
 				err = MyErr(ee.Error())
 			} else {
-				err = MyErr(e.(string))
+				err = MyErr(fmt.Sprint(e))
 			}
 		}
 	}()

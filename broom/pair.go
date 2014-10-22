@@ -24,11 +24,7 @@ func (p *Pair) First() interface{} {
 }
 
 func (p *Pair) Rest() Sequence {
-	v := p.cdr
-	if v != nil {
-		return v.(Sequence)
-	}
-	return nil
+	return p.cdr
 }
 
 func (p *Pair) Cons(item interface{}) Sequence {
@@ -36,7 +32,7 @@ func (p *Pair) Cons(item interface{}) Sequence {
 }
 
 func (p *Pair) IsEmpty() bool {
-	return p == nil
+	return p == nil || p == (*Pair)(nil)
 }
 
 func (p *Pair) String() string {
@@ -54,15 +50,20 @@ func Slice2List(xs ...interface{}) Sequence {
 	// this function supports . cdr, for none proper list
 	if len(xs) == 0 {
 		return nil
+		//return (*Pair)(nil) is wrong idea. we check with v == nil
 	}
 	return Cons(xs[0], Slice2List(xs[1:]...))
 }
 
 func isList(v interface{}) bool {
-	if nil == v {
+	if v == nil {
+		//accepts any nil!!
 		return true
 	}
 	if xs, ok := v.(Sequence); ok {
+		if xs.IsEmpty() {
+			return true
+		}
 		return isList(xs.Rest())
 	}
 	return false

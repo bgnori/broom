@@ -55,7 +55,28 @@ func Eval(env Environment, expr interface{}) interface{} {
 				return rv.MapIndex(reflect.ValueOf(Second(x))).Interface()
 			case reflect.Func:
 				//case func(Environment, Sequence) interface{}:
-				return v.(func(Environment, Sequence) interface{})(env, x.Rest())
+				classic, ok := v.(func(Environment, Sequence) interface{})
+				if ok {
+					return classic(env, x.Rest())
+				}
+				f := reflect.ValueOf(v)
+				if !f.IsValid() {
+					panic(fmt.Sprintf("bad func: %v", f))
+				}
+				args := BuildArgs(env, f, x.Rest())
+				xs := f.Call(args)
+				switch len(xs) {
+				case 0:
+					return nil
+				case 1:
+					return xs[0].Interface()
+				default:
+					ys := make([]interface{}, 0, len(xs))
+					for _, r := range xs {
+						ys = append(ys, r.Interface())
+					}
+					return Slice2List(ys...)
+				}
 			default:
 				panic("application error, expected SExprOperator, but got " + fmt.Sprintf("%v", v))
 			}
@@ -65,7 +86,7 @@ func Eval(env Environment, expr interface{}) interface{} {
 		switch rt.Kind() {
 		case reflect.Func:
 			return expr
-		case reflect.Slice, reflect.Array, reflect.String:
+		case reflect.Slice, reflect.Array://, reflect.String:
 			return expr
 		case reflect.Map:
 			return expr

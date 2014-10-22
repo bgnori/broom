@@ -10,7 +10,7 @@
     (list 'if expr (cons 'begin (Slice2List form)) '()))
 
 (defmacro lambda [xs body]
-    (list 'fn (List2Slice xs) body))
+    (list 'fn (Seq2Slice xs) body))
 
 (defmacro defn [name args body]
     (let [_defn_arg args]
